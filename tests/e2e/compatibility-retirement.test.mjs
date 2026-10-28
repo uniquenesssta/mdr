@@ -1,19 +1,25 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { createServer } from 'vite';
-import { launchChromium } from './lib/cdp-browser.mjs';
+import { getFreePort, launchChromium } from './lib/cdp-browser.mjs';
 import { createApplicationInspector } from './lib/application-inspector.mjs';
 
-test('R16-08 feature Views preserve the frozen markup and release their exact DOM ownership', { timeout: 60000 }, async () => {
-  const baseline = JSON.parse(await readFile('tests/fixtures/stage-16/ui-markup-baseline.json', 'utf8'));
+test('R16-08 feature Views preserve the approved Figma blue markup and release their exact DOM ownership', { timeout: 60000 }, async () => {
+  const baseline = JSON.parse(await readFile('tests/fixtures/blue-ui/markup-baseline.json', 'utf8'));
+  const historical = await readFile('tests/fixtures/stage-16/ui-markup-baseline.json');
+  const historicalSha256 = '4eb83c94c2175a651127b413084c56ecbee3f564afa2359c1ffe6d9d249984a2';
+  assert.equal(createHash('sha256').update(historical).digest('hex'), historicalSha256);
+  assert.equal(baseline.authority.historicalSha256, historicalSha256);
+  assert.equal(baseline.authority.fileKey, 'hMLGpGuR3Cpo0Tt2U8iagb');
   const booleanAttributes = new Set(['hidden','disabled','checked','multiple','selected','readonly','autofocus','required']);
   const normalizeMarkup = node => {
     if (!Array.isArray(node)) return node;
     return [node[0], Object.fromEntries(Object.entries(node[1]).map(([key, value]) =>
       [key, value === true && !booleanAttributes.has(key) ? '' : value])), node[2].map(normalizeMarkup)];
   };
-  const server = await createServer({ server: { host: '127.0.0.1', port: 0, open: false, hmr: false }, logLevel: 'error' });
+  const server = await createServer({ configLoader: 'native', server: { host: '127.0.0.1', port: await getFreePort(), strictPort: true, open: false, hmr: false }, logLevel: 'error' });
   let browser;
   try {
     await server.listen();
@@ -45,9 +51,9 @@ test('R16-08 feature Views preserve the frozen markup and release their exact DO
       return { slots, overlays, published, portHost, remaining, emptied, restored: root.childNodes.length === 0 };
     })()`);
     for (const [key, nodes] of Object.entries(actual.slots)) assert.deepEqual(nodes, baseline.slots[key].map(normalizeMarkup), key);
-    for (const node of [...baseline.slots.overlay, ...baseline.slots.ports].filter(Array.isArray)) {
-      assert.deepEqual(actual.overlays[node[1].id], normalizeMarkup(node), node[1].id);
-    }
+    const expectedOverlays = Object.fromEntries([...baseline.slots.overlay, ...baseline.slots.ports]
+      .filter(Array.isArray).map(node => [node[1].id, normalizeMarkup(node)]));
+    assert.deepEqual(actual.overlays, expectedOverlays, 'complete overlay nodes and attributes');
     assert.deepEqual(actual.published, []);
     assert.equal(actual.portHost, false);
     assert.deepEqual(actual.remaining, ['SPAN']);
@@ -84,18 +90,25 @@ test('R16-08 feature Views preserve the frozen markup and release their exact DO
     assert.deepEqual(editing.published, []);
     assert.equal(editing.reloaded, 'fresh');
     assert.equal(editing.resetVersion, 0);
-    for (const [action, id, focus] of [['open-link','link-modal','link-url-input'], ['open-find','find-modal','find-input'],
-      ['open-image','image-modal','image-url-input'], ['open-mermaid','mermaid-modal','mermaid-code']]) {
+    for (const [action, id, focus, role] of [['open-link','link-modal','link-url-input','dialog'], ['open-find','find-modal','find-input','search'],
+      ['open-image','image-modal','image-url-input','dialog'], ['open-mermaid','mermaid-modal','mermaid-code','dialog']]) {
       const modal = await browser.page.evaluate(`(async () => {
         document.querySelector('[data-editor-action="${action}"]').click();
         await new Promise(requestAnimationFrame);
         const root = document.getElementById('${id}'), panel = root.firstElementChild;
         const result = { open: root.classList.contains('show'), role: panel.getAttribute('role'), focused: document.activeElement.id };
+        if ('${action}' === 'open-find') {
+          result.popover = root.classList.contains('c-popover');
+          result.modal = panel.getAttribute('aria-modal') === 'true';
+        }
         root.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
         result.closed = !root.classList.contains('show');
+        // ModalShell releases its focus scope and restores focus on the next frame.
+        await new Promise(requestAnimationFrame);
         return result;
       })()`);
-      assert.deepEqual(modal, { open: true, role: 'dialog', focused: focus, closed: true }, id);
+      assert.deepEqual(modal, { open: true, role, focused: focus, closed: true,
+        ...(action === 'open-find' ? { popover: true, modal: false } : {}) }, id);
     }
   } finally {
     try { await browser?.close(); } finally { await server.close(); }
@@ -103,7 +116,7 @@ test('R16-08 feature Views preserve the frozen markup and release their exact DO
 });
 
 test('R16-08 integration inspection accesses actual owners without enabling a product test slot', { timeout: 60000 }, async () => {
-  const server = await createServer({ server: { host: '127.0.0.1', port: 0, open: false, hmr: false }, logLevel: 'error' });
+  const server = await createServer({ configLoader: 'native', server: { host: '127.0.0.1', port: await getFreePort(), strictPort: true, open: false, hmr: false }, logLevel: 'error' });
   let browser, inspector;
   try {
     await server.listen(); browser = await launchChromium();

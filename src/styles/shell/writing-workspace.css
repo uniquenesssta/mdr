@@ -1,0 +1,44 @@
+/* Responsibility: Compose the Figma titlebar, workspace header, canvas and narrow-window shell. */
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: 1; }
+[hidden] { display: none !important; }
+.l-app-shell { position: relative; padding: 0; background: var(--color-canvas); }
+.l-menu-bar, html.is-compact-shell .l-menu-bar { flex: 0 0 40px; height: 40px; min-height: 40px; margin: 0; padding: 0 8px; gap: 8px; border: 0; border-bottom: 0;box-shadow:inset 0 -1px 0 var(--color-border-subtle); border-radius: 0; background: var(--color-surface-raised); box-shadow: none; flex-wrap: nowrap; overflow: visible; }
+.app-brand { gap: 0; padding: 0; }
+.app-brand-mark { width: 28px; height: 28px; border-radius: 4px; background: var(--color-accent); color: var(--color-on-accent); font-size: 14px; font-weight: 500; box-shadow: none; }
+.app-brand-name, .menu-bar-divider { display: none; }
+.l-menu-bar .menu-trigger, html.is-compact-shell .menu-dropdown > .menu-trigger { width: 40px; min-width: 40px; height: 36px; min-height: 36px; padding: 0; border-radius: 8px; color: var(--color-accent); font-size: 14px; line-height: 22px; font-weight: 500; }
+html.is-compact-shell .menu-button-icon { display: none; }
+html.is-compact-shell .menu-button-label { display: inline; }
+.writing-window-title { flex: 1; min-width: 0; align-self: stretch; color: transparent; font-size: 0; }
+.window-controls, html.is-compact-shell .window-controls { display: flex; flex: 0 0 auto; gap: 8px; height: 40px; margin-left: auto; align-items: center; }
+.window-controls button, html.is-compact-shell .window-control-btn { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; min-height: 40px; padding: 12px; border: 0; border-radius: 0; background: transparent; color: var(--color-text-secondary); }
+.window-controls button .icon { width: 16px; height: 16px; }
+.window-controls button:hover { background: var(--color-surface-hover); }
+.window-controls .close:hover { background: var(--color-danger); color: var(--color-surface-raised); }
+.l-workspace { gap: 0; background: var(--color-canvas); }
+.l-workspace-main { display: flex; flex: 1; min-height: 0; min-width: 0; flex-direction: column; }
+.l-sidebar { border: 0; border-right: 1px solid var(--color-border-subtle); border-radius: 0; background: var(--color-surface-raised); box-shadow: none; padding: 16px; gap: 24px; }
+.l-sidebar.is-hidden { display: none; padding: 0; border: 0; }
+.l-sidebar-resizer { margin-left: -4px; margin-right: -4px; }
+.l-workspace-main > .l-split-pane { flex: 1; min-height: 0; margin: 24px; border: 0; border-radius: 12px; box-shadow: none; background: var(--color-surface-raised); overflow: hidden; }
+.l-toolbar-shell, .l-toolbar-shell.toolbar-boundary-wrap { display: flex; justify-content: center; align-items: center; flex-wrap: nowrap; min-height: 76px; height: 76px; flex: 0 0 76px; margin: 0; padding: 16px; gap: 0; border: 0; border-radius: 0; background: var(--color-surface-raised); box-shadow: none; position: relative; overflow: visible; }
+.l-toolbar-shell.is-hidden { display: flex; }
+.writing-mode-slot { display: flex; justify-content: center; min-width: 0; }
+.writing-modes { display: flex; width: 208px; height: 40px; padding: 4px; gap: 4px; background: var(--color-canvas); border-radius: 8px; }
+.l-toolbar-shell .writing-modes button { flex: 0 0 60px; height: 32px; min-height: 32px; padding: 0; border: 0; color: var(--color-accent); background: transparent; font-size: 14px; font-weight: 500; border-radius: 8px; }
+.l-toolbar-shell .writing-modes button:last-child { flex-basis: 72px; }
+.l-toolbar-shell .writing-modes button.active { background: var(--color-accent); color: var(--color-on-accent); box-shadow: none; }
+.l-toolbar-shell .writing-modes button:disabled { cursor:default;opacity:1; }
+.l-toolbar-shell .writing-modes button:disabled:not(.active) { color:var(--color-text-disabled); }
+.l-toolbar-shell .writing-modes button.active:disabled:hover { background:var(--color-accent);color:var(--color-on-accent); }
+.writing-mode-menu, .writing-theme-toggle { display: none !important; }
+body.preview-only-mode .f-editor-pane, body.preview-only-mode .l-pane-resizer, body.preview-only-mode .f-preview-pane > .pane-header, body.hybrid-view-mode .f-editor-pane > .pane-header { display: none; }
+body.preview-only-mode .f-preview-pane { flex: 1; max-width: none; }
+.pane-header { background: var(--color-surface-raised); }
+.l-pane.is-collapsed { background: var(--color-surface-raised); }
+@media (max-width: 900px) {
+  .l-workspace-main > .l-split-pane { margin: 16px; }
+}
+
+.l-menu-bar,html.is-compact-shell .l-menu-bar { box-shadow:inset 0 -1px 0 var(--color-border-subtle); }

@@ -13,7 +13,8 @@ export const EDITOR_SETTINGS_SECTION = defineSettingsSection({
   fields: [
     { settingId: 'editorFontSize', control: 'select', surface: 'settings-dialog' },
     { settingId: 'editorTextColor', control: 'color', surface: 'settings-dialog' },
-    { settingId: 'activeLineColor', control: 'color', surface: 'settings-dialog' },
+    // Keep stored metadata readable without exposing the removed active-line feature.
+    { settingId: 'activeLineColor', control: 'color', surface: 'retired' },
     { settingId: 'tableVisualEditing', control: 'toggle', surface: 'external' },
     { settingId: 'codeVisualEditing', control: 'toggle', surface: 'external' }
   ]

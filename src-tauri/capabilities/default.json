@@ -3,7 +3,8 @@
   "identifier": "default",
   "description": "Default desktop permissions",
   "windows": [
-    "main"
+    "main",
+    "session-*"
   ],
   "permissions": [
     "core:default",

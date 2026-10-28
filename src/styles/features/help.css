@@ -1,140 +1,40 @@
-/* Responsibility: Help pages, shortcut reference and about-card presentation. */
+/* Responsibility: Compact six-tab Help dialog and content from the real help registry. */
+.help-preferences-modal { width:520px;max-width:calc(100vw - 32px);height:auto;max-height:min(520px,calc(100vh - 32px)); }
+.help-preferences-modal .preferences-header { min-height:48px;padding:14px 20px 6px; }
+.help-preferences-modal .preferences-layout { display:flex;flex-direction:column;min-height:0;gap:16px;margin:12px 20px 20px; }
+.help-preferences-modal .preferences-nav { display:flex;flex-direction:row;flex:0 0 auto;align-items:center;padding:0;margin:0;gap:4px;overflow-x:auto;border:0;background:transparent; }
+.help-preferences-modal .preferences-nav-item { flex:0 0 auto;min-height:28px;height:28px;width:auto;padding:0 8px;border:1px solid transparent;border-radius:8px;background:transparent;color:var(--color-text-secondary);white-space:nowrap; }
+.help-preferences-modal .preferences-nav-item.active { border-color:var(--color-border-subtle);background:var(--color-accent-soft);color:var(--color-accent); }
+.help-preferences-modal .preferences-nav-item span { font-size:14px;line-height:22px;font-weight:400; }
+.help-preferences-modal .preferences-nav-item small { display:none; }
+.help-preferences-modal .preferences-content { min-height:0;padding:0;overflow:auto;background:transparent;font-size:14px;line-height:22px; }
+.help-preferences-modal .preferences-page { padding:0;background:transparent; }
+.help-preferences-modal .preferences-page-heading { margin:0 0 12px;padding:0;border:0; }
+.help-preferences-modal .preferences-page-heading h4 { margin:0;font-size:18px;line-height:28px;font-weight:700;color:var(--color-text-heading); }
+.help-preferences-modal .preferences-page-heading p { display:none; }
+.help-shortcut-row { display:flex;align-items:center;justify-content:space-between;gap:12px;height:28px; }
+.help-shortcut-row kbd,.shortcut-grid kbd { border:0;padding:0;background:transparent;box-shadow:none;color:var(--color-text-secondary);font:12px/20px var(--font-family-ui); }
+.help-start-details { margin-top:12px;font-size:12px; }
+.help-start-details summary { cursor:pointer;color:var(--color-text-secondary); }
+.help-preferences-modal .help-topic-card { margin:0 0 12px;padding:0;border:0;background:transparent;box-shadow:none; }
+.help-content p { margin:0;color:var(--color-text-secondary); }
+.help-content h5 { margin:0 0 6px;color:var(--color-text-heading);font-size:14px;font-weight:500; }
+.help-topic-card ul { margin:0;padding-left:1.35em;color:var(--color-text-primary); }
+.help-topic-card li { margin:4px 0; }
+.help-step-list { display:grid;gap:10px; }
+.help-step-list > div { display:flex;align-items:flex-start;gap:12px;padding:0;background:transparent;border:0; }
+.help-step-list > div > span { color:var(--color-accent);font-weight:500; }
+.help-step-list p { display:flex;flex-direction:column;gap:4px; }
+.help-step-list small { color:var(--color-text-secondary);font-size:12px;line-height:20px; }
+.shortcut-grid { display:grid;grid-template-columns:minmax(0,1fr);gap:0; }
+.shortcut-grid > div { display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:28px;color:var(--color-text-primary); }
+.about-app-card { display:flex;align-items:center;gap:12px;padding:0;margin-bottom:12px;background:transparent;border:0; }
+.about-app-mark { display:flex;align-items:center;justify-content:center;flex:0 0 36px;width:36px;height:36px;border-radius:8px;background:var(--color-accent);color:var(--color-on-accent);font-size:18px; }
+.about-app-card div { display:flex;flex-direction:column;gap:4px; }
+.about-app-card small { font-size:12px;color:var(--color-text-secondary); }
 
-.help-content p {
-  margin: 0;
-  color: var(--color-text-secondary);
-}
-
-.help-step-list {
-  display: grid;
-  gap: var(--space-lg);
-}
-
-.help-step-list > div {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-xl);
-  padding: 13px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-}
-
-.help-step-list > div > span {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 26px;
-  width: 26px;
-  height: 26px;
-  border-radius: var(--radius-round);
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-}
-
-.help-step-list p {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.help-step-list b,
-.help-topic-card h5 {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-md);
-  font-weight: 650;
-}
-
-.help-step-list small {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-  line-height: 1.55;
-}
-
-.help-topic-card {
-  margin-bottom: var(--space-xl);
-  padding: 14px 15px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-}
-
-.help-topic-card h5 {
-  margin: 0 0 var(--space-md);
-}
-
-.help-topic-card ul {
-  margin: 0;
-  padding-left: 1.35em;
-  color: var(--color-text-secondary);
-}
-
-.help-topic-card li {
-  margin: 5px 0;
-}
-
-.shortcut-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-md);
-}
-
-.shortcut-grid > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-xl);
-  min-width: 0;
-  padding: var(--space-lg) 11px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.shortcut-grid kbd {
-  flex: 0 0 auto;
-}
-
-.about-app-card {
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  margin-bottom: var(--space-2xl);
-  padding: 15px;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface-subtle);
-}
-
-.about-app-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: var(--radius-2xl);
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-  font-size: var(--font-size-3xl);
-  font-weight: 750;
-}
-
-.about-app-card div {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xs);
-}
-
-.about-app-card b {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-lg);
-}
-
-.about-app-card small {
-  color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
-}
+.help-preferences-modal { max-height:min(320px,calc(100vh - 32px)); }
+.help-preferences-modal[data-page=markdown] { max-height:min(292px,calc(100vh - 32px)); }
+.help-preferences-modal[data-page=about] { max-height:min(236px,calc(100vh - 32px)); }
+.help-preferences-modal .preferences-layout { margin-top:4px;margin-bottom:16px;gap:12px; }
+.help-shortcut-row { height:24px; }

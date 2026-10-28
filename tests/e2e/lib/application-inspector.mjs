@@ -1,6 +1,7 @@
 // DevTools-only access to the actual application owners for integration tests.
 // No product hook, DOM property, global slot, source evaluation or replacement implementation.
 // Opaque inspector handles stay in this test process and are released with its session.
+import { readRemoteString } from './cdp-result-reader.mjs';
 let sequence = 0;
 const inspectors = new WeakMap();
 
@@ -50,7 +51,7 @@ function collectOwners() {
     markdownEditorEditorControllerPort: one('Editor Controller', value => methods(value, 'setText', 'subscribeTransactions', 'appendImportedMarkdown')),
     markdownEditorEditorUiCommandPort: one('Editor commands', registered('getLayoutMode')),
     markdownEditorDocumentUiCommandPort: one('Document commands', registered('importTextContent')),
-    markdownEditorExportCommandPort: one('Export commands', value => methods(value, 'has', 'invoke') && !descriptor(value, 'register')),
+    markdownEditorExportCommandPort: one('Export commands', value => methods(value, 'has', 'invoke', 'destroy') && !descriptor(value, 'register')),
     markdownEditorExportRequestPort: one('Export request policy', value => methods(value, 'createRequest') && descriptor(value, 'imageRatios')),
     markdownEditorExportTaskPort: one('Export Task Controller', value => methods(value, 'begin', 'finish', 'getSnapshot', 'isCancelled')),
     markdownEditorExportDocumentPort: one('Export Builder', value => methods(value, 'build', 'getSourceContext', 'destroy')),
@@ -78,7 +79,9 @@ function collectOwners() {
     markdownEditorPdfExportPort: owners.pdf,
     markdownEditorImageExportPort: owners.image
   };
-  return { capabilities, editorApi, model };
+  const selectionSync = one('Selection sync', value => own(value, 'editorApi') === editorApi
+    && own(value, 'highlightSession') && typeof value.buildPreviewHighlightPlan === 'function');
+  return { capabilities, editorApi, model, selectionSync };
 }
 
 function checked(response) {
@@ -127,8 +130,15 @@ export function createApplicationInspector(connection) {
   return Object.freeze({
     async evaluate(expression, options = {}) {
       const objectId = await capture();
+      const declarations = 'const applicationCapabilities=this.capabilities,editorApi=this.editorApi,documentModel=this.model,selectionSync=this.selectionSync;';
+      if (options.awaitPromise !== false && options.returnByValue !== false) {
+        const snapshot = checked(await connection.send('Runtime.callFunctionOn', { objectId,
+          functionDeclaration: 'async function(){' + declarations + 'const value=await(async()=>{' + evaluationBody(expression) + '})();return {value:JSON.stringify({value})};}',
+          awaitPromise: true, returnByValue: false, userGesture: options.userGesture !== false }));
+        return JSON.parse(await readRemoteString(connection, snapshot.objectId)).value;
+      }
       const result = checked(await connection.send('Runtime.callFunctionOn', { objectId,
-        functionDeclaration: 'function(){const applicationCapabilities=this.capabilities,editorApi=this.editorApi,documentModel=this.model;' + evaluationBody(expression) + '}',
+        functionDeclaration: 'function(){' + declarations + evaluationBody(expression) + '}',
         awaitPromise: options.awaitPromise !== false, returnByValue: options.returnByValue !== false, userGesture: options.userGesture !== false }));
       return result?.value;
     },

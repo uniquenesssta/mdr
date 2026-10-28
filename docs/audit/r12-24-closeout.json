@@ -139,7 +139,7 @@
   "reviewedSources": [
     {
       "path": ".github/workflows/r12-14.yml",
-      "blobSha": "387a8fba7ede9e0aa6449f2531e6382723f39e6e"
+      "blobSha": "c178621936cf1e16a08c4dcfbab975a3d536d10f"
     },
     {
       "path": ".gitignore",
@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "54f643e651d67aad02193ed106de96acaebc710a"
+      "blobSha": "4ef527a679a95d561dc7e282c748a64828398574"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -179,7 +179,7 @@
     },
     {
       "path": "src-tauri/capabilities/default.json",
-      "blobSha": "49daac75abebdb88ccb3651e4d5b0f7dec59fd74"
+      "blobSha": "a959141b4a90cebbd57fed2bfa53b34843131512"
     },
     {
       "path": "src-tauri/src/document_store/cache.rs",
@@ -187,7 +187,7 @@
     },
     {
       "path": "src-tauri/src/main.rs",
-      "blobSha": "a2f7c1e0eadf161cd7bacbeff44cd74bb510211d"
+      "blobSha": "aa5d604dcd99aaa03d55d9b670431a8fc19673f6"
     },
     {
       "path": "src-tauri/src/performance_log/batch.rs",
@@ -199,7 +199,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "blobSha": "ff00373baae7b02c92f82f3f4c9d81949d32e8ff"
+      "blobSha": "0242b696740e8266876d301eddff1f85abecb9c8"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -251,15 +251,15 @@
     },
     {
       "path": "src/bootstrap/module-entry.js",
-      "blobSha": "c5cf8378c7db2ee703a092355a9594b7a1ab1049"
+      "blobSha": "cceaa275460817fcdaa4b7e9a2b5c51864846760"
     },
     {
       "path": "src/bootstrap/workspace-content.js",
-      "blobSha": "38f7f394dfc9dae6ec4164a03995b24c05bc6f74"
+      "blobSha": "4c27ccc9330bd85e5730dcebc9bf5f530baabd58"
     },
     {
       "path": "src/bootstrap/workspace-startup.js",
-      "blobSha": "fa6e1440051a39b90b4584c942d5f2591a4a30ba"
+      "blobSha": "6888273c175d064b60bd5e1eaf064a8e28a348eb"
     },
     {
       "path": "src/features/documents/application/document-open-coordinator.js",
@@ -275,7 +275,7 @@
     },
     {
       "path": "src/features/documents/index.js",
-      "blobSha": "81ba77fd85e9621db41c954812d2c20f71ccf9b0"
+      "blobSha": "90ec3d0907434fe1ec7a0a3ca9e533d3d70ad955"
     },
     {
       "path": "src/features/documents/infrastructure/session-document-repository.js",
@@ -283,7 +283,7 @@
     },
     {
       "path": "src/features/documents/ui/document-content-view.js",
-      "blobSha": "8b7d654eb471c987fd9810b94ad6cde35e2b0906"
+      "blobSha": "a832fd4a1f34eeef2ea755a0bb6808b09765fbd3"
     },
     {
       "path": "src/features/documents/ui/document-workspace.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "src/features/editor/index.js",
-      "blobSha": "144b37d6bb231ddca7c3e83fc426a91383aef563"
+      "blobSha": "edc5c0059fc912bbf47750cb3f7a67b5375f1cdd"
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-hybrid-extension.js",
@@ -339,7 +339,7 @@
     },
     {
       "path": "src/features/editor/ui/editor-content-view.js",
-      "blobSha": "7818371bfad00456540e28b5e6180376eda14688"
+      "blobSha": "6bd6e59e3c2deda392d02587d9178d68cebec5a0"
     },
     {
       "path": "src/features/editor/ui/editor-pane-view.js",
@@ -347,19 +347,19 @@
     },
     {
       "path": "src/features/editor/ui/editor-toolbar-view.js",
-      "blobSha": "8e2d355d9e29ff032215531f0d57c21cb52894ca"
+      "blobSha": "dc8b998cf1c8f459a8de8e39d06d002d061a23bf"
     },
     {
       "path": "src/features/editor/ui/find-replace-dialog-view.js",
-      "blobSha": "c97f96860c8409d8b7afe73233dba55d1b317774"
+      "blobSha": "b14648a147ec136d2fc47a00ca04b3013462645d"
     },
     {
       "path": "src/features/editor/ui/image-dialog-view.js",
-      "blobSha": "7a769b0d0486becd1f80205fb4641601e10f89eb"
+      "blobSha": "b4ecf018cfd6a585d16b6ceb8db19448acfeb7ef"
     },
     {
       "path": "src/features/editor/ui/link-dialog-view.js",
-      "blobSha": "7928f4d02fdab0a5e10c3f415392d792f4bc6fc8"
+      "blobSha": "bdbc4895f0402bd5f9d3f151c34430cc5e0d60d8"
     },
     {
       "path": "src/features/editor/ui/mermaid-dialog-view.js",
@@ -375,7 +375,7 @@
     },
     {
       "path": "src/features/export/application/export-request.js",
-      "blobSha": "73cc04301d30ba15991c702b83ae44ca16c9fcf0"
+      "blobSha": "71b8588e3ff8da1c2bdb9d9b2efa746e4ec9ea57"
     },
     {
       "path": "src/features/export/document/export-document-builder.js",
@@ -427,11 +427,11 @@
     },
     {
       "path": "src/features/export/formats/image/image-export-surface.js",
-      "blobSha": "b2576dbf0f9af3074e4a439d96da8d70a9269806"
+      "blobSha": "c9845097922e5e406c811c2f78c20201ae2f8376"
     },
     {
       "path": "src/features/export/formats/image/image-exporter.js",
-      "blobSha": "fb007f36b9e381fbc96e6e66e653253f1965bb57"
+      "blobSha": "7ae05eb5b76c1f3a10c9b402ff1ee50dd66a3959"
     },
     {
       "path": "src/features/export/formats/image/image-ratio-presets.js",
@@ -455,7 +455,7 @@
     },
     {
       "path": "src/features/export/index.js",
-      "blobSha": "be41c18c6c2379690a6cd1f53c1cd14a481cf4ee"
+      "blobSha": "fb9ad3fb18e7f07fdf3194f0edaad88b577e2e23"
     },
     {
       "path": "src/features/export/task/export-cancellation.js",
@@ -471,11 +471,11 @@
     },
     {
       "path": "src/features/export/ui/export-image-dialog-view.js",
-      "blobSha": "1b9d0ae3401c796d303fb6d2fb0ff89ddd8d0331"
+      "blobSha": "8406274a0a3abfad3731bb5b202eff1dc1505675"
     },
     {
       "path": "src/features/export/ui/export-progress-dialog-view.js",
-      "blobSha": "25c72ba3a365c7d6827ca3ae244fb07ff0868a5a"
+      "blobSha": "493b90a4f4ff94037e67e46b139be08a953300b2"
     },
     {
       "path": "src/features/help/index.js",
@@ -563,7 +563,7 @@
     },
     {
       "path": "src/features/import/ui/import-content-view.js",
-      "blobSha": "14f0d323efce1839fb26c70df30d65e062618f5e"
+      "blobSha": "4eb0e43c476de7aeaf6d39dff58120a41caf2b39"
     },
     {
       "path": "src/features/import/web-clipper/html-extractor.js",
@@ -579,7 +579,7 @@
     },
     {
       "path": "src/features/import/web-clipper/web-clipper-view.js",
-      "blobSha": "8e33056a5431d03848358d87282d58cace1c0c44"
+      "blobSha": "4b56fd03b6ccf7ccb535bf0b253d0f7a05199ec8"
     },
     {
       "path": "src/features/import/web-clipper/web-fetch-coordinator.js",
@@ -603,7 +603,7 @@
     },
     {
       "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
-      "blobSha": "a37f3d490c8fe36c23260718d4bfa9dcb2ee3585"
+      "blobSha": "e9cd0574cbba23ee11981d88bb6a4387d5ee402f"
     },
     {
       "path": "src/features/layout/split/compact-split-controller.js",
@@ -619,11 +619,11 @@
     },
     {
       "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
-      "blobSha": "d4a89e69dc0afbc2f5366a2cda226db0fb808021"
+      "blobSha": "81bc5b12036e0c1a26fd6115ffd231395f53026a"
     },
     {
       "path": "src/features/layout/workspace-preferences.js",
-      "blobSha": "93f958059678e5766a999c6bb8cb06d18c57ba0c"
+      "blobSha": "c3c102fe8d0ecb89ac61cc6946ed4c439f229d0c"
     },
     {
       "path": "src/features/link-preview/index.js",
@@ -631,11 +631,11 @@
     },
     {
       "path": "src/features/link-preview/link-preview-controller.js",
-      "blobSha": "459ac2aeda90dc365a121f351e926de7a085f931"
+      "blobSha": "ba30d5e95cbaa446a9957b75e6178c8c7e173752"
     },
     {
       "path": "src/features/menu/index.js",
-      "blobSha": "1a6cd74183b6c27a185ce993502880ab26d90ec9"
+      "blobSha": "c36ba9e99e34e308d762325f3414fcef9af9d5b9"
     },
     {
       "path": "src/features/menu/menu-actions.js",
@@ -647,11 +647,11 @@
     },
     {
       "path": "src/features/menu/shell-menus.js",
-      "blobSha": "386e484be4dbd1924414e31592268fff55b36ca0"
+      "blobSha": "26a918b553d95cd0090673254245fe3a605a5a1b"
     },
     {
       "path": "src/features/menu/ui/menu-content-view.js",
-      "blobSha": "f710cd1fe436cabe3585a30d5fa494dd87c80bb7"
+      "blobSha": "79801bd86eb0f72b95a5992a94c8c2132b1648f4"
     },
     {
       "path": "src/features/persistence/index.js",
@@ -663,11 +663,11 @@
     },
     {
       "path": "src/features/persistence/ui/status-content-view.js",
-      "blobSha": "468885f5ff5316736869084c5223d817d74db92b"
+      "blobSha": "d758c316587121dcb667a29342dbf8f6e9cf2d6f"
     },
     {
       "path": "src/features/persistence/ui/workspace-status.js",
-      "blobSha": "dddce4c65688e2b7e0b9f17139473ff1fc34174d"
+      "blobSha": "0acd42877ed76bdcffdd0b52abcf3888c34eef28"
     },
     {
       "path": "src/features/preview/application/preview-commands.js",
@@ -675,7 +675,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "blobSha": "be306f07cfb3de10e8409ca14baf4a46bed7807f"
+      "blobSha": "18e1782cdb0411060d3fd14494df765a2643a2ad"
     },
     {
       "path": "src/features/preview/index.js",
@@ -699,7 +699,7 @@
     },
     {
       "path": "src/features/preview/ui/preview-content-view.js",
-      "blobSha": "e4eb1ac8ce7f1221920c20a6e7c034a5ff15a458"
+      "blobSha": "379027d3987c886d9fdeb17029a15fa21cf486d4"
     },
     {
       "path": "src/features/preview/worker/preview-worker-client.js",
@@ -707,7 +707,7 @@
     },
     {
       "path": "src/features/settings/application/settings-controller.js",
-      "blobSha": "67ddeb83fa3ed438935b11b13dcb241b4b75de16"
+      "blobSha": "425de7f4973d3de4b262d83835ac5ffb4697579f"
     },
     {
       "path": "src/features/settings/index.js",
@@ -719,7 +719,7 @@
     },
     {
       "path": "src/features/sidebar/ui/sidebar-content-view.js",
-      "blobSha": "e119f5e4c400f245d8b303f9d51c012ba2259e3e"
+      "blobSha": "09e46dc9157361921a060efba13b4782b9f6c7dd"
     },
     {
       "path": "src/features/sync/scroll/scroll-sync-controller.js",
@@ -727,7 +727,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "blobSha": "8e7ae0e4920fa7ad807d6fea4b50bf228b107ba6"
+      "blobSha": "bdcc584495b8dd784c3967db0c1329172190bf06"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -767,7 +767,7 @@
     },
     {
       "path": "src/features/telemetry/telemetry-redaction.js",
-      "blobSha": "0a2270f1a1ed94038bece92802961bd240cafbba"
+      "blobSha": "b6cb8b6798e0fc7cbccbf04e7afe91caab5c4622"
     },
     {
       "path": "src/features/window/index.js",
@@ -783,7 +783,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "5a3a59f73a69e87b626824fbd634e4429fbd7df5"
+      "blobSha": "33c0be8cb01216058652d515f0a046633d8a4fb9"
     },
     {
       "path": "src/platform/desktop/performance-log-client.js",
@@ -795,7 +795,7 @@
     },
     {
       "path": "src/platform/index.js",
-      "blobSha": "031c057d9afbf38fe16225bd17ff75f5e4314150"
+      "blobSha": "9af9f01c08938554eef0c6bc28e7b95dae7b6793"
     },
     {
       "path": "src/platform/ports/logs-port.js",
@@ -815,7 +815,7 @@
     },
     {
       "path": "src/styles/features/export.css",
-      "blobSha": "5671c2dc7ecaa2b86af4655581c231d86ebab1ef"
+      "blobSha": "6ff70ebe4f5231bdf5f89e386daf1b79dbbfb328"
     },
     {
       "path": "src/styles/shell/app-shell.css",
@@ -835,7 +835,7 @@
     },
     {
       "path": "src/ui/shell/app-shell-view.js",
-      "blobSha": "7c0aa59e72986f240744addd8f33ad42a0c7f911"
+      "blobSha": "e7ee7dac530c75a83c66dd7e3b1604c381a23443"
     },
     {
       "path": "src/ui/shell/menu-bar-shell.js",
@@ -855,11 +855,11 @@
     },
     {
       "path": "src/ui/shell/toolbar-shell.js",
-      "blobSha": "eebd2d7c772017d2889dcc74ec4406fa88a3955d"
+      "blobSha": "d7d0f31274d31af4300a904df2af19088c56a8b7"
     },
     {
       "path": "src/ui/shell/workspace-shell.js",
-      "blobSha": "d65b62e439d56613bc9574d56d491a967264c688"
+      "blobSha": "caca7162650eae929880a26d8bce50f2177fed57"
     },
     {
       "path": "tests/architecture/architecture-tooling.test.mjs",
@@ -871,7 +871,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "blobSha": "397ccd809fcce96cc58e490da148921a20a687b2"
+      "blobSha": "8354561bb2ccf3edb54136f76ea4a5cd093e025d"
     },
     {
       "path": "tests/architecture/helpers.mjs",
@@ -919,7 +919,7 @@
     },
     {
       "path": "tests/browser-e2e-contract.test.mjs",
-      "blobSha": "3c59dfeab4142ab49d812d8faea64089166e6dcd"
+      "blobSha": "176ed53c65b402e191ec64611087b12627a7deeb"
     },
     {
       "path": "tests/cdp-browser-lifecycle.test.mjs",
@@ -927,7 +927,7 @@
     },
     {
       "path": "tests/e2e/lib/application-driver.mjs",
-      "blobSha": "f5cc18bc6d01eebbd8d4c4f0ca1bff490617d7e8"
+      "blobSha": "fede941d1b7caa74fef4ab7d764b994373e4ab9a"
     },
     {
       "path": "tests/e2e/lib/built-application-check.mjs",
@@ -935,7 +935,7 @@
     },
     {
       "path": "tests/e2e/lib/cdp-browser.mjs",
-      "blobSha": "a0e20cdad250d8e7d5f397c510b7c3298d93d6f6"
+      "blobSha": "3c1cb99d7690b9e11c623719265694ec973462a4"
     },
     {
       "path": "tests/e2e/lib/e2e-installation.mjs",
@@ -943,7 +943,7 @@
     },
     {
       "path": "tests/e2e/lib/export-characterization.mjs",
-      "blobSha": "fc2bd210a669b43dcf9dc6675d8526ae491a4921"
+      "blobSha": "127ccec9fd233196f82c79a5caa4c9503d761e85"
     },
     {
       "path": "tests/e2e/lib/export-test-commands.mjs",
@@ -959,7 +959,7 @@
     },
     {
       "path": "tests/e2e/run-browser-tests.mjs",
-      "blobSha": "15b1215060743bea49edd9078630346e963fd607"
+      "blobSha": "d9b13224ce4eb393b6bd4f38feb44d4dc97c6cd6"
     },
     {
       "path": "tests/e2e/window-controller.test.mjs",
@@ -1031,7 +1031,7 @@
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "blobSha": "a869ad78bfe793fbd9696445c904a9cdb27148c2"
+      "blobSha": "11a8105ef82a83c469e70c2046e785f1fedb2d41"
     },
     {
       "path": "tests/stage-12-opener.test.mjs",
@@ -1083,7 +1083,7 @@
     },
     {
       "path": "tests/stage-15-event-catalogue.test.mjs",
-      "blobSha": "c0348bbc8391589dd5880102c6520489acd037a1"
+      "blobSha": "06607010de7765cf3dd07cd0e452a2e5f4739cc4"
     },
     {
       "path": "tests/stage-15-log-cleanup.test.mjs",
@@ -1095,7 +1095,7 @@
     },
     {
       "path": "tests/stage-15-redaction.test.mjs",
-      "blobSha": "4823b8ae405f967eda7cba0550c430af32f9fe76"
+      "blobSha": "b6df845bcce009516c99634e81423f509fc783eb"
     },
     {
       "path": "tests/stage-15-stale-dist.test.mjs",
@@ -1127,11 +1127,11 @@
     },
     {
       "path": "tests/ui/app-shell.test.mjs",
-      "blobSha": "d49ad2df8f141610c04e80058847308ff490de36"
+      "blobSha": "a29be47a5564c5bd56849915f64826dc79f53377"
     },
     {
       "path": "tests/ui/css-tokens.test.mjs",
-      "blobSha": "5306be2c2d0a82e1b4ab67a6c3cf16e8dd970afe"
+      "blobSha": "4c9437175694f91270673a8683454c9141303778"
     },
     {
       "path": "tests/ui/minimal-index.test.mjs",
@@ -1139,11 +1139,11 @@
     },
     {
       "path": "tests/ui/responsive-shell.test.mjs",
-      "blobSha": "f87909b218fbd939f94fa04dbf60729a601dfd00"
+      "blobSha": "57e10231a209892a5d823c897fd7d49c15f05bd1"
     },
     {
       "path": "tests/ui/style-layering.test.mjs",
-      "blobSha": "51c8f261589deb1d6b35a794e73f13980c13a3bc"
+      "blobSha": "58c2d336863413fd53b77628e878c6cf2c5bcf0e"
     },
     {
       "path": "tests/unit/documents/document-session-controller.test.mjs",
@@ -1167,11 +1167,11 @@
     },
     {
       "path": "tests/unit/layout/toolbar-boundary-controller.test.mjs",
-      "blobSha": "1bb504c998e3563856da52e3bb625c0cccbe1e8a"
+      "blobSha": "0a8c93cb8c0a0793331bbf6a26e0df95b4f84f96"
     },
     {
       "path": "tests/unit/menu/menu-view.test.mjs",
-      "blobSha": "b4ef0763dc5586668f2bfb65c8ad35713fbc46ba"
+      "blobSha": "5506ba38418230be9aaec12c69ef353747b80083"
     },
     {
       "path": "tests/unit/preview/preview-layout-stability.test.mjs",
@@ -1187,11 +1187,11 @@
     },
     {
       "path": "tests/stage-16-test-cleanup.test.mjs",
-      "blobSha": "695d4aa5fe906210f961d499e56960bc8cb86f7c"
+      "blobSha": "9fe4c215235b0c631d9b5ea8a108b802c93ed2f2"
     },
     {
       "path": "docs/audit/r16-10-test-cleanup.json",
-      "blobSha": "408f89f5cda34bcb626382bce3c742aa9b0216e1"
+      "blobSha": "71db8d078886b6e0a2382338036232e86d725eb4"
     },
     {
       "path": "scripts/architecture/module-naming.mjs",
@@ -1203,11 +1203,11 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "c1d53e6db52d8abd3ce4f749952901bd24285995"
+      "blobSha": "4515733535a25ab0ff578efb2cb7e9cf47f44c6e"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
-      "blobSha": "1ccd5b9a49387fbbcfe5d5843e1fa3338bff29e6"
+      "blobSha": "59d640ebc3cf266b9fbc0eaada1302cb330e14da"
     },
     {
       "path": "tests/stage-16-dependency-graph.test.mjs",
@@ -1215,11 +1215,11 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "c325210ac6f93f24e31a1205db14ecb697c369a8"
+      "blobSha": "809d6f8e533104adc430933e37454573147b112e"
     },
     {
       "path": "scripts/architecture/repository.mjs",
-      "blobSha": "897b22243115cd64f4db89c35fd472dcfa3aae64"
+      "blobSha": "01269f441b5bfb0978a34ec6b5015ed439792470"
     },
     {
       "path": "scripts/stage-16/single-implementation.mjs",
@@ -1283,7 +1283,7 @@
     },
     {
       "path": "tests/stage-08-hybrid-inline-presentation.test.mjs",
-      "blobSha": "39a5d2eb162d2e4a0a75b5daad78b6c15d445f6e"
+      "blobSha": "da0f403da153e0a6f694c9d29ffc8a913f49d11f"
     },
     {
       "path": "src/features/menu/submenu-positioner.js",
@@ -1291,7 +1291,7 @@
     },
     {
       "path": "src/styles/shell/menu-bar.css",
-      "blobSha": "c54ed7d227a31f79b18eaaab461d487c1e7bce1c"
+      "blobSha": "d70f2cf81d2fd1f4d69035b367b598e52b1a7449"
     },
     {
       "path": "tests/unit/menu/shell-menus.test.mjs",
@@ -1327,7 +1327,7 @@
     },
     {
       "path": "tests/e2e/lib/selection-stability-checks.mjs",
-      "blobSha": "5d07e6063156e62bcd8def66d1139916e1ed262d"
+      "blobSha": "ee64ae011d2a2a56a395514981cade9e74b1ed0a"
     },
     {
       "path": "tests/unit/preview/preview-worker-focus.test.mjs",
@@ -1348,6 +1348,74 @@
     {
       "path": "src/features/preview/worker/preview-worker.js",
       "blobSha": "727383200f4771e39c8fe9a8c1f35f1253af8282"
+    },
+    {
+      "path": "src/features/layout/session-layout-controller.js",
+      "blobSha": "6fec3b462184651fa53bde7f80ba25eaa01959ae"
+    },
+    {
+      "path": "src-tauri/src/app_launch/mod.rs",
+      "blobSha": "080ce48200ac41bc2d9451997439cf79759d31ee"
+    },
+    {
+      "path": "src-tauri/src/app_launch/instance_guard.rs",
+      "blobSha": "f17e5012ce3e24e95d4d749b5ac79b27e07cf6ef"
+    },
+    {
+      "path": "src-tauri/src/app_launch/inbox.rs",
+      "blobSha": "657e5d3fbc9f9775e4d9ac64edaeef9f21bc72e7"
+    },
+    {
+      "path": "src-tauri/src/app_launch/policy.rs",
+      "blobSha": "b4bb05e37b34a740929f5d9bf2816abd2e12edf9"
+    },
+    {
+      "path": "src-tauri/src/app_launch/routing.rs",
+      "blobSha": "1e6279aa4e43d6d457068b78d1b9a99fbd9d5846"
+    },
+    {
+      "path": "src-tauri/src/app_launch/launch_commands.rs",
+      "blobSha": "c8bd681d79e7f7fd1336e6c4c52824ad6e3eeabd"
+    },
+    {
+      "path": "src/platform/desktop/launch-client.js",
+      "blobSha": "f247f0095247be4d80f4334bcd71ef2079dec226"
+    },
+    {
+      "path": "src/platform/ports/launch-port.js",
+      "blobSha": "16e76b11176a3880e394cd505a91cf4b3faba125"
+    },
+    {
+      "path": "src/features/documents/infrastructure/window-session-storage.js",
+      "blobSha": "b59eb328adf91f5bd426aadf7f7982f8ca11220e"
+    },
+    {
+      "path": "src/features/documents/application/launch-open-controller.js",
+      "blobSha": "ce2fa9e4d83355fbb894604c8f9ab36081873874"
+    },
+    {
+      "path": "src/features/settings/application/launch-policy-controller.js",
+      "blobSha": "55153bf7679375445b65885548aae139648739cf"
+    },
+    {
+      "path": "src/features/settings/ui/launch-policy-field-view.js",
+      "blobSha": "18e624a5644d4969780398224fa22fa496f1d395"
+    },
+    {
+      "path": "src/features/sync/selection/preview-component-mapping.js",
+      "blobSha": "7504020af96e215577d16ff8fe8bf4394ceb0165"
+    },
+    {
+      "path": "src/features/sync/index.js",
+      "blobSha": "3b41d450d6baeeea5066c4fbf0e9845f63ebfeb9"
+    },
+    {
+      "path": "src/features/preview/pipeline/preview-enhancement-coordinator.js",
+      "blobSha": "7a0daf7bba0352c45fddb391a9f39635d7fad36d"
+    },
+    {
+      "path": "src/features/editor/ui/selection-toolbar-view.js",
+      "blobSha": "c9bb05b471f7e646feba3e4e0a81e9ae4d0daace"
     }
   ],
   "priorFailures": {
@@ -15054,6 +15122,12 @@
         "baselineBlob": "41cf537aa473a800c22af50657d304dba9ec7312",
         "currentPath": "src/features/preview/pipeline/preview-layout-stability.js",
         "reason": "R17.1 separately authorized mode-transition preview recovery; frozen telemetry baseline retained, event schema unchanged."
+      },
+      {
+        "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+        "baselineBlob": "d82d635a6b314b19681409d62446afac9e62cff2",
+        "currentPath": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+        "reason": "User-authorized minimal header: measure its single 208px mode group instead of requiring the removed action row or a narrow two-row presentation. Original R15 baseline and telemetry event schema retained."
       }
     ],
     "supplementalRepair": {
@@ -15356,6 +15430,713 @@
       "workspaceReaudit": "docs/audit/r17-01-workspace-reaudit.json",
       "state": "docs/audit/r17-acceptance.json",
       "historicalAcceptancesUnchanged": true
+    },
+    "blueUiIntegration": {
+      "date": "2026-10-27",
+      "authorization": "Latest user instruction: integrate the reviewed Figma blue design 1:1.",
+      "scope": "Presentation and existing command/state projections; no native permission or document format expansion.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "54f643e651d67aad02193ed106de96acaebc710a",
+          "blobSha": "ece51740ced6362d4533264efdde0d99da287ee9"
+        },
+        {
+          "path": "src/bootstrap/module-entry.js",
+          "previousBlob": "c5cf8378c7db2ee703a092355a9594b7a1ab1049",
+          "blobSha": "8e5cb8cf8b1997de88a5c2fe3b477df60b6a7cab"
+        },
+        {
+          "path": "src/bootstrap/workspace-content.js",
+          "previousBlob": "38f7f394dfc9dae6ec4164a03995b24c05bc6f74",
+          "blobSha": "3e2eaf5622ad5c585f8e9b1f52da3030ca9a89ae"
+        },
+        {
+          "path": "src/features/documents/index.js",
+          "previousBlob": "81ba77fd85e9621db41c954812d2c20f71ccf9b0",
+          "blobSha": "c378c4c22477df16c4b0f68d61f4ff46fa2466f4"
+        },
+        {
+          "path": "src/features/documents/ui/document-content-view.js",
+          "previousBlob": "8b7d654eb471c987fd9810b94ad6cde35e2b0906",
+          "blobSha": "a832fd4a1f34eeef2ea755a0bb6808b09765fbd3"
+        },
+        {
+          "path": "src/features/editor/index.js",
+          "previousBlob": "144b37d6bb231ddca7c3e83fc426a91383aef563",
+          "blobSha": "edc5c0059fc912bbf47750cb3f7a67b5375f1cdd"
+        },
+        {
+          "path": "src/features/editor/ui/editor-content-view.js",
+          "previousBlob": "7818371bfad00456540e28b5e6180376eda14688",
+          "blobSha": "6bd6e59e3c2deda392d02587d9178d68cebec5a0"
+        },
+        {
+          "path": "src/features/editor/ui/editor-toolbar-view.js",
+          "previousBlob": "8e2d355d9e29ff032215531f0d57c21cb52894ca",
+          "blobSha": "4c1ed10f195436a5cec0c527e11e947d6dd1102f"
+        },
+        {
+          "path": "src/features/editor/ui/find-replace-dialog-view.js",
+          "previousBlob": "c97f96860c8409d8b7afe73233dba55d1b317774",
+          "blobSha": "b14648a147ec136d2fc47a00ca04b3013462645d"
+        },
+        {
+          "path": "src/features/editor/ui/image-dialog-view.js",
+          "previousBlob": "7a769b0d0486becd1f80205fb4641601e10f89eb",
+          "blobSha": "b4ecf018cfd6a585d16b6ceb8db19448acfeb7ef"
+        },
+        {
+          "path": "src/features/editor/ui/link-dialog-view.js",
+          "previousBlob": "7928f4d02fdab0a5e10c3f415392d792f4bc6fc8",
+          "blobSha": "bdbc4895f0402bd5f9d3f151c34430cc5e0d60d8"
+        },
+        {
+          "path": "src/features/export/application/export-request.js",
+          "previousBlob": "73cc04301d30ba15991c702b83ae44ca16c9fcf0",
+          "blobSha": "71b8588e3ff8da1c2bdb9d9b2efa746e4ec9ea57"
+        },
+        {
+          "path": "src/features/export/formats/image/image-export-surface.js",
+          "previousBlob": "b2576dbf0f9af3074e4a439d96da8d70a9269806",
+          "blobSha": "c9845097922e5e406c811c2f78c20201ae2f8376"
+        },
+        {
+          "path": "src/features/export/formats/image/image-exporter.js",
+          "previousBlob": "fb007f36b9e381fbc96e6e66e653253f1965bb57",
+          "blobSha": "7ae05eb5b76c1f3a10c9b402ff1ee50dd66a3959"
+        },
+        {
+          "path": "src/features/export/index.js",
+          "previousBlob": "be41c18c6c2379690a6cd1f53c1cd14a481cf4ee",
+          "blobSha": "fb9ad3fb18e7f07fdf3194f0edaad88b577e2e23"
+        },
+        {
+          "path": "src/features/export/ui/export-image-dialog-view.js",
+          "previousBlob": "1b9d0ae3401c796d303fb6d2fb0ff89ddd8d0331",
+          "blobSha": "8406274a0a3abfad3731bb5b202eff1dc1505675"
+        },
+        {
+          "path": "src/features/export/ui/export-progress-dialog-view.js",
+          "previousBlob": "25c72ba3a365c7d6827ca3ae244fb07ff0868a5a",
+          "blobSha": "493b90a4f4ff94037e67e46b139be08a953300b2"
+        },
+        {
+          "path": "src/features/import/ui/import-content-view.js",
+          "previousBlob": "14f0d323efce1839fb26c70df30d65e062618f5e",
+          "blobSha": "4eb0e43c476de7aeaf6d39dff58120a41caf2b39"
+        },
+        {
+          "path": "src/features/import/web-clipper/web-clipper-view.js",
+          "previousBlob": "8e33056a5431d03848358d87282d58cace1c0c44",
+          "blobSha": "4b56fd03b6ccf7ccb535bf0b253d0f7a05199ec8"
+        },
+        {
+          "path": "src/features/layout/sidebar/sidebar-resize-controller.js",
+          "previousBlob": "a37f3d490c8fe36c23260718d4bfa9dcb2ee3585",
+          "blobSha": "e9cd0574cbba23ee11981d88bb6a4387d5ee402f"
+        },
+        {
+          "path": "src/features/layout/workspace-preferences.js",
+          "previousBlob": "93f958059678e5766a999c6bb8cb06d18c57ba0c",
+          "blobSha": "dff3ee6c8832ba8c9bb31abf53c9a7a568e6492c"
+        },
+        {
+          "path": "src/features/link-preview/link-preview-controller.js",
+          "previousBlob": "459ac2aeda90dc365a121f351e926de7a085f931",
+          "blobSha": "ba30d5e95cbaa446a9957b75e6178c8c7e173752"
+        },
+        {
+          "path": "src/features/menu/index.js",
+          "previousBlob": "1a6cd74183b6c27a185ce993502880ab26d90ec9",
+          "blobSha": "c36ba9e99e34e308d762325f3414fcef9af9d5b9"
+        },
+        {
+          "path": "src/features/menu/shell-menus.js",
+          "previousBlob": "386e484be4dbd1924414e31592268fff55b36ca0",
+          "blobSha": "26a918b553d95cd0090673254245fe3a605a5a1b"
+        },
+        {
+          "path": "src/features/menu/ui/menu-content-view.js",
+          "previousBlob": "f710cd1fe436cabe3585a30d5fa494dd87c80bb7",
+          "blobSha": "98092c10244ecc8e9bf4df649aee8dec6fb3988f"
+        },
+        {
+          "path": "src/features/persistence/ui/status-content-view.js",
+          "previousBlob": "468885f5ff5316736869084c5223d817d74db92b",
+          "blobSha": "d758c316587121dcb667a29342dbf8f6e9cf2d6f"
+        },
+        {
+          "path": "src/features/persistence/ui/workspace-status.js",
+          "previousBlob": "dddce4c65688e2b7e0b9f17139473ff1fc34174d",
+          "blobSha": "0acd42877ed76bdcffdd0b52abcf3888c34eef28"
+        },
+        {
+          "path": "src/features/preview/ui/preview-content-view.js",
+          "previousBlob": "e4eb1ac8ce7f1221920c20a6e7c034a5ff15a458",
+          "blobSha": "379027d3987c886d9fdeb17029a15fa21cf486d4"
+        },
+        {
+          "path": "src/features/settings/application/settings-controller.js",
+          "previousBlob": "67ddeb83fa3ed438935b11b13dcb241b4b75de16",
+          "blobSha": "425de7f4973d3de4b262d83835ac5ffb4697579f"
+        },
+        {
+          "path": "src/features/sidebar/ui/sidebar-content-view.js",
+          "previousBlob": "e119f5e4c400f245d8b303f9d51c012ba2259e3e",
+          "blobSha": "09e46dc9157361921a060efba13b4782b9f6c7dd"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "5a3a59f73a69e87b626824fbd634e4429fbd7df5",
+          "blobSha": "b2fe9fc6a3b80a3de6a7f0f526dd69205cab383b"
+        },
+        {
+          "path": "src/styles/features/export.css",
+          "previousBlob": "5671c2dc7ecaa2b86af4655581c231d86ebab1ef",
+          "blobSha": "6ff70ebe4f5231bdf5f89e386daf1b79dbbfb328"
+        },
+        {
+          "path": "src/ui/shell/app-shell-view.js",
+          "previousBlob": "7c0aa59e72986f240744addd8f33ad42a0c7f911",
+          "blobSha": "e7ee7dac530c75a83c66dd7e3b1604c381a23443"
+        },
+        {
+          "path": "src/ui/shell/toolbar-shell.js",
+          "previousBlob": "eebd2d7c772017d2889dcc74ec4406fa88a3955d",
+          "blobSha": "d7d0f31274d31af4300a904df2af19088c56a8b7"
+        },
+        {
+          "path": "src/ui/shell/workspace-shell.js",
+          "previousBlob": "d65b62e439d56613bc9574d56d491a967264c688",
+          "blobSha": "caca7162650eae929880a26d8bce50f2177fed57"
+        },
+        {
+          "path": "tests/architecture/fixtures/production-modules.json",
+          "previousBlob": "397ccd809fcce96cc58e490da148921a20a687b2",
+          "blobSha": "17bc9859e72b883dabbd93fb1e7240f9339d3377"
+        },
+        {
+          "path": "tests/browser-e2e-contract.test.mjs",
+          "previousBlob": "3c59dfeab4142ab49d812d8faea64089166e6dcd",
+          "blobSha": "176ed53c65b402e191ec64611087b12627a7deeb"
+        },
+        {
+          "path": "tests/e2e/lib/application-driver.mjs",
+          "previousBlob": "f5cc18bc6d01eebbd8d4c4f0ca1bff490617d7e8",
+          "blobSha": "fede941d1b7caa74fef4ab7d764b994373e4ab9a"
+        },
+        {
+          "path": "tests/e2e/lib/cdp-browser.mjs",
+          "previousBlob": "a0e20cdad250d8e7d5f397c510b7c3298d93d6f6",
+          "blobSha": "6fdfc4410cf300e17d80b3f80baaf384456d2bdc"
+        },
+        {
+          "path": "tests/e2e/lib/export-characterization.mjs",
+          "previousBlob": "fc2bd210a669b43dcf9dc6675d8526ae491a4921",
+          "blobSha": "277bddb1bd37c7cc1909904ffaebc09009fbfc98"
+        },
+        {
+          "path": "tests/e2e/run-browser-tests.mjs",
+          "previousBlob": "15b1215060743bea49edd9078630346e963fd607",
+          "blobSha": "d9b13224ce4eb393b6bd4f38feb44d4dc97c6cd6"
+        },
+        {
+          "path": "tests/ui/app-shell.test.mjs",
+          "previousBlob": "d49ad2df8f141610c04e80058847308ff490de36",
+          "blobSha": "a29be47a5564c5bd56849915f64826dc79f53377"
+        },
+        {
+          "path": "tests/ui/css-tokens.test.mjs",
+          "previousBlob": "5306be2c2d0a82e1b4ab67a6c3cf16e8dd970afe",
+          "blobSha": "7f489c6357d1920fc3a9ca08ba09449e4c9f7049"
+        },
+        {
+          "path": "tests/ui/responsive-shell.test.mjs",
+          "previousBlob": "f87909b218fbd939f94fa04dbf60729a601dfd00",
+          "blobSha": "57e10231a209892a5d823c897fd7d49c15f05bd1"
+        },
+        {
+          "path": "tests/ui/style-layering.test.mjs",
+          "previousBlob": "51c8f261589deb1d6b35a794e73f13980c13a3bc",
+          "blobSha": "58c2d336863413fd53b77628e878c6cf2c5bcf0e"
+        },
+        {
+          "path": "tests/unit/menu/menu-view.test.mjs",
+          "previousBlob": "b4ef0763dc5586668f2bfb65c8ad35713fbc46ba",
+          "blobSha": "5506ba38418230be9aaec12c69ef353747b80083"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "c1d53e6db52d8abd3ce4f749952901bd24285995",
+          "blobSha": "5ce2e264d1bfbe659e86359f523be3aabbf3bf0a"
+        },
+        {
+          "path": "scripts/architecture/dependency-graph.mjs",
+          "previousBlob": "1ccd5b9a49387fbbcfe5d5843e1fa3338bff29e6",
+          "blobSha": "59d640ebc3cf266b9fbc0eaada1302cb330e14da"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "c325210ac6f93f24e31a1205db14ecb697c369a8",
+          "blobSha": "6f48e4ad056faca83bfdebecdc0565e44d074bc3"
+        },
+        {
+          "path": "scripts/architecture/repository.mjs",
+          "previousBlob": "897b22243115cd64f4db89c35fd472dcfa3aae64",
+          "blobSha": "01269f441b5bfb0978a34ec6b5015ed439792470"
+        },
+        {
+          "path": "tests/stage-08-hybrid-inline-presentation.test.mjs",
+          "previousBlob": "39a5d2eb162d2e4a0a75b5daad78b6c15d445f6e",
+          "blobSha": "da0f403da153e0a6f694c9d29ffc8a913f49d11f"
+        },
+        {
+          "path": "src/styles/shell/menu-bar.css",
+          "previousBlob": "c54ed7d227a31f79b18eaaab461d487c1e7bce1c",
+          "blobSha": "d70f2cf81d2fd1f4d69035b367b598e52b1a7449"
+        }
+      ],
+      "evidence": "docs/design/blue-integration.json",
+      "acceptance": "UI-specific verification only; R17 acceptance remains pending.",
+      "finalRefresh": {
+        "at": "2026-10-26T20:12:37.245Z",
+        "changes": [
+          {
+            "path": "docs/audit/r16-01-deletion-inventory.json",
+            "previousBlob": "607781a559070f5bde103b3aeaf9b7f72ffe6942",
+            "blobSha": "f9af32a41920a4f1ca23d7f6e46f495b5c42b9e2"
+          },
+          {
+            "path": "docs/audit/r16-11-module-naming.json",
+            "previousBlob": "91c321a331ebd4ccb81f76d96b822f48ca4ed068",
+            "blobSha": "22e38a6e36ca1acaf6bf054d23fca6a863c82ee3"
+          },
+          {
+            "path": "docs/audit/r16-12-dependency-graph.json",
+            "previousBlob": "93803cab7301fde217aa0d74903d1951be3c1bf7",
+            "blobSha": "2a626c95e561abc15173383abda3edcc7aa4c3ae"
+          }
+        ],
+        "scope": "Current-source fingerprints after verified blue presentation and lifecycle repairs; historical acceptance unchanged."
+      }
+    },
+    "uiBaselineMigration": {
+      "date": "2026-10-27",
+      "authorization": "User confirmed: 那就按你的建议来吧",
+      "scope": "Three approved UI expectations and the demonstrated Vite port allocation failure; product source and historical acceptance remain unchanged.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "f9af32a41920a4f1ca23d7f6e46f495b5c42b9e2",
+          "blobSha": "5c75963c0f5f54a03ff684492a959ad5fff759a9"
+        }
+      ],
+      "review": "Only five reviewed tracked test inputs changed in the deletion audit; protected models, candidates, statuses and all no-deletion decisions were compared and preserved.",
+      "record": "docs/design/legacy-ui-baseline-migration.md"
+    },
+    "emptySessionCorrection": {
+      "date": "2026-10-27",
+      "scope": "Active-document availability only: lock writing for empty sessions, restore correct editable/read-only state at document boundaries, keep the empty paper unobstructed.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "5c75963c0f5f54a03ff684492a959ad5fff759a9",
+          "blobSha": "e9d62614485a42bbe819699f8ca1b1e8867a6ded"
+        },
+        {
+          "path": "src/features/layout/workspace-preferences.js",
+          "previousBlob": "dff3ee6c8832ba8c9bb31abf53c9a7a568e6492c",
+          "blobSha": "3b597267b776565c9763750bda20c614353979ff"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "b2fe9fc6a3b80a3de6a7f0f526dd69205cab383b",
+          "blobSha": "0a3d140fc19a863434bce1318de2dbc1a8e3be5d"
+        },
+        {
+          "path": "tests/architecture/fixtures/production-modules.json",
+          "previousBlob": "c387a83b500026bedf0d7c86d1b305d0a90eb289",
+          "blobSha": "be1f71b68a0cbbdc6f199fd0dc6d97ed4ee93e98"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "22e38a6e36ca1acaf6bf054d23fca6a863c82ee3",
+          "blobSha": "31df42b6bcdbbd3445aed9ee3551bff81e10b599"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "2a626c95e561abc15173383abda3edcc7aa4c3ae",
+          "blobSha": "aef389412ad8b6a8cd184a033500d0352cf5a6ce"
+        },
+        {
+          "path": "src/features/layout/session-layout-controller.js",
+          "previousBlob": null,
+          "blobSha": "06378d9b956f76b428837fa95e1c719153271a28"
+        }
+      ],
+      "auditInputChanges": [
+        "src/features/layout/workspace-preferences.js",
+        "src/main.js",
+        "tests/architecture/fixtures/production-modules.json"
+      ],
+      "historicalAcceptanceUnchanged": true,
+      "fixtureFollowup": {
+        "scope": "Provide the real active document session to the existing settings regression harness; keep all previous assertions. Preserve a pre-existing active document mode when mounting the new boundary.",
+        "auditInputsChanged": [
+          "tests/stage-14-settings-effects.test.mjs"
+        ],
+        "changedReviewedSources": [
+          {
+            "path": "docs/audit/r16-01-deletion-inventory.json",
+            "previousBlob": "e9d62614485a42bbe819699f8ca1b1e8867a6ded",
+            "blobSha": "8eff7b898555bc631c63653fcdfb0ddc1bfdf38e"
+          },
+          {
+            "path": "docs/audit/r16-11-module-naming.json",
+            "previousBlob": "31df42b6bcdbbd3445aed9ee3551bff81e10b599",
+            "blobSha": "8490e02507dfd8c604feafde168d875e6d85a0bb"
+          },
+          {
+            "path": "docs/audit/r16-12-dependency-graph.json",
+            "previousBlob": "aef389412ad8b6a8cd184a033500d0352cf5a6ce",
+            "blobSha": "2df3ec2d12b696cd280918ceb98ea4295c86605b"
+          },
+          {
+            "path": "src/features/layout/session-layout-controller.js",
+            "previousBlob": "06378d9b956f76b428837fa95e1c719153271a28",
+            "blobSha": "6fec3b462184651fa53bde7f80ba25eaa01959ae"
+          }
+        ]
+      }
+    },
+    "previewSelectionCorrection": {
+      "date": "2026-10-27",
+      "scope": "Latest explicit correction: previews show native selection highlights without formatting tools; editor uses a normal caret with no active-line strip. Legacy current-line color stays readable in storage and is retired from UI.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "8eff7b898555bc631c63653fcdfb0ddc1bfdf38e",
+          "blobSha": "a50150f16f5f3434d683f9c7b8705e9087b6f265"
+        },
+        {
+          "path": "src/features/layout/workspace-preferences.js",
+          "previousBlob": "3b597267b776565c9763750bda20c614353979ff",
+          "blobSha": "c3c102fe8d0ecb89ac61cc6946ed4c439f229d0c"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "8490e02507dfd8c604feafde168d875e6d85a0bb",
+          "blobSha": "09acddd62b4e6850d23d21d1c7ef0303b405d11c"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "2df3ec2d12b696cd280918ceb98ea4295c86605b",
+          "blobSha": "a6456dff932af66fe2bbe3cdee4fdadf545749e9"
+        }
+      ],
+      "auditInputChanges": [
+        "src/features/editor/infrastructure/codemirror-extension-registry.js",
+        "src/features/layout/workspace-preferences.js",
+        "src/features/settings/sections/editor-settings.js",
+        "src/features/settings/sections/settings-section.js",
+        "src/features/settings/ui/settings-dialog-view.js",
+        "src/styles/features/editor.css",
+        "src/styles/features/hybrid.css",
+        "src/styles/features/preview.css",
+        "tests/unit/settings/settings-sections.test.mjs"
+      ],
+      "historicalAcceptanceUnchanged": true,
+      "record": "docs/design/blue-integration.json",
+      "cleanupRepair": {
+        "scope": "Actual full-regression failure: localized taskkill status 128 lacked PID prefix after owned browser exited; retain root/child liveness probes and all unrelated error failures. No product source or snapshot change.",
+        "auditInputChanges": [
+          "tests/e2e/lib/cdp-browser.mjs",
+          "tests/stage-13-browser-cleanup.test.mjs"
+        ],
+        "changedReviewedSources": [
+          {
+            "path": "docs/audit/r16-01-deletion-inventory.json",
+            "previousBlob": "a50150f16f5f3434d683f9c7b8705e9087b6f265",
+            "blobSha": "b3a2f57c26f3dd8db6c358bed0323f425fc8d145"
+          },
+          {
+            "path": "tests/e2e/lib/cdp-browser.mjs",
+            "previousBlob": "6fdfc4410cf300e17d80b3f80baaf384456d2bdc",
+            "blobSha": "048f47927206b07b0d71bb5bde09d5a1557c0b04"
+          },
+          {
+            "path": "docs/audit/r16-11-module-naming.json",
+            "previousBlob": "09acddd62b4e6850d23d21d1c7ef0303b405d11c",
+            "blobSha": "59367dc49bc8c821591cd1f8d12be889c848ae85"
+          }
+        ],
+        "parentPidFollowup": {
+          "scope": "Taskkill failure lines include the target PID first and a parent PID as context. Probe every failed target and owned root; do not mistake the live Node parent for a failed browser target. Surviving children and unknown failures still reject.",
+          "auditInputChanges": [
+            "tests/e2e/lib/cdp-browser.mjs",
+            "tests/stage-13-browser-cleanup.test.mjs"
+          ],
+          "changedReviewedSources": [
+            {
+              "path": "docs/audit/r16-01-deletion-inventory.json",
+              "previousBlob": "b3a2f57c26f3dd8db6c358bed0323f425fc8d145",
+              "blobSha": "095af653e74dafe603b38b0efdece5a2db4f47a5"
+            },
+            {
+              "path": "tests/e2e/lib/cdp-browser.mjs",
+              "previousBlob": "048f47927206b07b0d71bb5bde09d5a1557c0b04",
+              "blobSha": "3c1cb99d7690b9e11c623719265694ec973462a4"
+            },
+            {
+              "path": "docs/audit/r16-11-module-naming.json",
+              "previousBlob": "59367dc49bc8c821591cd1f8d12be889c848ae85",
+              "blobSha": "31d6bb8aa0ccc5d8ede3a3750d3fdd99cb23beab"
+            }
+          ]
+        }
+      }
+    },
+    "sidebarSelectionCorrection": {
+      "date": "2026-10-27",
+      "scope": "User authorized zero-width collapsed sidebar and visibility-based minimal editor-to-preview reveal. Preserve frozen mapping/scroll interfaces and exact highlighting; retire same-height assertions only where contradicted by the new behavior.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "095af653e74dafe603b38b0efdece5a2db4f47a5",
+          "blobSha": "8777a6c1dde776bc4fa087f06742131d179462e1"
+        },
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "previousBlob": "8e7ae0e4920fa7ad807d6fea4b50bf228b107ba6",
+          "blobSha": "9b26f091a4d3dbdccdf8cfe76f823d8d80a4d9af"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "31d6bb8aa0ccc5d8ede3a3750d3fdd99cb23beab",
+          "blobSha": "f7140f2a10320f00e2c7d0745e6cec574e34e6a6"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "a6456dff932af66fe2bbe3cdee4fdadf545749e9",
+          "blobSha": "001d75b30be8b9d4fb438731d23360cd82d9a584"
+        },
+        {
+          "path": "tests/e2e/lib/selection-stability-checks.mjs",
+          "previousBlob": "5d07e6063156e62bcd8def66d1139916e1ed262d",
+          "blobSha": "ee64ae011d2a2a56a395514981cade9e74b1ed0a"
+        }
+      ],
+      "auditInputChanges": [
+        "src/features/sync/selection/selection-sync-controller.js",
+        "tests/e2e/lib/selection-stability-checks.mjs",
+        "tests/stage-09-selection-feedback-guard.test.mjs"
+      ],
+      "historicalAcceptanceUnchanged": true,
+      "record": "docs/design/blue-integration.json"
+    },
+    "minimalHeaderCorrection": {
+      "date": "2026-10-27",
+      "authorization": "去掉红色的这两块，将写作分栏纯阅读居中，去掉源码",
+      "scope": "Header presentation only: three centered mode controls, no visible document title/actions. Keep live nonvisual title projection for existing document ports; real export options move to the File menu and read the active Session title. Advanced source capabilities stay intact.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "8777a6c1dde776bc4fa087f06742131d179462e1",
+          "blobSha": "615abeb19225884432313c41dea7946a74a002c5"
+        },
+        {
+          "path": "src/bootstrap/module-entry.js",
+          "previousBlob": "8e5cb8cf8b1997de88a5c2fe3b477df60b6a7cab",
+          "blobSha": "6b9ba2537b444d19431be08a2ad014281275ae41"
+        },
+        {
+          "path": "src/features/editor/ui/editor-toolbar-view.js",
+          "previousBlob": "4c1ed10f195436a5cec0c527e11e947d6dd1102f",
+          "blobSha": "dc8b998cf1c8f459a8de8e39d06d002d061a23bf"
+        },
+        {
+          "path": "src/features/layout/toolbar/toolbar-boundary-controller.js",
+          "previousBlob": "d4a89e69dc0afbc2f5366a2cda226db0fb808021",
+          "blobSha": "81bc5b12036e0c1a26fd6115ffd231395f53026a"
+        },
+        {
+          "path": "src/features/menu/ui/menu-content-view.js",
+          "previousBlob": "98092c10244ecc8e9bf4df649aee8dec6fb3988f",
+          "blobSha": "79801bd86eb0f72b95a5992a94c8c2132b1648f4"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "0a3d140fc19a863434bce1318de2dbc1a8e3be5d",
+          "blobSha": "7384e3b334a209910683c04451fbb88aec0ef6a4"
+        },
+        {
+          "path": "tests/e2e/lib/export-characterization.mjs",
+          "previousBlob": "277bddb1bd37c7cc1909904ffaebc09009fbfc98",
+          "blobSha": "127ccec9fd233196f82c79a5caa4c9503d761e85"
+        },
+        {
+          "path": "tests/unit/layout/toolbar-boundary-controller.test.mjs",
+          "previousBlob": "1bb504c998e3563856da52e3bb625c0cccbe1e8a",
+          "blobSha": "0a8c93cb8c0a0793331bbf6a26e0df95b4f84f96"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "f7140f2a10320f00e2c7d0745e6cec574e34e6a6",
+          "blobSha": "14eca5a06f555887136fc5efa5cadcfe507d38e3"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "001d75b30be8b9d4fb438731d23360cd82d9a584",
+          "blobSha": "a473304b3521fb5c73f3d73bc8e8b9644873728a"
+        }
+      ],
+      "auditInputChanges": [
+        "src/bootstrap/module-entry.js",
+        "src/features/editor/ui/editor-toolbar-view.js",
+        "src/features/layout/toolbar/toolbar-boundary-controller.js",
+        "src/features/menu/ui/menu-content-view.js",
+        "src/main.js",
+        "tests/e2e/lib/export-characterization.mjs",
+        "tests/unit/layout/toolbar-boundary-controller.test.mjs"
+      ],
+      "historicalAcceptanceUnchanged": true,
+      "record": "docs/design/blue-integration.json",
+      "telemetryReview": {
+        "date": "2026-10-28",
+        "scope": "Replace the obsolete class-only assertion for this one authorized producer with its exact reviewed current fingerprint. Keep all 43 historical baselines, compact-shell byte-exact migration, telemetry event schema and all command tests.",
+        "changedReviewedSources": [
+          {
+            "path": "docs/audit/r16-01-deletion-inventory.json",
+            "previousBlob": "615abeb19225884432313c41dea7946a74a002c5",
+            "blobSha": "7fe2e99a201806ae57e22a715221015255c1becb"
+          },
+          {
+            "path": "tests/stage-15-event-catalogue.test.mjs",
+            "previousBlob": "c0348bbc8391589dd5880102c6520489acd037a1",
+            "blobSha": "06607010de7765cf3dd07cd0e452a2e5f4739cc4"
+          }
+        ],
+        "auditInputChanges": [
+          "tests/stage-15-event-catalogue.test.mjs"
+        ],
+        "regressionTests": 30
+      }
+    },
+    "launchPolicyAndQuotes": {
+      "date": "2026-10-28",
+      "record": "docs/design/launch-policy-and-quotes.json",
+      "status": "local-runtime-verified-with-rust-environment-block",
+      "scope": "User-authorized Windows launch policy and independent window sessions; prior commands, model formats, and R17 acceptance unchanged.",
+      "updatedReviewedSources": [
+        "docs/audit/r16-01-deletion-inventory.json",
+        "src-tauri/capabilities/default.json",
+        "src-tauri/src/main.rs",
+        "src/bootstrap/module-entry.js",
+        "src/bootstrap/workspace-startup.js",
+        "src/features/documents/index.js",
+        "src/main.js",
+        "src/platform/index.js",
+        "tests/architecture/fixtures/production-modules.json",
+        "docs/audit/r16-11-module-naming.json",
+        "docs/audit/r16-12-dependency-graph.json"
+      ],
+      "addedReviewedSources": [
+        "src-tauri/src/app_launch/mod.rs",
+        "src-tauri/src/app_launch/instance_guard.rs",
+        "src-tauri/src/app_launch/inbox.rs",
+        "src-tauri/src/app_launch/policy.rs",
+        "src-tauri/src/app_launch/routing.rs",
+        "src-tauri/src/app_launch/launch_commands.rs",
+        "src/platform/desktop/launch-client.js",
+        "src/platform/ports/launch-port.js",
+        "src/features/documents/infrastructure/window-session-storage.js",
+        "src/features/documents/application/launch-open-controller.js",
+        "src/features/settings/application/launch-policy-controller.js",
+        "src/features/settings/ui/launch-policy-field-view.js"
+      ],
+      "securityContract": "Caller-scoped queue ack, 128-file/1MiB envelopes, config directory verified with Tauri, trusted session-* local windows only. Existing file/image validation stays authoritative; no raw document bodies in launch envelopes. No R17 acceptance.",
+      "validation": "2919 tracked Node tests in16 groups;5 new Node tests;79 browser checks;10 real Windows launch checks plus existing frame/header/preview checks. Rust305 passed,1 existing setup permission failure. No stage acceptance."
+    },
+    "diagramSelectionRepair": {
+      "date": "2026-10-28",
+      "record": "docs/design/blue-integration.json#selectionMappingRepair",
+      "changedReviewedSources": [
+        ".github/workflows/r12-14.yml",
+        "docs/audit/r16-01-deletion-inventory.json",
+        "src-tauri/src/performance_log/redaction.rs",
+        "src/main.js",
+        "src/features/sync/index.js",
+        "src/features/sync/selection/selection-sync-controller.js",
+        "src/features/sync/selection/preview-component-mapping.js",
+        "src/features/preview/application/preview-controller.js",
+        "src/features/preview/pipeline/preview-enhancement-coordinator.js",
+        "src/features/telemetry/telemetry-redaction.js",
+        "tests/architecture/fixtures/production-modules.json",
+        "tests/stage-12-log-redaction.test.mjs",
+        "tests/stage-15-redaction.test.mjs",
+        "docs/audit/r16-11-module-naming.json",
+        "docs/audit/r16-12-dependency-graph.json",
+        "src/features/editor/ui/selection-toolbar-view.js"
+      ],
+      "scope": "User-authorized repair from latest actual logs; source-fence component mapping, current DOM anchors, strictly enumerated diagnostics. Frozen models and prior acceptance unchanged.",
+      "architecture": "Frozen selectionMappingApi remains directly injected; an optional rendered-component capability handles SVG/source correspondence without changing the text kernel or 96% gate.",
+      "additionalRepair": "Menu occlusion and pointer-down/frame/pointer-up loss: menu interactions suppress formatting tools, and unchanged toolbar configuration no longer remounts pressed buttons.",
+      "status": "local-runtime-verified-with-existing-clippy-findings",
+      "validation": {
+        "fullNode": {
+          "passed": 2921,
+          "failed": 0,
+          "skipped": 0,
+          "groups": 16,
+          "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028/repository-stable.log"
+        },
+        "newNode": 8,
+        "browserUi": 82,
+        "rustRedaction": 17,
+        "windows": "Actual isolated WebView2 process: frame, 480/860 narrow chrome, empty modes, minimal header, 20 preview selection checks, 5 diagram checks, sidebar/reveal and 5453875-character cross-chapter selection.",
+        "build": "Production fingerprint c36100a48ae4ce85bb90f6f620ddd0ebccfde3d9376e94ed1a177c3bed247c22 verified; isolated Tauri debug build passed.",
+        "staticGates": 4,
+        "clippy": "Executed: 3 existing findings outside this repair in frozen storage and compatibility tests. Not suppressed; no acceptance claim.",
+        "fullRust": "Not rerun for this repair. Earlier case-sensitive NTFS setup permission failure remains.",
+        "stageAcceptance": false
+      }
+    },
+    "localGitCheckpoints": {
+      "date": "2026-10-28",
+      "authorization": "User requests a local commit after each completed change to support rollback.",
+      "existingStagedCheckpoint": "d9d3767f00cad6107187bc0a5cb37cece43e18d5",
+      "integration": "Current UI, Windows launch policy, synchronization fixes, design handoff and required test/assets are saved by the local commit carrying this record. No remote push or R17 acceptance.",
+      "preparation": {
+        "trackedFiles": 1459,
+        "newFilesAdded": 79,
+        "productionBuild": {
+          "accepted": true,
+          "sourceSha256": "1cad526cee35b077d0e67806b2c10e2f2a1141cea6162b35d3f3a6a9a915d7ef",
+          "sourceFiles": 497,
+          "outputFiles": 140
+        },
+        "runtimeJsCssUnchanged": true,
+        "svg": "The copy-action asset is named assets/icons/duplicate.svg with its geometry unchanged; all three local references were updated.",
+        "whitespaceOnly": [
+          "docs/design/assets/fonts/OFL.txt",
+          "public/assets/fonts/JetBrainsMono-OFL.txt",
+          "public/assets/fonts/NotoSansSC-OFL.txt",
+          "docs/design/overlay-density-review.md",
+          "src/styles/shell/writing-workspace.css"
+        ],
+        "validation": {
+          "tests": 2944,
+          "pass": 2944,
+          "fail": 0,
+          "skipped": 0,
+          "groups": 17,
+          "trackedTestFiles": 389,
+          "evidence": "O:/Project/Markdown Rust/Temp/git-checkpoint-20261028/repository.log",
+          "afterWhitespaceAuditTests": 60
+        },
+        "status": "ready-for-local-integration-commit"
+      }
     }
   }
 }

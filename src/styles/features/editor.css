@@ -57,7 +57,7 @@
 
 .virtual-editor-host .cm-activeLine,
 .virtual-editor-host .cm-activeLineGutter {
-      background: var(--color-editor-active-line);
+      background: transparent;
 }
 
 .virtual-editor-host .cm-selectionBackground {
@@ -84,18 +84,18 @@
 }
 
 .virtual-editor-host .cm-content {
-  padding-top: 34px;
+  padding-top: var(--space-4xl);
   padding-bottom: 42px;
 }
 
 .virtual-editor-host .cm-line {
-  padding-right: 38px;
-  padding-left: 14px;
+  padding-right: var(--space-4xl);
+  padding-left: var(--space-4xl);
 }
 
 .virtual-editor-host .cm-gutters {
   min-width: 48px;
-  padding-top: 34px;
+  padding-top: var(--space-4xl);
   color: color-mix(in srgb, var(--color-text-muted) 78%, transparent);
 }
 

@@ -37,8 +37,10 @@ test('Atomic 5.12 Document Title View is session-read-only, sends title drafts a
   const input = createInput();
   const session = createSession();
   const drafts = [];
-  const view = createDocumentTitleView({ input, session, updateTitleDraft: value => drafts.push(value) });
+  const windowTitle = { textContent: '' };
+  const view = createDocumentTitleView({ input, windowTitle, session, updateTitleDraft: value => drafts.push(value) });
   assert.equal(input.value, 'A.md');
+  assert.equal(windowTitle.textContent, 'A.md — MDR');
   assert.equal(input.listenerCount(), 1);
   assert.equal(session.listenerCount(), 1);
   input.value = 'Draft.md';
@@ -46,6 +48,7 @@ test('Atomic 5.12 Document Title View is session-read-only, sends title drafts a
   assert.deepEqual(drafts, ['Draft.md']);
   session.update({ records: Object.freeze([{ id: 'b', title: 'B.md' }]), activeId: 'b' });
   assert.equal(input.value, 'B.md');
+  assert.equal(windowTitle.textContent, 'B.md — MDR');
   view.destroy();
   view.destroy();
   assert.equal(input.listenerCount(), 0);

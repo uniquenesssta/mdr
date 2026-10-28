@@ -1,8 +1,4 @@
 
-const HEADING_FONT_SCALES = new Map([
-  [1, '190%'], [2, '155%'], [3, '130%'], [4, '114%'], [5, '104%'], [6, '100%']
-]);
-
 export function addHeadingLinePresentation({
   lineClasses,
   lineStyles,
@@ -12,7 +8,6 @@ export function addHeadingLinePresentation({
   addLineStyle
 }) {
   addLineClass(lineClasses, lineFrom, `cm-hybrid-heading cm-hybrid-heading-${level}`);
-  addLineStyle(lineStyles, lineFrom, 'font-size', HEADING_FONT_SCALES.get(level) || '100%');
 }
 
 export function applyAtxHeadingLine({

@@ -66,11 +66,16 @@ test('R16-10 migration retains declared scenarios and assertions except the expl
     const original = inspectTestSource(baseline(row.path));
     const current = inspectTestSource(await readFile(row.path, 'utf8'));
     const expected = original.caseContracts.filter(item => !ledger.retiredCases.some(entry => matches(entry, row.path, item.name)));
-    assert.deepEqual(current.cases, expected.map(item => item.name), row.path);
+    const added = (ledger.addedCases || []).filter(entry => entry.path === row.path);
+    assert.deepEqual(current.cases.filter(name => !added.some(entry => entry.name === name)), expected.map(item => item.name), row.path);
+    for (const entry of added) assert.ok(current.cases.includes(entry.name), entry.name);
     assert.deepEqual(current.disabledCases, original.disabledCases, row.path);
     for (const [index, contract] of expected.entries()) {
-      if (!ledger.behaviorReplacements.some(entry => matches(entry, row.path, contract.name))) {
-        assert.deepEqual(current.caseContracts[index].assertions, contract.assertions, row.path + ': ' + contract.name);
+      const replacement = ledger.behaviorReplacements.find(entry => matches(entry, row.path, contract.name));
+      if (replacement?.currentAssertions) {
+        assert.deepEqual(current.caseContracts.find(item => item.name === contract.name).assertions, replacement.currentAssertions, row.path + ': current reviewed assertions drifted');
+      } else if (!replacement) {
+        assert.deepEqual(current.caseContracts.find(item => item.name === contract.name).assertions, contract.assertions, row.path + ': ' + contract.name);
       }
     }
   }

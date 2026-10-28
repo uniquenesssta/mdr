@@ -83,6 +83,11 @@ test('reader errors and spontaneous abort retain distinct failure/cancellation r
 function dialogHarness(confirmLargeFile = () => true) {
   const h = readerHarness(), nodes = new Map(), inserted = [], messages = [];
   class Element extends EventTarget {
+    textContent = ""; attributes = new Map();
+    setAttribute(name,value) { this.attributes.set(name,String(value)); }
+    append(...children) { this.children ??= []; this.children.push(...children); }
+    checkValidity() { try { return ["http:","https:","data:"].includes(new URL(this.value).protocol); } catch { return false; } }
+    click() { this.dispatchEvent(new Event("click")); }
     value = ''; files = []; dataset = {}; children = [];
     classList = { toggle() {} };
     replaceChildren(...children) { this.children = children; }

@@ -113,7 +113,8 @@ export async function runCrossChapterSelectionCheck(page, app,
     const source=selection.getRangeAt(0).getBoundingClientRect(),target=ranges[0].getBoundingClientRect();
     const sourceRatio=((source.top+source.bottom)/2-editor.getBoundingClientRect().top)/editor.clientHeight;
     const targetRatio=((target.top+target.bottom)/2-preview.getBoundingClientRect().top)/preview.clientHeight;
-    return {sourceRatio,targetRatio,errorPx:Math.abs(sourceRatio-targetRatio)*preview.clientHeight,selectionLength:selection.toString().length,
+    const viewport=preview.getBoundingClientRect();
+    return {sourceRatio,targetRatio,visibilityErrorPx:Math.max(0,viewport.top-target.top,target.bottom-viewport.bottom),previewTop:preview.scrollTop,selectionLength:selection.toString().length,
       highlightedLength:ranges.reduce((length,range)=>length+range.toString().length,0)};})()`;
   for (let line of targets) {
     while (line < lines.length && (!lines[line].trim() || lines[line].startsWith('#') || lines[line].length < 16)) line += 1;
@@ -131,8 +132,8 @@ export async function runCrossChapterSelectionCheck(page, app,
     // geometry assertion: it must complete the original navigation by itself.
     try {
       await page.evaluate(`new Promise((resolve,reject)=>{let stable=0;const started=performance.now();
-        const sample=()=>{const value=${geometry};stable=value?.selectionLength===12&&value.highlightedLength===12&&value.errorPx<=8?stable+1:0;
-          if(stable>=8)resolve(true);else if(performance.now()-started>5000)reject(Error('Timed out waiting for stable first cross-chapter word alignment'));
+        let previous=null;const sample=()=>{const value=${geometry};stable=value?.selectionLength===12&&value.highlightedLength===12&&value.visibilityErrorPx<=1&&previous!==null&&Math.abs(value.previewTop-previous)<=1?stable+1:0;previous=value?.previewTop??null;
+          if(stable>=8)resolve(true);else if(performance.now()-started>5000)reject(Error('Timed out waiting for a visible and stable first cross-chapter word selection'));
           else requestAnimationFrame(sample);};requestAnimationFrame(sample);})`);
     } catch (error) {
       throw new Error(error.message + ': ' + JSON.stringify({ line: line + 1, geometry: await page.evaluate(geometry),
@@ -145,8 +146,10 @@ export async function runCrossChapterSelectionCheck(page, app,
       await page.evaluate('new Promise(resolve=>requestAnimationFrame(resolve))');
       samples.push(await page.evaluate(geometry));
     }
-    assert.ok(samples.every(sample => sample?.errorPx <= 8), JSON.stringify(samples));
-    measurements.push({ line: line + 1, alignedMs, maxErrorPx: Math.max(...samples.map(sample => sample.errorPx)) });
+    assert.ok(samples.every(sample => sample?.visibilityErrorPx <= 1), JSON.stringify(samples));
+    const driftPx=Math.max(...samples.map(sample=>sample.previewTop))-Math.min(...samples.map(sample=>sample.previewTop));
+    assert.ok(driftPx<=1,'A completed chapter reveal must not keep moving: '+JSON.stringify(samples));
+    measurements.push({ line: line + 1, visibleMs:alignedMs, maxVisibilityErrorPx:Math.max(...samples.map(sample=>sample.visibilityErrorPx)),driftPx });
   }
   assert.equal(await app.getEditorValue(), normalized);
   return { characters: normalized.length, measurements };

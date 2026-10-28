@@ -1,0 +1,31 @@
+/* Responsibility: Floating selection toolbar, compact groups and keyboard-pinned state. */
+.l-toolbar-shell .format-group, .l-toolbar-shell.toolbar-boundary-wrap .format-group { position: fixed; display: none; flex: none; align-items: center; flex-wrap: nowrap; width: max-content; max-width: calc(100vw - 16px); height: 36px; min-height: 36px; padding: 3px 5px; gap: 2px; border: 1px solid var(--color-border-subtle); border-radius: 12px; background: var(--color-surface-raised); box-shadow: var(--shadow-popover); z-index: var(--layer-popover); }
+.l-toolbar-shell .format-group.has-selection, .l-toolbar-shell.toolbar-boundary-wrap .format-group.has-selection { display: flex; }
+.l-toolbar-shell.is-hidden .format-group { display: none; }
+.l-toolbar-shell .format-group[data-density=standard] { height: 40px; min-height: 40px; }
+.l-toolbar-shell .format-group > * { flex-shrink: 0; }
+.l-toolbar-shell .format-group button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; min-height: 28px; min-width: 30px; padding: 0 6px; border: 0; border-radius: 8px; color: var(--color-accent); background: transparent; font-size: 14px; font-weight: 500; white-space: nowrap; }
+.l-toolbar-shell .format-group[data-density=standard] > button, .l-toolbar-shell .format-group[data-density=standard] > .dropdown > button { height: 32px; min-height: 32px; }
+.l-toolbar-shell .format-group button > span { display: inline; }
+.l-toolbar-shell .format-group .heading-dropdown > button { width: 60px; }
+.l-toolbar-shell .format-group .text-color-button { width: 30px; }
+.l-toolbar-shell .format-group .highlight-color-button, .l-toolbar-shell .format-group [data-editor-action=open-link], .l-toolbar-shell .format-group [data-editor-action=toggle-more] { width: 48px; }
+.l-toolbar-shell .format-group .toolbar-divider { width: 9px; min-width: 9px; height: 20px; padding: 2px 4px; }
+.l-toolbar-shell .format-group .toolbar-divider::before { content: ''; display: block; width: 1px; height: 16px; background: var(--color-border-subtle); }
+.l-toolbar-shell .format-group .icon { width: 16px; height: 16px; }
+.l-toolbar-shell .format-group .color-tool-button > .icon { display: none; }
+.color-tool-indicator { display: none; }
+.l-toolbar-shell .format-group .color-tool-highlight { color: inherit; background: transparent; }
+.writing-more-menu { display: none !important; }
+.l-toolbar-shell .format-group .dropdown-menu { max-height: calc(100vh - 16px); overflow-y: auto; }
+
+.selection-toolbar-items { display:flex;align-items:center;flex:0 1 auto;min-width:0;gap:2px;overflow-x:auto;scrollbar-width:none; }
+.selection-toolbar-items::-webkit-scrollbar { display:none; }
+.selection-toolbar-items > * { flex-shrink:0; }
+.l-toolbar-shell .format-group[data-density=standard] .selection-toolbar-items > button,.l-toolbar-shell .format-group[data-density=standard] .selection-toolbar-items > .dropdown > button { height:32px;min-height:32px; }
+
+.l-toolbar-shell .format-group .color-menu-actions > button { width:100%;height:32px;min-height:32px;padding:0;border:1px solid var(--color-border-subtle);border-radius:8px;background:var(--color-surface-raised);box-shadow:none; }
+.l-toolbar-shell .format-group .color-menu-actions > button.primary { background:var(--color-accent);border-color:var(--color-accent);color:var(--color-on-accent); }
+.l-toolbar-shell .format-group .color-menu .color-swatch { height:38px;min-height:38px;border-radius:2px;background:var(--swatch-color); }
+.l-toolbar-shell .format-group > .selection-toolbar-items { flex-shrink:1;max-width:100%; }
+.l-toolbar-shell .format-group > [data-editor-action=pin-toolbar] { width:28px;min-width:28px; }

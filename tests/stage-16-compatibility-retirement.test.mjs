@@ -37,8 +37,11 @@ test('R16-08 keeps historical UI scope exact while proving the current ownership
   assert.deepEqual(retirement.historicalUiModules, owned(previous.modules));
   assert.equal(retirement.historicalUiModules.length, 72);
   const current = owned(manifest.modules);
-  assert.equal(current.length, 69);
-  assert.deepEqual(current.filter(path => !retirement.historicalUiModules.includes(path)), ['src/ui/dom/static-content.js']);
+  assert.equal(current.length, 73);
+  assert.deepEqual(current.filter(path => !retirement.historicalUiModules.includes(path)), [
+    'src/styles/features/document-surface.css','src/styles/features/find-replace.css',
+    'src/styles/features/selection-toolbar.css','src/styles/shell/writing-workspace.css','src/ui/dom/static-content.js'
+  ]);
   assert.deepEqual(retirement.historicalUiModules.filter(path => !current.includes(path)).sort(),
     retirement.retiredModules.filter(row => row.path.startsWith('src/ui/compatibility/') || row.path === 'public/compatibility/business-content.html').map(row => row.path).sort());
 });

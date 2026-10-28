@@ -247,7 +247,8 @@ test('Atomic 4.5 production integration removes the classic Help authority and w
   assert.doesNotMatch(modalBridge, /id: 'help-modal'/);
   assert.match(helpDialog, /id: 'help-modal'/);
   assert.match(helpDialog, /'data-i18n': 'helpTitle'/);
-  assert.match(helpDialog, /'data-i18n': 'helpOk'/);
+  assert.match(helpDialog, /closeButton\.setAttribute\('aria-label', document\.closeLabel\)/);
+  assert.doesNotMatch(helpDialog, /'data-i18n': 'helpOk'/);
   assert.doesNotMatch(helpDialog, /onclick=/);
   assert.doesNotMatch(sourceAnalysis, /help-content\.js/);
 });

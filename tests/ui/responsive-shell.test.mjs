@@ -56,8 +56,8 @@ test('responsive shell CSS contains bounded flex and status-bar geometry', async
   const statusBlocks = cssBlocks(statusBar, '.l-status-bar');
   assert.ok(statusBlocks.some(block => /min-width:\s*0/.test(block) && /overflow:\s*hidden/.test(block)));
   const statusLeft = cssBlock(statusBar, '.statusbar-left');
-  assert.match(statusLeft, /overflow:\s*hidden/);
-  assert.match(statusLeft, /min-width:\s*0/);
+  // Hidden legacy ports must not leave an empty flex item before the save state.
+  assert.match(statusLeft, /display:\s*none/);
 
   assert.match(compactSplit, /\.l-workspace,\s*\n\s*\.l-split-pane,\s*\n\s*\.l-pane\s*\{/);
 });

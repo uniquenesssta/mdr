@@ -5,7 +5,6 @@
  * State/side effects: One overlay, focus/visibility scopes, event subscriptions and frame set per instance.
  * Lifecycle: Explicit create and terminal idempotent destroy release every owned resource and reject late opens.
  */
-import { createIconView } from '../../ui/components/icon-view.js';
 import {
   createEventScope,
   createFocusScope,
@@ -129,13 +128,13 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
 
     const actions = createSafeElement(document, 'div', { className: 'link-preview-actions' });
     externalButton = createButton('link-preview-external', '在系统浏览器打开', '在系统浏览器打开');
-    externalButton.textContent = '在浏览器打开';
+    externalButton.textContent = '系统浏览器打开';
     overlayEvents.listen(externalButton, 'click', () => {
       openInSystemBrowser(currentUrl).catch(error => showMessage(error?.message || String(error)));
     });
 
     closeButton = createButton('link-preview-close', '关闭链接预览', '关闭并返回编辑器');
-    closeButton.append(createIconView(document, 'icon-close'));
+    closeButton.textContent = '关闭';
     overlayEvents.listen(closeButton, 'click', () => closeLinkPreview('close-button'));
 
     actions.append(externalButton, closeButton);
@@ -158,15 +157,20 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
     });
     overlayEvents.listen(frame, 'load', () => {
       if (!currentUrl || currentUrl === 'about:blank') return;
-      overlay?.classList.remove('is-loading');
+      overlay?.classList.remove('is-loading', 'is-blocked');
       report('link.preview-loaded', {
         host: safeHost(currentUrl),
         inputLength: currentUrl.length
       });
     });
 
+    overlayEvents.listen(frame, 'error', () => {
+      if (!currentUrl) return;
+      overlay.classList.remove('is-loading');overlay.classList.add('is-blocked');
+      notice.textContent='网页无法嵌入，请在系统浏览器打开。';
+    });
     body.append(frame);
-    overlay.append(toolbar, notice, body);
+    overlay.append(toolbar, urlElement, notice, body);
     document.body.appendChild(overlay);
     return overlay;
   }
@@ -206,6 +210,8 @@ export function createLinkPreview({ document, window, links: platformLinks, reco
     titleElement.textContent = safeHost(parsed.url) || '链接预览';
     urlElement.textContent = parsed.url;
     urlElement.title = parsed.url;
+    overlay.classList.remove('is-blocked');
+    overlay.querySelector('.link-preview-notice').textContent='网页正在加载…';
     overlay.classList.add('is-loading');
     visibility.show();
     document.documentElement.classList.add('has-link-preview');

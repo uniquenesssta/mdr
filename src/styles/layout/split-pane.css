@@ -135,11 +135,13 @@
 }
 
 .pane-header {
-  height: 47px;
-  padding: 0 14px;
+  height: var(--control-height);
+  min-height: var(--control-height);
+  flex-shrink: 0;
+  padding: 0 var(--space-4xl);
   gap: var(--space-lg);
   border-bottom: 1px solid var(--color-border-subtle);
-  background: color-mix(in srgb, var(--color-surface-raised) 94%, var(--color-surface-subtle));
+  background: var(--color-canvas);
   color: var(--color-text-muted);
   font-size: var(--font-size-xs);
   text-transform: none;
@@ -151,9 +153,10 @@
   align-items: center;
   gap: var(--space-md);
   color: var(--color-text-primary);
-  font-size: 12.5px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  letter-spacing: 0;
+  margin-right: auto;
 }
 
 .pane-title::before {
@@ -172,7 +175,7 @@
 .l-pane-resizer {
   width: 9px;
   flex-basis: 9px;
-  background: color-mix(in srgb, var(--color-surface-subtle) 60%, transparent);
+  background: var(--color-canvas);
 }
 
 .l-pane-resizer:hover,
@@ -196,3 +199,10 @@
 .l-pane.is-collapsed .pane-title::before {
   display: none;
 }
+
+/* Quiet pane metadata; both content columns share the same alignment grid. */
+.pane-title::before { display: none; }
+.pane-header [data-i18n="editorPaneHint"] { display: none; }
+.pane-header .collapse-btn { width: var(--control-compact); height: var(--control-compact); flex: 0 0 var(--control-compact); padding: var(--space-xs); }
+.f-preview-pane > .pane-header > .pane-title { order: -1; }
+.f-preview-pane > .pane-header > .collapse-btn { order: 2; }

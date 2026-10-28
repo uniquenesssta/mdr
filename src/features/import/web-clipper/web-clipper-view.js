@@ -10,29 +10,30 @@ function createDialog(overlayRoot) {
     parent?.append(element);
     return element;
   };
-  const root = node(null, 'div', { id: 'url-modal', className: 'modal-overlay' });
-  const panel = node(root, 'div', { className: 'modal' });
+  const root = node(null, 'div', { id: 'url-modal', className: "modal-overlay url-modal" });
+  const panel = node(root, 'div', { className: 'modal web-clipper-dialog' });
   const header = node(panel, 'div', { className: 'modal-header' });
   const title = node(header, 'h3', { id: 'url-modal-title' });
-  title.append(createIconView(documentRef, 'icon-globe', { className: 'icon icon-lg' }), documentRef.createTextNode(' '));
+  // The dialog title stays aligned with every other form.
   node(title, 'span', { attributes: { 'data-i18n': 'urlTitle' } });
   const closeButton = node(header, 'button', { attributes: { type: 'button', 'data-clipper-close': true } });
   closeButton.append(createIconView(documentRef, 'icon-close'));
   const body = node(panel, 'div', { className: 'modal-body' });
   node(body, 'label', { attributes: { for: 'url-input', 'data-i18n': 'urlLabel' } });
-  const url = node(body, 'input', { id: 'url-input', attributes: { type: 'url', 'data-i18n-placeholder': 'urlPlaceholder' } });
+  const url = node(body, 'input', {"className":"url-input", id: 'url-input', attributes: { type: 'url', 'data-i18n-placeholder': 'urlPlaceholder' } });
   const option = node(body, 'div', { className: 'c-form-inline-option' });
   const local = node(option, 'input', { id: 'use-local-proxy', className: 'c-inline-checkbox', attributes: { type: 'checkbox' } });
   node(option, 'label', { className: 'c-inline-label', attributes: { for: local.id, 'data-i18n': 'useProxy' } });
-  const proxy = node(body, 'input', { id: 'proxy-url', className: 'c-proxy-input is-hidden',
+  const proxy = node(body, 'input', { id: 'proxy-url', className: "c-proxy-input is-hidden proxy-url",
     attributes: { type: 'url', 'data-i18n-placeholder': 'proxyPlaceholder' } });
-  const fetchButton = node(body, 'button', { className: 'primary',
+  const fetchButton = node(null, 'button', { className: 'clipper-fetch',
     attributes: { type: 'button', 'data-clipper-fetch': true, 'data-i18n': 'fetchBtn' } });
   const status = node(body, 'div', { id: 'url-status', className: 'c-form-status' });
   const area = node(body, 'div', { id: 'manual-area', className: 'c-manual-input is-hidden' });
   node(area, 'label', { attributes: { for: 'manual-html', 'data-i18n': 'manualLabel' } });
-  const manual = node(area, 'textarea', { id: 'manual-html', attributes: { rows: '6', 'data-i18n-placeholder': 'manualPlaceholder' } });
+  const manual = node(area, 'textarea', {"className":"manual-html", id: 'manual-html', attributes: { rows: '6', 'data-i18n-placeholder': 'manualPlaceholder' } });
   const footer = node(panel, 'div', { className: 'modal-footer' });
+  footer.append(fetchButton);
   node(footer, 'button', { attributes: { type: 'button', 'data-clipper-close': true, 'data-i18n': 'cancel' } });
   const insertButton = node(footer, 'button', { className: 'primary',
     attributes: { type: 'button', 'data-clipper-insert': true, 'data-i18n': 'convertInsert' } });
@@ -46,12 +47,16 @@ export function createWebClipperView({ overlayRoot, controller, translate, notif
   const events = createEventScope();
   let destroyed = false, modal = null, unsubscribe = null, unsubscribeLocale = null;
   const renderState = state => {
+    panel.dataset.state = state.status;
+    local.parentElement.hidden = state.native;
+    fetchButton.disabled = state.status === 'fetching';
+    insertButton.disabled = state.status === 'fetching' || !(state.hasContent || state.manualHtml.trim());
     for (const [element, value] of [[url, state.url], [proxy, state.proxyUrl], [manual, state.manualHtml]]) if (element.value !== value) element.value = value;
     local.checked = state.useLocalProxy;
     proxy.classList.toggle('is-hidden', state.native || !state.useLocalProxy);
     area.classList.toggle('is-hidden', !state.showManual);
     const key = state.status === 'fetching' ? 'urlStatusFetching' : state.status === 'empty' ? 'urlStatusEmptyUrl' : state.status === 'success' ? (state.source === 'public-proxy' ? 'urlStatusPublicSuccess' : 'urlStatusLocalSuccess') : state.status === 'manual-required' ? (state.source === 'public-proxy' ? 'urlStatusPublicFailed' : 'urlStatusLocalFailed') : '';
-    status.textContent = key ? translate(key, state.error) + (state.hint ? '\n' + state.hint : '') : '';
+    status.textContent = key ? translate(key, state.error) + (state.hint ? '\n' + state.hint : '') : '输入网页地址，抓取后转换为 Markdown。';
     status.classList.remove('is-muted', 'is-success', 'is-error');
     status.classList.add(state.status === 'success' ? 'is-success' : ['empty', 'manual-required'].includes(state.status) ? 'is-error' : 'is-muted');
   };

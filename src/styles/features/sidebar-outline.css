@@ -122,3 +122,10 @@
   background: var(--color-accent-soft);
   box-shadow: inset 2px 0 0 var(--color-accent);
 }
+
+.outline-node { margin:0; }
+.outline-row { min-height:36px;height:36px;grid-template-columns:12px minmax(0,1fr);gap:4px;padding:0 8px;border-radius:8px; }
+.outline-link,.outline-node[class*="outline-level-"] > .outline-row .outline-link { font-size:14px;line-height:22px;font-weight:400;color:var(--color-text-primary); }
+.outline-toggle { width:12px;height:28px;padding:0; }
+.outline-children { margin-left:16px;padding-left:0;border:0; }
+.outline-row.active .outline-link { color:var(--color-accent); }

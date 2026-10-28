@@ -4,10 +4,11 @@ import { createApplicationLifetime } from './application-lifetime.js';
 import { createCommandRegistry } from '../shared/commands/command-registry.js';
 import { createPlatform } from '../platform/index.js';
 import { telemetry } from '../features/telemetry/index.js';
-import { createDocumentSessionStore, normalizeRecentFilePath } from '../features/documents/index.js';
+import { createDocumentSessionStore, createDocumentEmptyView, createRecentFilesReadSource, normalizeRecentFilePath, createWindowSessionStorage } from '../features/documents/index.js';
 import { createHelpFeature } from '../features/help/index.js';
+import { createExportDialogView } from '../features/export/index.js';
 import { MENU_COMMAND_IDS, createMenuActions, createMenuCommandBindings, createMenuController,
-  createMenuState, createMenuView, createSubmenuPositioner } from '../features/menu/index.js';
+  createMenuState, createMenuView, createSubmenuPositioner, createWorkspaceActionsView } from '../features/menu/index.js';
 import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsFeature,
   createSettingsRepository, createSettingsStore } from '../features/settings/index.js';
 import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry } from '../i18n/index.js';
@@ -34,6 +35,8 @@ export function startModuleEntry({ documentRef = globalThis.document,
       const platform = createPlatform({ runtime, now: () => runtime.performance.now(),
         record: (operation, entry) => telemetry.record?.(operation, entry) });
       lifetime.own(() => { void platform.destroy().catch(error => console.error('Platform cleanup failed:', error)); });
+      const launchContext = platform.capabilities.isDesktop ? await platform.launch.readContext() : { windowLabel: 'main' };
+      const documentStorage = createWindowSessionStorage(storage, launchContext.windowLabel);
       const documentSessionStore = own(createDocumentSessionStore());
       const settingsRepository = createSettingsRepository({ storage });
       const settingsStore = own(createSettingsStore({ initialSnapshot: settingsRepository.load(),
@@ -51,13 +54,16 @@ export function startModuleEntry({ documentRef = globalThis.document,
       own(createThemeToggleController({ trigger: documentRef.querySelector('[data-theme-toggle]'),
         readTheme: () => settingsStore.get('theme'), commitTheme: theme => settingsCommands.commit({ theme }).theme }));
       const settingsController = own(createSettingsFeature({ menuRoot: ui.menu, overlayRoot: ui.overlay,
-        documentRef, store: settingsStore, platform }));
+        workspaceRoot: ui.workspace, documentRef, store: settingsStore, platform }));
       const editorCommands = own(createCommandRegistry('Editor commands'));
       const documentCommands = own(createCommandRegistry('Document commands'));
       const menuState = own(createMenuState());
       const menuCommandBindings = own(createMenuCommandBindings());
       lifetime.own(menuCommandBindings.register(MENU_COMMAND_IDS.HELP_OPEN, () => helpController.open()));
-      lifetime.own(menuCommandBindings.register(MENU_COMMAND_IDS.SETTINGS_OPEN, () => settingsController.open()));
+      lifetime.own(menuCommandBindings.register(MENU_COMMAND_IDS.SETTINGS_OPEN, payload => {
+        const opened = settingsController.open(payload?.page);
+        return opened;
+      }));
       const closeMenus = () => editorCommands.has('closeAppMenus') ? editorCommands.invoke('closeAppMenus') : false;
       const menuController = own(createMenuController({ state: menuState, bindings: menuCommandBindings,
         view: createMenuView({ root: ui.menu }), closeMenus,
@@ -65,12 +71,17 @@ export function startModuleEntry({ documentRef = globalThis.document,
       const submenuPositioner = own(createSubmenuPositioner({ root: ui.menu, runtime }));
       const { startApplication } = await importApplication();
       if (typeof startApplication !== 'function') throw new Error('Application factory is unavailable.');
-      const application = own(await startApplication({ platform, documentSessionStore, settingsStore,
+      const application = own(await startApplication({ platform, documentSessionStore, settingsStore, documentStorage,
         i18nService, helpController, menuController, submenuPositioner, editorCommands, documentCommands }));
       const menuActions = own(createMenuActions({ bindings: menuCommandBindings, editorCommands, documentCommands,
         exportCommands: application.exportCommands, recentFiles: application.recentFiles,
         normalizeRecentPath: normalizeRecentFilePath }));
       menuActions.start();
+      own(createDocumentEmptyView({root:ui.workspace.querySelector('.l-split-pane'),session:documentSessionStore,onNew:()=>menuController.execute(MENU_COMMAND_IDS.DOCUMENT_NEW)}));
+      own(createWorkspaceActionsView({ sidebar: ui.sidebar, overlayRoot: ui.overlay, commands: menuController,
+        recentSource: createRecentFilesReadSource(application.recentFiles), desktopAvailable: platform.capabilities.desktop.fileSystem }));
+      own(createExportDialogView({ overlayRoot: ui.overlay, trigger: ui.menu.querySelector('[data-workspace-export]'), commands: application.exportCommands, beforeOpen: closeMenus,
+        readInput: () => ({ name: documentSessionStore.records.find(record => record.id === documentSessionStore.activeId)?.title || '未命名文档.md', directory: settingsStore.get('exportDirectory') }) }));
       submenuPositioner.start();
       menuController.start();
       application.activate();

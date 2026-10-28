@@ -1,7 +1,7 @@
 /**
  * Responsibility: Final Stage 9 bidirectional selection orchestration. It coordinates Readers, frozen model-kernel mapping, Highlight Session, Feedback Guard and Retry Scheduler without owning any of those specialist responsibilities.
  * Imports: No production imports; every editor/model/preview/scroll/mapping/runtime capability is injected by the composition root.
- * State/side effects: Owns selection listeners, two cancellable frames, one document-scoped Editor navigation intent, dedupe/alignment state and statistics. Chapter work stays with Preview.
+ * State/side effects: Owns selection listeners, two cancellable frames, one document-scoped Editor reveal intent, dedupe state and statistics. Chapter work stays with Preview.
  * Lifecycle: start()/stop() are idempotent; destroy() is terminal and removes every owned listener/frame/subscription while leaving injected dependencies to their owners.
  */
 
@@ -96,6 +96,7 @@ export class SelectionSyncController {
       highlightSession,
       retryScheduler,
       selectionMapping,
+      componentMapping = null,
       scrollController,
       documentRef = editor.ownerDocument,
       requestFrame,
@@ -120,6 +121,7 @@ export class SelectionSyncController {
     assertMethods(highlightSession, REQUIRED_HIGHLIGHT_METHODS, 'SelectionHighlightSession');
     assertMethods(retryScheduler, REQUIRED_RETRY_METHODS, 'SelectionRetryScheduler');
     assertMethods(selectionMapping, REQUIRED_MAPPING_METHODS, 'frozen selectionMappingApi');
+    if (componentMapping) assertMethods(componentMapping, REQUIRED_MAPPING_METHODS, 'rendered component mapping');
     assertMethods(scrollController, ['scrollTo', 'getState'], 'ScrollSyncController');
     if (!documentRef || typeof documentRef.addEventListener !== 'function' || typeof documentRef.removeEventListener !== 'function') {
       throw new TypeError('SelectionSyncController requires documentRef event target');
@@ -145,6 +147,7 @@ export class SelectionSyncController {
     this.highlightSession = highlightSession;
     this.retryScheduler = retryScheduler;
     this.selectionMapping = selectionMapping;
+    this.componentMapping = componentMapping;
     this.scrollController = scrollController;
     this.documentRef = documentRef;
     this.requestFrame = requestFrame;
@@ -164,7 +167,6 @@ export class SelectionSyncController {
     this.previewFrameVersion = 0;
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
-    this.editorAlignmentUntil = 0;
     this.editorIntent = null;
     this.finalFeedbackState = null;
     this.stats = {
@@ -310,7 +312,8 @@ export class SelectionSyncController {
     if (!this.isEditorIntentCurrent()) {
       this.editorIntent = {
         identity: this.selectionIdentity(selection),
-        scopePending: false
+        scopePending: false,
+        revealed: false
       };
     }
     return this.editorIntent;
@@ -346,7 +349,6 @@ export class SelectionSyncController {
       return false;
     }
     this.stats.editorRequests += 1;
-    if (shouldScroll && options.extendAlignment !== false) this.editorAlignmentUntil = this.now() + 1400;
     this.retryScheduler.cancel();
     this.scheduleFrameChain('editor', options.frames, () => {
       this.runEditor(shouldScroll, reason, Boolean(options.force), 0);
@@ -427,11 +429,13 @@ export class SelectionSyncController {
     let mappedCharacters = 0;
     let projectionCoverage = 1;
     let matchedAnchors = 0;
+    let componentMappings = 0;
     for (const anchor of candidates) {
       const sourceRange = anchorSourceRange(anchor);
       if (!sourceRange) continue;
       const source = this.documentModel.sliceText(sourceRange.sourceStart, sourceRange.sourceEnd);
-      const mapped = this.selectionMapping.createPreviewRangesForSourceSelection(
+      const component = this.componentMapping?.createPreviewRangesForSourceSelection(anchor, source, sourceRange.sourceStart, from, to);
+      const mapped = component || this.selectionMapping.createPreviewRangesForSourceSelection(
         anchor,
         source,
         sourceRange.sourceStart,
@@ -445,10 +449,11 @@ export class SelectionSyncController {
         projectionCoverage,
         Number.isFinite(mapped?.projectionCoverage) ? mapped.projectionCoverage : 0
       );
-      if (mapped?.ranges?.length) {
+      if (mapped?.ranges?.length || mapped?.atomicElements?.length) {
         ranges.push(...mapped.ranges);
         matchedAnchors += 1;
       }
+      if (mapped?.componentMapping) componentMappings += 1;
       for (const element of mapped?.atomicElements || []) atomicElements.add(element);
     }
     const visibleCoverage = sourceCharacters ? mappedCharacters / sourceCharacters : 1;
@@ -456,12 +461,13 @@ export class SelectionSyncController {
     const plan = {
       ranges,
       atomicElements: [...atomicElements],
-      rect: combinedViewportRect(ranges),
+      rect: combinedViewportRect([...ranges, ...atomicElements]),
       matchedAnchors,
       sourceCharacters,
       mappedCharacters,
       visibleCoverage,
-      projectionCoverage
+      projectionCoverage,
+      componentMappings
     };
     return this.highlightSession.canPresent(plan) ? plan : null;
   }
@@ -481,23 +487,46 @@ export class SelectionSyncController {
     return virtual.hasLineRangeMounted?.(fromLine, toLine) !== false;
   }
 
-  scrollPreviewPlanIntoView(plan, fromLine, behavior, viewportRatio) {
-    const ratio = clamp(viewportRatio, 0.05, 0.95);
-    let contentY = null;
-    if (plan?.rect) {
-      const previewRect = this.preview.getBoundingClientRect?.();
-      if (previewRect) {
-        contentY = this.preview.scrollTop + plan.rect.top - previewRect.top + Math.max(1, plan.rect.height) / 2;
-      }
-    }
-    if (!Number.isFinite(contentY)) contentY = this.requirePreviewMapper().getContentYForLine(fromLine);
-    const targetTop = contentY - this.preview.clientHeight * ratio;
-    this.scrollController.scrollTo('preview', targetTop, {
-      behavior,
+  scrollPreviewPlanIntoView(plan, fromLine) {
+    const height = Math.max(1, this.preview.clientHeight);
+    const viewportTop = (this.preview.getBoundingClientRect?.().top || 0) + (this.preview.clientTop || 0);
+    const top = plan?.rect ? plan.rect.top - viewportTop
+      : this.requirePreviewMapper().getContentYForLine(fromLine) - this.preview.scrollTop;
+    const bottom = plan?.rect ? plan.rect.bottom - viewportTop : top + 1;
+    // A visible target is already located. Do not align it to the source pane.
+    if (top >= -1 && bottom <= height + 1) return false;
+    const margin = Math.min(8, height / 4);
+    if (bottom - top > height - margin * 2 && top < height && bottom > 0) return false;
+    const delta = top < 0 || bottom - top > height - margin * 2 ? top - margin : bottom - height + margin;
+    return this.scrollController.scrollTo('preview', this.preview.scrollTop + delta, {
+      behavior: 'auto',
       reason: 'selection-editor-to-preview',
-      suspendMs: behavior === 'smooth' ? 520 : 180,
-      settleMs: behavior === 'smooth' ? 1000 : 700
+      suspendMs: 180,
+      settleMs: 700
     });
+  }
+
+  revealPreviewSelection(plan, fromLine) {
+    const moved = this.scrollPreviewPlanIntoView(plan, fromLine);
+    const intent = this.editorIntent;
+    if (!intent) return;
+    if (!moved && !intent.scrollStarted) { intent.revealed = true; return; }
+    intent.scrollStarted = true;
+    const rect = combinedViewportRect(plan.ranges) || plan.rect;
+    const position = rect ? [rect.top, rect.bottom, this.preview.scrollTop] : [this.preview.scrollTop];
+    const stable = !moved && intent.lastRevealPosition?.length === position.length
+      && position.every((value, i) => Math.abs(value - intent.lastRevealPosition[i]) <= 1);
+    intent.visibleSamples = stable ? (intent.visibleSamples || 0) + 1 : 0;
+    intent.lastRevealPosition = position;
+    if (intent.visibleSamples >= 3) { intent.revealed = true; return; }
+    intent.revealChecks = (intent.revealChecks || 0) + 1;
+    if (intent.revealChecks <= 30) {
+      this.scheduleEditor(true, 'editor-reveal-settle', { force: true, frames: 2 });
+    } else {
+      this.editorIntent = null;
+      this.diagnostic('selection.sync-anomaly', { category: 'sync.selection', status: 'warning',
+        details: { direction: 'editor-to-preview', reason: 'preview-reveal-unsettled' } });
+    }
   }
 
   getEditorContentYForPosition(position) {
@@ -540,7 +569,7 @@ export class SelectionSyncController {
     const createPlan = () => this.buildPreviewHighlightPlan(from, to);
     const plan = createPlan();
     if (!plan) {
-      return { status: this.getPreviewVirtual()?.active ? 'pending' : 'mapping-failed', selectionLength: to - from, matchedAnchors: 0 };
+      return { status: this.getPreviewVirtual()?.active ? 'pending' : 'mapping-failed', selectionLength: to - from, matchedAnchors: 0, sourceStart: from, sourceEnd: to };
     }
     this.highlightSession.show(plan, { restore: createPlan });
     const editorY = this.getEditorContentYForPosition(from + Math.floor((to - from) / 2));
@@ -549,20 +578,22 @@ export class SelectionSyncController {
       0.05,
       0.95
     );
-    const behavior = /pointerup|keyup|editor-select/.test(reason) ? 'smooth' : 'auto';
-    if (shouldScroll) this.scrollPreviewPlanIntoView(plan, fromLine, behavior, sourceViewportRatio);
+    if (shouldScroll && !this.editorIntent?.revealed) {
+      this.revealPreviewSelection(plan, fromLine);
+    }
+    const targetViewportRatio = viewportRatioForRect(this.preview, combinedViewportRect([...plan.ranges, ...plan.atomicElements]) || plan.rect);
     return {
-      status: 'exact',
+      status: plan.componentMappings ? 'mapped' : 'exact',
       selectionLength: to - from,
       matchedAnchors: plan.matchedAnchors,
       mappedCharacters: plan.mappedCharacters,
       mappingCoverage: Math.min(plan.visibleCoverage, plan.projectionCoverage),
-      mappingMode: 'source-dom',
-      exactMapping: true,
+      mappingMode: plan.componentMappings ? 'source-component' : 'source-dom',
+      exactMapping: !plan.componentMappings,
       sourceStart: from,
       sourceEnd: to,
       sourceViewportRatio,
-      targetViewportRatio: sourceViewportRatio
+      targetViewportRatio
     };
   }
 
@@ -570,7 +601,8 @@ export class SelectionSyncController {
     const sourceRange = anchorSourceRange(anchor);
     if (!sourceRange) return null;
     const source = this.documentModel.sliceText(sourceRange.sourceStart, sourceRange.sourceEnd);
-    return this.selectionMapping.mapPreviewDomPointToSource(
+    return this.componentMapping?.mapPreviewDomPointToSource(anchor, source, sourceRange.sourceStart, node, offset, affinity)
+      || this.selectionMapping.mapPreviewDomPointToSource(
       anchor,
       source,
       sourceRange.sourceStart,
@@ -638,8 +670,8 @@ export class SelectionSyncController {
       matchedAnchors: highlight?.matchedAnchors || 2,
       sourceStart: start,
       sourceEnd: end,
-      exactMapping: true,
-      mappingMode: 'dom-source',
+      exactMapping: !exactStart.componentMapping && !exactEnd.componentMapping,
+      mappingMode: exactStart.componentMapping || exactEnd.componentMapping ? 'component-source' : 'dom-source',
       mappingCoverage: coverage,
       sourceViewportRatio,
       targetViewportRatio: sourceViewportRatio
@@ -666,7 +698,7 @@ export class SelectionSyncController {
 
   shouldRealignEditorSelection() {
     const source = this.scrollController.getState();
-    return this.now() < this.editorAlignmentUntil && source.sourceSide !== 'preview'
+    return this.isEditorIntentCurrent() && !this.editorIntent.revealed && source.sourceSide !== 'preview'
       && !['wheel', 'touch', 'keyboard'].includes(source.sourceReason);
   }
 
@@ -721,6 +753,7 @@ export class SelectionSyncController {
         category: 'sync.selection',
         status: 'warning',
         dedupeKey: `selection:${direction}:${status}`,
+        fingerprint: `${direction}:${status}:${this.documentModel.getDocumentVersion()}:${details.previewRevision}:${reason}`,
         minIntervalMs: 4000,
         details
       });

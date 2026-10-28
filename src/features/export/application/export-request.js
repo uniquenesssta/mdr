@@ -55,6 +55,10 @@ export function createExportRequest(input) {
     const cropFit = options.cropFit === undefined ? false : options.cropFit;
     if (typeof cropFit !== 'boolean') invalid('imageOptions.cropFit', '图片裁切选项无效');
     imageOptions = Object.freeze({ ratio, ...EXPORT_IMAGE_RATIOS[ratio], cropFit });
+    if (options.background !== undefined) {
+      if (!['light', 'dark'].includes(options.background)) invalid('imageOptions.background', '请选择有效的图片背景');
+      imageOptions = Object.freeze({ ...imageOptions, background: options.background });
+    }
   } else if (input.imageOptions !== undefined) {
     invalid('imageOptions', '该导出格式不支持图片选项');
   }

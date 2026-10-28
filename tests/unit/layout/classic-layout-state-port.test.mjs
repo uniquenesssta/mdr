@@ -3,7 +3,7 @@ import test from 'node:test';
 import { createLayoutState, getCompactShellMaxWidth, getCompactSplitMaxWidth, RESPONSIVE_BREAKPOINTS, matchesNarrowInteractiveLayout } from '../../../src/features/layout/index.js';
 test('R16-08 explicit LayoutState owns every former projection value and exposes immutable snapshots', () => {
   const state = createLayoutState();
-  assert.equal(state.snapshot.sidebar.width, 248);
+  assert.equal(state.snapshot.sidebar.width, 240);
   state.setSidebar({ visible: false, width: 312 });
   state.setSplit({ editorCollapsed: true, previewCollapsed: false, ratio: 0.61, compactActive: true, compactPane: 'preview' });
   state.setMode('preview');

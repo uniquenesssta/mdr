@@ -6,6 +6,7 @@
  * Lifecycle: Explicit start/destroy; destroy removes the listener and runtime command metadata.
  */
 import { MENU_COMMAND_IDS as C } from './menu-command-bindings.js';
+import { applyMenuPresentation } from './ui/menu-presentation.js';
 
 const command = id => Object.freeze({ type: 'command', id });
 const separator = Object.freeze({ type: 'separator' });
@@ -26,7 +27,7 @@ const MENU_LAYOUT = Object.freeze({
   ]),
   'app-view-menu': Object.freeze([
     command(C.LAYOUT_TOGGLE_SIDEBAR), separator,
-    command(C.LAYOUT_MODE_BOTH), command(C.LAYOUT_MODE_EDIT), command(C.LAYOUT_MODE_PREVIEW), separator,
+    passthrough('view-writing-item'), command(C.LAYOUT_MODE_BOTH), command(C.LAYOUT_MODE_EDIT), command(C.LAYOUT_MODE_PREVIEW), separator,
     command(C.PAGE_FULLSCREEN_TOGGLE), command(C.SYSTEM_FULLSCREEN_TOGGLE)
   ]),
   'insert-menu': Object.freeze([
@@ -34,8 +35,10 @@ const MENU_LAYOUT = Object.freeze({
       command(C.EDITOR_HEADING_1), command(C.EDITOR_HEADING_2), command(C.EDITOR_HEADING_3),
       command(C.EDITOR_HEADING_4), command(C.EDITOR_HEADING_5), command(C.EDITOR_HEADING_6)
     ]),
+    passthrough('insert-quote-item'),
+    submenu([passthrough('insert-unordered-item'),passthrough('insert-ordered-item'),passthrough('insert-task-item')]),separator,
     command(C.EDITOR_LINK_OPEN), command(C.EDITOR_IMAGE_OPEN), command(C.EDITOR_TABLE_INSERT_3X3),
-    command(C.EDITOR_TABLE_VISUAL_TOGGLE), command(C.EDITOR_CODE_VISUAL_TOGGLE),
+    passthrough('insert-code-item'), separator, command(C.EDITOR_TABLE_VISUAL_TOGGLE), command(C.EDITOR_CODE_VISUAL_TOGGLE),
     submenu([command(C.EDITOR_MATH_INLINE), command(C.EDITOR_MATH_BLOCK)]),
     command(C.EDITOR_MERMAID_OPEN)
   ]),
@@ -113,6 +116,7 @@ export function createMenuView({ root }) {
     if (commandElements.size !== declaration.length) {
       throw new Error(`Menu declaration/DOM command count mismatch: ${declaration.length}/${commandElements.size}.`);
     }
+    applyMenuPresentation(root);
     return commandElements.size;
   }
 

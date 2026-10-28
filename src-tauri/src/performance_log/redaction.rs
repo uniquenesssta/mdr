@@ -79,13 +79,16 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
     if envelope {
         match key {
             "source" => return matches!(value, "frontend" | "rust"),
-            "status" => return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped"),
+            "status" => {
+                return matches!(value, "ok" | "error" | "warning" | "cancelled" | "skipped")
+            }
             "category" => {
                 return matches!(
                     value,
                     "app.lifecycle"
                         | "content.operation"
                         | "document.error"
+                        | "document.lifecycle"
                         | "document.model"
                         | "document.operation"
                         | "editor.hybrid"
@@ -142,6 +145,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "document.imported"
                         | "document.save-as-error"
                         | "document.snapshot"
+                        | "document.session-reset"
                         | "downloadExportImage"
                         | "duplicateDocument"
                         | "editor.pointer-position-corrected"
@@ -161,6 +165,7 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "hybrid.invalid-block-range"
                         | "hybrid.slow-decoration-build"
                         | "hybrid.source-edit-close"
+                        | "hybrid.mermaid-render-result"
                         | "hybrid.widget-build-failure"
                         | "hybrid.widget-geometry"
                         | "initial_file_path"
@@ -184,8 +189,9 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "interaction.scroll.burst"
                         | "interaction.shortcut"
                         | "layout.compact-shell-change"
-                        | "layout.system-fullscreen-error"
+                        | "layout.mode-change"
                         | "layout.toolbar-boundary-change"
+                        | "layout.system-fullscreen-error"
                         | "layout.window-resize-settled"
                         | "list_text_file_tree"
                         | "loadFile"
@@ -199,6 +205,10 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "native.delete_document_state"
                         | "native.fetch_url"
                         | "native.initial_file_path"
+                        | "native.read_launch_context"
+                        | "native.set_single_instance"
+                        | "native.peek_launch_request"
+                        | "native.ack_launch_request"
                         | "native.list_text_file_tree"
                         | "native.load_document_manifest"
                         | "native.load_document_state"
@@ -219,6 +229,11 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "open_external_url"
                         | "prefixLines"
                         | "preview.mermaid-render-failure"
+                        | "link.preview-open"
+                        | "link.preview-close"
+                        | "link.preview-loaded"
+                        | "link.preview-blocked"
+                        | "link.preview-external-open"
                         | "preview.mermaid-render-result"
                         | "read_document_chunk"
                         | "read_dropped_file"
@@ -226,6 +241,11 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "redo"
                         | "renameDocument"
                         | "render.preview-layout-refresh"
+                        | "render.preview-annotation"
+                        | "render.preview-enhancements"
+                        | "render.preview-index-only"
+                        | "render.preview-patch"
+                        | "render.preview-prewarm"
                         | "renderMermaidBlocks"
                         | "renderOutline"
                         | "replaceAll"
@@ -272,17 +292,32 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
         }
     }
     match key {
-        "contentType" => matches!(value, "text/html" | "text/plain" | "text/markdown" | "application/json"),
+        "contentType" => matches!(
+            value,
+            "text/html" | "text/plain" | "text/markdown" | "application/json"
+        ),
         "side" | "sourceSide" | "targetSide" | "scrollSourceSide" => {
             matches!(value, "editor" | "preview" | "")
         }
-        "mode" | "presentationMode" => matches!(value, "source" | "hybrid" | "preview"),
+        "mode" => matches!(
+            value,
+            "source" | "hybrid" | "preview" | "full" | "virtual" | "chapter"
+        ),
+        "presentationMode" | "presentation" => matches!(value, "source" | "hybrid" | "preview"),
+        "previousMode" | "nextMode" => matches!(value, "hybrid" | "both" | "edit" | "preview"),
+        "requestedPreviewMode" => matches!(value, "auto" | "full" | "virtual" | "chapter"),
+        "resolvedPreviewMode" => matches!(value, "full" | "virtual" | "chapter"),
+        "origin" => matches!(value, "user" | "programmatic" | "layout" | "compensation"),
+        "theme" => matches!(value, "default" | "dark"),
         "direction" => matches!(value, "editor-to-preview" | "preview-to-editor"),
         "result" => matches!(
             value,
             "exact" | "mapped" | "pending" | "mapping-failed" | "no-selection"
         ),
-        "mappingMode" => matches!(value, "source-dom" | "dom-source"),
+        "mappingMode" => matches!(
+            value,
+            "source-dom" | "dom-source" | "source-component" | "component-source"
+        ),
         "reason" => matches!(
             value,
             "editor-select"
@@ -300,6 +335,10 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                 | "preview-mounted"
                 | "preview-replaced"
                 | "editor-geometry"
+                | "preview-enhancements"
+                | "preview-dom-patch"
+                | "virtual-preview-window"
+                | "virtual-preview-block-update"
         ),
         "failureStage" => matches!(value, "save-before-read" | "read" | "activate" | "apply-ui"),
         "errorCode" => matches!(
@@ -320,7 +359,11 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
         // do not mistake its final slash-delimited fragment for a safe file name.
         Value::String(path) => {
             let name = terminal_path_component(path);
-            if name.len() > 160 || name.chars().any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c)) {
+            if name.len() > 160
+                || name
+                    .chars()
+                    .any(|c| c.is_control() || "?&#=\"{}[]<>:".contains(c))
+            {
                 Value::String(REDACTED.into())
             } else {
                 Value::String(name)
@@ -338,7 +381,13 @@ fn redact_path_value(value: &Value, depth: usize, remaining: &mut usize) -> Valu
     }
 }
 
-fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, envelope: bool) -> Value {
+fn redact_nested(
+    value: &Value,
+    key: &str,
+    depth: usize,
+    remaining: &mut usize,
+    envelope: bool,
+) -> Value {
     if depth > MAX_DEPTH || *remaining == 0 {
         return Value::String(REDACTED.into());
     }
@@ -354,7 +403,11 @@ fn redact_nested(value: &Value, key: &str, depth: usize, remaining: &mut usize, 
                     continue;
                 }
                 // Diagnostic field names are identifiers, never caller-supplied prose/paths.
-                if key.len() > 64 || !key.bytes().all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b)) {
+                if key.len() > 64
+                    || !key
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"_-".contains(&b))
+                {
                     continue;
                 }
                 let value = if is_path_field(key) {
@@ -400,6 +453,31 @@ pub(super) fn redact_value(value: &Value) -> Value {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn preserves_reviewed_selection_and_runtime_event_labels_without_free_text() {
+        let fields = serde_json::json!({"mappingMode":"source-component","nextMode":"both","origin":"programmatic","theme":"dark"});
+        assert_eq!(redact_value(&fields), fields);
+        let malicious = serde_json::json!({"mappingMode":"PRIVATE","nextMode":"PRIVATE","origin":"PRIVATE","theme":"PRIVATE","status":"PRIVATE"});
+        for key in ["mappingMode", "nextMode", "origin", "theme", "status"] {
+            assert_eq!(redact_value(&malicious)[key], "[redacted]");
+        }
+        for operation in [
+            "layout.mode-change",
+            "render.preview-patch",
+            "render.preview-annotation",
+            "render.preview-enhancements",
+            "link.preview-open",
+            "native.read_launch_context",
+            "hybrid.mermaid-render-result",
+            "document.session-reset",
+        ] {
+            let event = serde_json::json!({"operation":operation,"category":"document.lifecycle","details":{"body":"PRIVATE","nextMode":"both"}});
+            let result = redact_value(&event);
+            assert_eq!(result["operation"], operation);
+            assert_eq!(result["category"], "document.lifecycle");
+            assert!(!result.to_string().contains("PRIVATE"));
+        }
+    }
     use super::redact_value;
     use serde_json::json;
 
@@ -415,7 +493,10 @@ mod tests {
             },
             "safe": "kept"
         });
-        assert_eq!(redact_value(&value), json!({ "nested": {}, "safe": "[redacted]" }));
+        assert_eq!(
+            redact_value(&value),
+            json!({ "nested": {}, "safe": "[redacted]" })
+        );
     }
 
     #[test]
@@ -524,7 +605,10 @@ mod tests {
         let value = json!({
             "nested": r#"{"body":"SECRET","token":"TOKEN","path":"C:\\Private\\note.md","count":7}"#
         });
-        assert_eq!(redact_value(&value), json!({ "nested": {"path":"note.md","count":7} }));
+        assert_eq!(
+            redact_value(&value),
+            json!({ "nested": {"path":"note.md","count":7} })
+        );
     }
 
     #[test]

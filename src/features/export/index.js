@@ -23,4 +23,5 @@ export { createImageExporter } from './formats/image/image-exporter.js';
 export { createImageExportSurface } from './formats/image/image-export-surface.js';
 
 export { createExportController } from './application/export-controller.js';
+export { createExportDialogView } from './ui/export-dialog-view.js';
 export { createExportImageDialogView } from './ui/export-image-dialog-view.js';

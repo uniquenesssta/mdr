@@ -868,6 +868,16 @@
       false
     ],
     [
+      "src/features/documents/ui/document-empty-view.js",
+      "esm-module",
+      "view",
+      "Project the actual empty document session and route creation to the document command.",
+      "none",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
       "src/features/documents/ui/document-list-item-view.js",
       "esm-module",
       "documents-ui",
@@ -1183,6 +1193,16 @@
       "editor-ui",
       "Own Mermaid dialog template/form presentation and dispatch one Mermaid insertion command.",
       "mermaid-dialog-view-form-state",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/editor/ui/selection-toolbar-view.js",
+      "esm-module",
+      "editor-ui",
+      "Selection toolbar preferences, responsive overflow and floating placement.",
+      "editor-toolbar-view-menus",
       "explicit-instance",
       "retain",
       false
@@ -2438,6 +2458,16 @@
       false
     ],
     [
+      "src/features/settings/ui/toolbar-preview-view.js",
+      "esm-module",
+      "view",
+      "Render a noninteractive toolbar preview from the existing settings draft.",
+      "none",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
       "src/features/sidebar/folder-tree/folder-tree-controller.js",
       "esm-module",
       "sidebar-folder-tree-application",
@@ -3438,6 +3468,16 @@
       false
     ],
     [
+      "src/styles/features/document-surface.css",
+      "stylesheet",
+      "styles",
+      "Figma document typography, paper insets, quotations and embedded surfaces.",
+      "none",
+      "stylesheet",
+      "retain",
+      false
+    ],
+    [
       "src/styles/features/editor.css",
       "stylesheet",
       "presentation-feature",
@@ -3464,6 +3504,16 @@
       "Folder file-tree presentation and loading state.",
       "none",
       "stylesheet-load",
+      "retain",
+      false
+    ],
+    [
+      "src/styles/features/find-replace.css",
+      "stylesheet",
+      "styles",
+      "Figma compact find/replace alignment, options and state colors.",
+      "none",
+      "stylesheet",
       "retain",
       false
     ],
@@ -3574,6 +3624,16 @@
       "Markdown preview, source preview and virtualized preview presentation.",
       "none",
       "stylesheet-load",
+      "retain",
+      false
+    ],
+    [
+      "src/styles/features/selection-toolbar.css",
+      "stylesheet",
+      "styles",
+      "Figma selection toolbar geometry, primary strip overflow and palette controls.",
+      "none",
+      "stylesheet",
       "retain",
       false
     ],
@@ -3798,6 +3858,16 @@
       false
     ],
     [
+      "src/styles/shell/writing-workspace.css",
+      "stylesheet",
+      "presentation",
+      "Confirmed Figma writing workspace composition and shared visual geometry.",
+      "none",
+      "stylesheet",
+      "retain",
+      false
+    ],
+    [
       "src/styles/themes/dark.css",
       "stylesheet",
       "presentation-theme",
@@ -3874,6 +3944,16 @@
       "Owns generic modal accessibility, visibility, focus containment and restoration, Escape and backdrop policy, close reasons and exact teardown without feature fields or submission behavior.",
       "modal-shell-session",
       "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/ui/components/popover-shell.js",
+      "esm-module",
+      "ui",
+      "Nonmodal anchored popover visibility, dismissal, placement and focus lifecycle.",
+      "popover-presentation",
+      "explicit-destroy",
       "retain",
       false
     ],
@@ -4728,6 +4808,16 @@
       false
     ],
     [
+      "src/features/export/ui/export-dialog-view.js",
+      "esm-module",
+      "feature-ui",
+      "Compact export format and option presentation over the existing Export command port.",
+      "export-dialog-presentation",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
       "src/features/export/ui/export-progress-dialog-view.js",
       "esm-module",
       "export-ui",
@@ -5128,6 +5218,16 @@
       false
     ],
     [
+      "src/features/layout/session-layout-controller.js",
+      "esm-module",
+      "feature",
+      "Project active-document availability into mode controls and request writing mode at empty-session boundaries.",
+      "availability projection and document session subscription",
+      "explicit start/destroy",
+      "retain",
+      false
+    ],
+    [
       "src/features/layout/workspace-preferences.js",
       "esm-module",
       "feature",
@@ -5278,6 +5378,26 @@
       false
     ],
     [
+      "src/features/menu/ui/menu-presentation.js",
+      "esm-module",
+      "view",
+      "Project icon and semantic group presentation onto bound menu commands.",
+      "none",
+      "feature-owned",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/ui/workspace-actions-view.js",
+      "esm-module",
+      "feature-ui",
+      "Workspace new-document and recent-file entry points through the canonical Menu command authority.",
+      "workspace-menu-presentation",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
       "src/features/persistence/ui/status-content-view.js",
       "esm-module",
       "persistence",
@@ -5328,12 +5448,162 @@
       false
     ],
     [
+      "src/features/editor/domain/reading-policy.js",
+      "esm-module",
+      "editor-domain",
+      "Read-only document action policy.",
+      "none",
+      "pure",
+      "retain",
+      false
+    ],
+    [
       "src/ui/dom/static-content.js",
       "esm-module",
       "ui-dom",
       "Render declarative feature View nodes through safe elements and canonical sprite icons.",
       "Exact appended node ownership",
       "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/mod.rs",
+      "rust-module",
+      "desktop-runtime",
+      "Expose the native launch coordination boundary.",
+      "native coordinator",
+      "application-lifetime",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/instance_guard.rs",
+      "rust-module",
+      "desktop-runtime",
+      "Own the Windows named coordinator mutex handle.",
+      "kernel mutex",
+      "application-lifetime",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/inbox.rs",
+      "rust-module",
+      "desktop-storage",
+      "Persist and acknowledge bounded path-only launch envelopes.",
+      "durable launch inbox",
+      "per-request",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/policy.rs",
+      "rust-module",
+      "desktop-storage",
+      "Persist the native single-instance policy atomically.",
+      "native launch policy",
+      "per-operation",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/routing.rs",
+      "rust-module",
+      "desktop-runtime",
+      "Assign durable launches to independent local application windows.",
+      "native window routing",
+      "application-lifetime",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/launch_commands.rs",
+      "rust-module",
+      "desktop-command",
+      "Expose caller-scoped launch policy and request acknowledgements.",
+      "none",
+      "per-command",
+      "retain",
+      false
+    ],
+    [
+      "src-tauri/src/app_launch/tests.rs",
+      "rust-module",
+      "desktop-runtime",
+      "Test launch inbox filesystem and Windows mutex behavior.",
+      "test-owned fixtures",
+      "test-lifetime",
+      "retain",
+      false
+    ],
+    [
+      "src/platform/desktop/launch-client.js",
+      "esm-module",
+      "platform",
+      "Transport native launch RPC and event subscriptions.",
+      "none",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/platform/ports/launch-port.js",
+      "esm-module",
+      "platform",
+      "Declare launch transport lifecycle and method contract.",
+      "subscription disposers",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/documents/infrastructure/window-session-storage.js",
+      "esm-module",
+      "feature-infrastructure",
+      "Scope document session metadata to its native window.",
+      "none",
+      "window-lifetime",
+      "retain",
+      false
+    ],
+    [
+      "src/features/documents/application/launch-open-controller.js",
+      "esm-module",
+      "feature-application",
+      "Sequentially import and acknowledge native launch requests.",
+      "pending imports",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/settings/ui/launch-policy-field-view.js",
+      "esm-module",
+      "feature-ui",
+      "Present the native launch toggle and pending/error state.",
+      "DOM listeners",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/settings/application/launch-policy-controller.js",
+      "esm-module",
+      "feature-application",
+      "Coordinate native policy persistence and reset rollback.",
+      "confirmed native policy",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/sync/selection/preview-component-mapping.js",
+      "esm-module",
+      "sync-selection",
+      "Bridge rendered SVG components to their source ranges while delegating text mapping to the frozen kernel.",
+      "none",
+      "pure-contract",
       "retain",
       false
     ]

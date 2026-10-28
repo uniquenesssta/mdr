@@ -26,7 +26,7 @@ const expectedIconIds = Object.freeze([
   'icon-list-numbered', 'icon-task', 'icon-code', 'icon-braces', 'icon-link',
   'icon-table', 'icon-layout', 'icon-chevron-left', 'icon-chevron-right',
   'icon-close', 'icon-minimize', 'icon-maximize', 'icon-restore',
-  'icon-upload-cloud', 'icon-chevron-down', 'icon-mermaid'
+  'icon-upload-cloud', 'icon-chevron-down', 'icon-mermaid', 'icon-copy'
 ]);
 
 class FakeSvgNode {
@@ -51,8 +51,8 @@ test('Atomic Task 2.3 sprite has one stable definition for every preserved icon 
   const sprite = await readText('public/assets/icons.svg');
   const inspection = inspectSvgSprite(sprite);
   assert.deepEqual(inspection.ids, expectedIconIds);
-  assert.equal(inspection.symbolCount, 35);
-  assert.equal(inspection.uniqueSymbolCount, 35);
+  assert.equal(inspection.symbolCount, 36);
+  assert.equal(inspection.uniqueSymbolCount, 36);
   assert.deepEqual(inspection.duplicates, []);
   assert.deepEqual(inspection.invalidIds, []);
   assert.deepEqual(inspection.missingViewBoxes, []);
@@ -85,11 +85,11 @@ test('compatibility and dynamic callers reference the external sprite without a 
   // R13.14 moves the two clipper icons from the template to its owned view.
   const clipperIcons = [...clipperView.matchAll(/createIconView\(documentRef, '(icon-[a-z-]+)'/g)].map(match => match[1]);
   const imageIcons = [...exportImageView.matchAll(/createIcon\(doc,'(icon-[a-z-]+)'/g)].map(match => match[1]);
-  assert.equal(shellReferences.length, 43);
+  assert.equal(shellReferences.length, 52);
   assert.deepEqual(imageIcons, ['icon-image', 'icon-close']);
   assert.doesNotMatch(exportImageView, /createElementNS|<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
-  assert.deepEqual(clipperIcons, ['icon-globe', 'icon-close']);
-  assert.equal(shellReferences.length + clipperIcons.length + imageIcons.length, 47);
+  assert.deepEqual(clipperIcons, ['icon-close']);
+  assert.equal(shellReferences.length + clipperIcons.length + imageIcons.length, 55);
   assert.ok(shellReferences.every(record => record.href === `${ICON_SPRITE_URL}#${record.iconId}`));
   assert.ok(shellReferences.every(record => expectedIconIds.includes(record.iconId)));
   assert.doesNotMatch(shell, /<symbol\b|class="icon-sprite"|href="#icon-/i);
@@ -104,11 +104,11 @@ test('compatibility and dynamic callers reference the external sprite without a 
   assert.match(helpDialog, /createIconView\(documentRef, 'icon-close'\)/);
   assert.doesNotMatch(helpDialog, /<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.match(settingsDialog, /import \{ createIconView \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
-  assert.match(settingsDialog, /createIconView\(documentRef, 'icon-close'\)/);
+  assert.match(settingsDialog, /createIconView\(documentRef, 'icon-chevron-left'\)/);
   assert.doesNotMatch(settingsDialog, /<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.match(clipperView, /import \{ createIconView \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
   assert.doesNotMatch(clipperView, /createElementNS|<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
-  assert.match(linkPreview, /import \{ createIconView \} from '\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
+  assert.doesNotMatch(linkPreview, /createElementNS|<svg\b|<use\b/i);
   assert.match(folderTree, /import \{ createIconView, getIconHref \} from '\.\.\/\.\.\/\.\.\/ui\/components\/icon-view\.js'/);
   assert.doesNotMatch(folderTree, /function createIcon\(/);
   assert.doesNotMatch(browserTest, /<symbol\b[^>]*id="icon-/i);

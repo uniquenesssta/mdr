@@ -12,6 +12,8 @@ export const TOOLBAR_SETTINGS_SECTION = defineSettingsSection({
   id: SETTING_SECTIONS.TOOLBAR,
   fields: [
     { settingId: 'toolbarVisible', control: 'toggle', surface: 'settings-dialog' },
+    { settingId: 'toolbarDensity', control: 'select', surface: 'settings-dialog' },
+    { settingId: 'toolbarPrimaryItems', control: 'checklist', surface: 'settings-dialog' },
     { settingId: 'toolbarHiddenItems', control: 'checklist', surface: 'settings-dialog' }
   ]
 });

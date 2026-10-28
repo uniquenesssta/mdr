@@ -68,6 +68,10 @@ function createHarness(options = {}) {
         await new Promise(resolve => { releaseMermaid = resolve; });
       }
       events.push(`mermaid:end:${meta.get(root)?.name}:${isCancelled() ? 'cancelled' : 'current'}`);
+      if (meta.get(root)?.replaceMermaid) {
+        meta.get(root).connected = false;
+        return { rendered: 1 };
+      }
     },
     animate([root]) { events.push(`animate:${meta.get(root)?.name}`); },
     onBatchComplete(type, root) { events.push(`complete:${type}:${meta.get(root)?.name}`); },
@@ -156,6 +160,19 @@ test('Atomic 7.12 stale async Mermaid cannot commit after a newer begin', async 
   assert.ok(h.events.includes('mermaid:end:old:cancelled'));
   assert.ok(!h.events.includes('complete:mermaid:old'));
   assert.ok(h.events.includes('math:fresh'));
+});
+
+test('successful Mermaid root replacement still invalidates downstream structure; cancelled generations do not', async () => {
+  const h = createHarness();
+  const root = h.root('replaced', { mermaid: true, replaceMermaid: true });
+  h.coordinator.enqueue([root]); await drain(h.scheduler);
+  assert.ok(h.events.includes('complete:mermaid:replaced'));
+  const old = h.root('stale', { mermaid: true, replaceMermaid: true, holdMermaid: true });
+  h.coordinator.enqueue([old]); const running = h.scheduler.runNext();
+  await new Promise(resolve => setTimeout(resolve, 0));
+  h.setCurrentVersion(2); h.coordinator.begin(2); h.releaseMermaid();
+  await running; await drain(h.scheduler);
+  assert.ok(!h.events.includes('complete:mermaid:stale'));
 });
 
 test('Atomic 7.12 deduplicates heavy jobs for roots re-enqueued in the same generation', async () => {

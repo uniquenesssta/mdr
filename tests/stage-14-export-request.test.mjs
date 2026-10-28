@@ -9,6 +9,13 @@ const prior = JSON.parse(readFileSync(new URL('./fixtures/stage-14-export/contra
 const base = { format: 'markdown', documentId: 'doc', name: 'report.md', directory: 'C:\\exports' };
 const requestError = field => error => error instanceof ExportRequestValidationError && error.code === 'EXPORT_REQUEST_INVALID' && error.field === field;
 
+test('Figma image background is validated and remains opt-in for legacy requests', () => {
+  const request = createExportRequest({ ...base, format: 'image', imageOptions: { background: 'dark' } });
+  assert.equal(request.imageOptions.background, 'dark');
+  assert.equal(Object.hasOwn(createExportRequest({ ...base, format: 'image' }).imageOptions, 'background'), false);
+  assert.throws(() => createExportRequest({ ...base, format: 'image', imageOptions: { background: 'transparent' } }), requestError('imageOptions.background'));
+});
+
 test('R14-02 all formats have an explicit name mapping from the unchanged R14-01 inputs', () => {
   assert.deepEqual(fixture.names.map(x => x.input), prior.names.map(x => x.input));
   for (const item of fixture.names) {

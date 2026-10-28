@@ -14,7 +14,7 @@ export function createApplicationDriver(page) {
         throw new Error('Explicit public E2E capability unavailable: ${method}. Open the built app with ?e2e=1.');
       }
       return api[${JSON.stringify(method)}](...${JSON.stringify(args)});
-    })()`);
+    })()`, method === 'getEditorValue' ? { chunkedString: true } : undefined);
     if (method === 'waitForIdle' && result !== true) throw new Error('Public E2E idle wait did not complete.');
     return result;
   }])));

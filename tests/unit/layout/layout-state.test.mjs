@@ -5,7 +5,7 @@ import { createLayoutState } from '../../../src/features/layout/index.js';
 test('Atomic 6.1 LayoutState owns one immutable default snapshot for every required layout state group', () => {
   const state = createLayoutState();
   assert.deepEqual(state.snapshot, {
-    sidebar: { visible: true, autoCollapsed: false, width: 248 },
+    sidebar: { visible: true, autoCollapsed: false, width: 240 },
     split: { editorCollapsed: false, previewCollapsed: false, ratio: 0.5, compactActive: false, compactPane: 'editor' },
     mode: 'both',
     compact: { shellActive: false, shellInitialized: false },
@@ -55,7 +55,7 @@ test('LayoutState subscriptions publish immutable committed snapshots, continue 
   assert.equal(events.length, 1);
   assert.equal(events[0].changedGroup, 'sidebar');
   assert.ok(Object.isFrozen(events[0]));
-  assert.equal(events[0].previous.sidebar.width, 248);
+  assert.equal(events[0].previous.sidebar.width, 240);
   assert.equal(events[0].current.sidebar.width, 300);
   unsubscribe();
   unsubscribe();

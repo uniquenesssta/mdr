@@ -124,7 +124,7 @@
 }
 
 .preview-content .preview-text-highlight {
-      background: var(--color-accent-selection);
+      background: var(--color-accent-selection-strong);
       border-radius: var(--radius-xs);
       box-shadow: var(--shadow-selection-border);
 }
@@ -132,6 +132,12 @@
 ::highlight(preview-selection-sync) {
       background: var(--color-accent-selection-strong);
       color: inherit;
+}
+
+.preview-content::selection,
+.preview-content ::selection {
+      background: var(--color-accent-selection-strong);
+      color: var(--color-text-primary);
 }
 
 .preview-content .preview-atomic-selection-highlight {
@@ -267,3 +273,6 @@ body.ultra-large-document .preview-content .virtual-preview-body > [data-source-
 .preview-content .markdown-body {
   position: relative;
 }
+
+/* Confirmed MDR Figma component presentation. */
+.preview-content .markdown-body { max-width: calc(var(--document-measure) + 2 * var(--space-4xl)); padding: var(--space-4xl) var(--space-4xl) var(--space-8xl); margin: auto; }

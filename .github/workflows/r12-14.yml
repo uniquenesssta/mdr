@@ -558,11 +558,11 @@ jobs:
       - name: R12-15 release writer creates no log files
         if: ${{ !cancelled() }}
         run: node scripts/ci/verify-release-log-writer.mjs 2>&1 | tee "$RUNNER_TEMP/r12-14/release-writer.log"
-      - name: R12-14 direct recursive redaction 14 of 14
+      - name: R12-14 direct recursive redaction 15 of 15
         if: ${{ !cancelled() }}
         run: |
           cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"
-          grep -Fq 'test result: ok. 14 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
+          grep -Fq 'test result: ok. 15 passed; 0 failed' "$RUNNER_TEMP/r12-14/log-redaction.log"
       - name: R12-14 actual frontend payload to Rust JSONL
         if: ${{ !cancelled() }}
         run: |

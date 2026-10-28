@@ -7,8 +7,9 @@ import { telemetry } from '../telemetry/index.js';
  * Lifecycle: Explicit construction, rollback on failure and idempotent destroy.
  */
 import { createApplicationLifetime } from '../../bootstrap/application-lifetime.js';
+import { createSessionLayoutController } from './session-layout-controller.js';
 
-export function createWorkspacePreferences({ document, window, editor, preview, documentModel, coreSettingsStorePort, coreEditorUiCommandPort, coreLayoutStatePort, corePreviewCommandPort, splitController, compactSplitController, t, showToast, updateStatusBar, updateInlineColorToolAvailability }) {
+export function createWorkspacePreferences({ document, window, editor, preview, documentModel, coreDocumentSessionPort, coreSettingsStorePort, coreEditorUiCommandPort, coreLayoutStatePort, corePreviewCommandPort, splitController, compactSplitController, t, showToast, updateStatusBar, updateInlineColorToolAvailability }) {
   const lifetime = createApplicationLifetime();
   const setTimeout = lifetime.setTimeout, clearTimeout = lifetime.clearTimeout;
   try {
@@ -109,8 +110,7 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       document.documentElement.style.setProperty('--editor-font-size', coreSettingsStorePort.get('editorFontSize') + 'px');
       if (coreSettingsStorePort.get('editorTextColor')) document.body.style.setProperty('--color-editor-text', coreSettingsStorePort.get('editorTextColor'));
       else document.body.style.removeProperty('--color-editor-text');
-      if (coreSettingsStorePort.get('activeLineColor')) document.body.style.setProperty('--color-editor-active-line', coreSettingsStorePort.get('activeLineColor'));
-      else document.body.style.removeProperty('--color-editor-active-line');
+      document.body.style.removeProperty('--color-editor-active-line');
       const toolbar = document.querySelector('.l-toolbar-shell');
       if (toolbar) {
         toolbar.classList.toggle('is-hidden', !coreSettingsStorePort.get('toolbarVisible'));
@@ -205,6 +205,10 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
     function applyEditorPresentationMode(mode) {
       const hybrid = mode === 'hybrid' && Boolean(editor.setPresentationMode);
       document.body.classList.toggle('hybrid-view-mode', hybrid);
+      document.body.classList.toggle('preview-only-mode', mode === 'preview');
+      editor.setReadOnly?.(mode === 'preview' || !sessionLayout.hasDocument);
+      const title = document.querySelector('#filename');
+      if (title) title.readOnly = mode === 'preview' || !sessionLayout.hasDocument;
       editor.setPresentationMode?.(hybrid ? 'hybrid' : 'source');
       const actualMode = editor.getPresentationMode?.() || 'source';
       if (actualMode !== (hybrid ? 'hybrid' : 'source')) {
@@ -234,8 +238,9 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       const previousMode = getLayoutMode();
       const previewWasHidden = editorToolsLayoutStatePort.snapshot.split.previewCollapsed || previousMode === 'hybrid';
       let nextMode = ['both', 'hybrid', 'edit', 'preview'].includes(mode) ? mode : 'both';
+      if (!sessionLayout.hasDocument) nextMode = 'hybrid';
       if (nextMode === 'hybrid' && !editor.setPresentationMode) nextMode = 'edit';
-      if (persist) editorToolsSettingsStorePort.set('layoutMode', nextMode);
+      if (persist && sessionLayout.hasDocument) editorToolsSettingsStorePort.set('layoutMode', nextMode);
       editorToolsLayoutStatePort.setMode(nextMode);
 
       if (editorToolsEditorUiCommandPort.has('refreshToolbarLayoutLabel')) {
@@ -280,6 +285,14 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
         }
       });
     }
+    const sessionLayout = createSessionLayoutController({
+      session: coreDocumentSessionPort,
+      controls: document.querySelectorAll('.writing-modes [data-editor-action="layout"]'),
+      applyWritingMode: () => setLayoutMode('hybrid', false, false)
+    });
+    lifetime.own(() => sessionLayout.destroy());
+    sessionLayout.start();
+
     function applySettings(event) {
       const applied = event?.detail?.snapshot;
       if (!applied || !Array.isArray(event?.detail?.changedIds)) return;
@@ -287,7 +300,8 @@ const LARGE_DOCUMENT_CHARS = corePreviewCommandPort.thresholds.scheduling.postpr
       if (changedIds.includes('sidebarVisible')) coreLayoutStatePort.setSidebar({ visible: applied.sidebarVisible });
       if (changedIds.includes('layoutMode') || changedIds.includes('previewPerformanceMode')) setLayoutMode(applied.layoutMode, false, false);
       if (['editorFontSize', 'editorTextColor', 'activeLineColor', 'toolbarVisible', 'toolbarHiddenItems'].some(id => changedIds.includes(id))) applyEditorPreferences();
-      updateStatusBar(); showToast('设置已保存');
+      updateStatusBar();
+      if (!document.querySelector('.settings-workspace:not([hidden])')) showToast('设置已保存');
     }
     lifetime.listen(document, 'markdown-editor:settings-changed', applySettings);
     const sidebarHide = document.querySelector('[data-sidebar-hide]');

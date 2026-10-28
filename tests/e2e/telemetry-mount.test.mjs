@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createServer } from 'vite';
-import { launchChromium } from './lib/cdp-browser.mjs';
+import { getFreePort, launchChromium } from './lib/cdp-browser.mjs';
 
 test('R16-07 actual DEV startup mounts Telemetry once and terminal disposal releases browser resources', { timeout: 90000 }, async () => {
-  const server = await createServer({ server: { host: '127.0.0.1', port: 0, open: false, hmr: false }, logLevel: 'error' });
+  const server = await createServer({ configLoader: 'native', server: { host: '127.0.0.1', port: await getFreePort(), strictPort: true, open: false, hmr: false }, logLevel: 'error' });
   let browser;
   try {
     await server.listen();

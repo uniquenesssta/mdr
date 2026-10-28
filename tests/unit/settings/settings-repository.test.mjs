@@ -59,6 +59,18 @@ class MemoryStorage {
   }
 }
 
+test('toolbar density and an intentionally empty primary list persist without resetting legacy preferences', () => {
+  const storage = new MemoryStorage({ md_editor_theme: 'dark', md_editor_toolbar_hidden_items: '["find"]' });
+  const repository = createSettingsRepository({ storage });
+  repository.save({ toolbarDensity: 'standard', toolbarPrimaryItems: [] });
+  const restored = createSettingsRepository({ storage }).load();
+  assert.equal(restored.toolbarDensity, 'standard');
+  assert.deepEqual(restored.toolbarPrimaryItems, []);
+  assert.equal(storage.getItem('md_editor_toolbar_primary_items'), '[]');
+  assert.equal(restored.theme, 'dark');
+  assert.deepEqual(restored.toolbarHiddenItems, ['find']);
+});
+
 test('Atomic 4.7 restores legacy localStorage strings into one typed immutable Settings snapshot', () => {
   const storage = new MemoryStorage({
     md_editor_theme: 'dark',
@@ -84,7 +96,7 @@ test('Atomic 4.7 restores legacy localStorage strings into one typed immutable S
     theme: 'dark', language: 'en', layoutMode: 'hybrid', sidebarVisible: false,
     autoSaveEnabled: false, autoSaveDelay: 1500, editorFontSize: 18, editorTextColor: '#112233',
     activeLineColor: '#445566', exportDirectory: 'C:/Exports', toolbarVisible: false,
-    toolbarHiddenItems: ['bold', 'find'], previewPerformanceMode: 'virtual',
+    toolbarHiddenItems: ['bold', 'find'], toolbarDensity: 'compact', toolbarPrimaryItems: ['heading', 'bold', 'italic', 'textColor', 'highlight', 'link'], previewPerformanceMode: 'virtual',
     tableVisualEditing: true, codeVisualEditing: true
   });
   assert.equal(Object.isFrozen(snapshot), true);
@@ -104,7 +116,7 @@ test('Atomic 4.7 falls back for missing, malformed JSON and illegal legacy value
   const snapshot = repository.load(['theme', 'autoSaveDelay', 'toolbarHiddenItems', 'editorFontSize', 'language']);
 
   assert.deepEqual(snapshot, {
-    theme: 'light', autoSaveDelay: 500, toolbarHiddenItems: [], editorFontSize: 16, language: 'zh-CN'
+    theme: 'light', autoSaveDelay: 500, toolbarHiddenItems: [], editorFontSize: 18, language: 'zh-CN'
   });
   assert.deepEqual(storage.snapshot(), before);
   assert.deepEqual(storage.writes(), []);

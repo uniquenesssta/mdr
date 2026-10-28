@@ -15,7 +15,7 @@ export function createPreviewContentView(slots) {
         "\n            ",
         ["span",{"class":"preview-strategy-badge","id":"preview-strategy-badge","hidden":true},[]],
         "\n            ",
-        ["span",{"id":"word-count"},["0 字"]],
+        ["span",{"class":"word-count","id":"word-count"},["0 字"]],
         "\n          "
       ]],
       "\n          ",

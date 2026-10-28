@@ -1,0 +1,453 @@
+{
+  "date": "2026-10-27",
+  "scope": "Figma only",
+  "board": "188:10070",
+  "find": [
+    {
+      "id": "95:2572",
+      "rows": [
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 34
+                },
+                {
+                  "x": 42,
+                  "w": 34
+                },
+                {
+                  "x": 84,
+                  "w": 34
+                },
+                {
+                  "x": 126,
+                  "w": 34
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 76
+                },
+                {
+                  "x": 84,
+                  "w": 76
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "95:2613",
+      "rows": [
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 34
+                },
+                {
+                  "x": 42,
+                  "w": 34
+                },
+                {
+                  "x": 84,
+                  "w": 34
+                },
+                {
+                  "x": 126,
+                  "w": 34
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 76
+                },
+                {
+                  "x": 84,
+                  "w": 76
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "95:2654",
+      "rows": [
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 34
+                },
+                {
+                  "x": 42,
+                  "w": 34
+                },
+                {
+                  "x": 84,
+                  "w": 34
+                },
+                {
+                  "x": 126,
+                  "w": 34
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 76
+                },
+                {
+                  "x": 84,
+                  "w": 76
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "95:2696",
+      "rows": [
+        {
+          "input": {
+            "x": 0,
+            "w": 264
+          },
+          "actions": [
+            {
+              "x": 272,
+              "w": 160,
+              "items": [
+                {
+                  "x": 0,
+                  "w": 34
+                },
+                {
+                  "x": 42,
+                  "w": 34
+                },
+                {
+                  "x": 84,
+                  "w": 34
+                },
+                {
+                  "x": 126,
+                  "w": 34
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "colors": {
+    "mutatedNodeIds": [
+      "174:10422",
+      "107:8260",
+      "107:8261",
+      "I107:8261;94:1389",
+      "107:8263",
+      "I107:8263;94:1389",
+      "107:8265",
+      "I107:8265;94:1389",
+      "107:8267",
+      "I107:8267;94:1389",
+      "107:8269",
+      "I107:8269;94:1389",
+      "107:8271",
+      "107:8272",
+      "I107:8272;94:1389",
+      "107:8274",
+      "I107:8274;94:1389",
+      "107:8276",
+      "I107:8276;94:1389",
+      "107:8278",
+      "I107:8278;94:1389",
+      "107:8280",
+      "I107:8280;94:1389"
+    ],
+    "rows": [
+      {
+        "w": 200,
+        "h": 38,
+        "gap": 2,
+        "swatches": [
+          {
+            "x": 0,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 40.400001525878906,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 80.80000305175781,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 121.20000457763672,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 161.60000610351562,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          }
+        ]
+      },
+      {
+        "w": 200,
+        "h": 38,
+        "gap": 2,
+        "swatches": [
+          {
+            "x": 0,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 40.400001525878906,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 80.80000305175781,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 121.20000457763672,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          },
+          {
+            "x": 161.60000610351562,
+            "w": 38.400001525878906,
+            "h": 38,
+            "visibleWidth": 38.400001525878906
+          }
+        ]
+      }
+    ],
+    "verticalGap": 2,
+    "palette": {
+      "w": 232,
+      "h": 232
+    }
+  },
+  "preservedOptions": [
+    {
+      "id": "95:2572",
+      "inputWidths": [
+        264,
+        264
+      ],
+      "actionStart": 272,
+      "actionWidth": 160,
+      "optionsUnchanged": true
+    },
+    {
+      "id": "95:2613",
+      "inputWidths": [
+        264,
+        264
+      ],
+      "actionStart": 272,
+      "actionWidth": 160,
+      "optionsUnchanged": true
+    },
+    {
+      "id": "95:2654",
+      "inputWidths": [
+        264,
+        264
+      ],
+      "actionStart": 272,
+      "actionWidth": 160,
+      "optionsUnchanged": true
+    },
+    {
+      "id": "95:2696",
+      "inputWidths": [
+        264,
+        null
+      ],
+      "actionStart": 272,
+      "actionWidth": 160,
+      "optionsUnchanged": true
+    }
+  ],
+  "paletteButtons": {
+    "width": 96,
+    "height": 32,
+    "gap": 8,
+    "resetTone": "secondary",
+    "applyTone": "primary"
+  },
+  "latestUserCorrection": "Ten colour swatches fill the complete 200px content width, two rows of five, with 2px horizontal and vertical gutters; supersedes 15px spacing.",
+  "screenshotReviewed": true,
+  "softwareIntegrated": false,
+  "replacementButtonRevision": {
+    "date": "2026-10-27",
+    "mutatedNodeIds": [
+      "95:2602",
+      "95:2604",
+      "95:2643",
+      "95:2645",
+      "95:2684",
+      "95:2686",
+      "188:10141",
+      "178:12400"
+    ],
+    "buttons": [
+      {
+        "id": "95:2602",
+        "component": "State=results",
+        "tone": "secondary",
+        "state": "default",
+        "x": 0,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      },
+      {
+        "id": "95:2604",
+        "component": "State=results",
+        "tone": "secondary",
+        "state": "default",
+        "x": 84,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      },
+      {
+        "id": "95:2643",
+        "component": "State=empty",
+        "tone": "secondary",
+        "state": "disabled",
+        "x": 0,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      },
+      {
+        "id": "95:2645",
+        "component": "State=empty",
+        "tone": "secondary",
+        "state": "disabled",
+        "x": 84,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      },
+      {
+        "id": "95:2684",
+        "component": "State=invalid",
+        "tone": "secondary",
+        "state": "disabled",
+        "x": 0,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      },
+      {
+        "id": "95:2686",
+        "component": "State=invalid",
+        "tone": "secondary",
+        "state": "disabled",
+        "x": 84,
+        "w": 76,
+        "h": 32,
+        "hasBorder": true
+      }
+    ],
+    "errorVariantRetained": "State=invalid",
+    "comparisonState": "results",
+    "screenshotReviewed": true,
+    "reason": "Use the same outlined secondary button language as Reset. Theme comparison now shows results in both themes. Invalid regex state remains separately available.",
+    "softwareIntegrated": false
+  }
+}

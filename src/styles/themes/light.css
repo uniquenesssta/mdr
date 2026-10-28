@@ -1,68 +1,61 @@
-:root {
-  /**
-   * Responsibility: Declare light-theme semantic token values only.
-   * Imports: Foundation token semantics through the CSS cascade; component/feature implementation rules are forbidden.
-   * Exports: Light-theme CSS custom-property values consumed by shared styles.
-   * State/side effects: Declarative CSS only; no JavaScript state or persistence.
-   * Lifecycle: Stylesheet-only contract; no runtime lifecycle.
-   */
-  /* Color roles */
-  --color-canvas: #eef1f5;
+/* Responsibility: Figma light semantic theme. Imports: none. Exports: visual custom properties. State/side effects: theme token projection. Lifecycle: stylesheet. */
+:root,
+[data-theme="light"] {
+  --color-canvas: #f4f7fb;
   --color-surface-raised: #ffffff;
-  --color-surface-subtle: #f4f6f9;
-  --color-surface-hover: #e9edf3;
-  --color-text-primary: #181c24;
-  --color-text-secondary: #596273;
-  --color-text-muted: #8a94a4;
-  --color-border-subtle: rgba(23, 31, 45, 0.10);
-  --color-border-strong: rgba(23, 31, 45, 0.16);
-  --color-accent: #2563eb;
-  --color-accent-hover: #1d4ed8;
-  --color-accent-soft: rgba(37, 99, 235, 0.10);
-  --color-accent-emphasis: rgba(37, 99, 235, 0.16);
-  --color-accent-shadow: rgba(79, 70, 229, 0.20);
-  --color-accent-shadow-strong: rgba(79, 70, 229, 0.25);
-  --color-accent-selection: rgba(79, 70, 229, 0.22);
-  --color-accent-selection-strong: rgba(79, 70, 229, 0.24);
-  --color-accent-selection-border: rgba(79, 70, 229, 0.12);
-  --color-accent-outline: rgba(79, 70, 229, 0.18);
-  --color-accent-control-shadow: rgba(37, 99, 235, 0.24);
-  --color-accent-gradient-start: #3175ff;
-  --color-accent-gradient-end: #1956d7;
-  --color-danger: #dc3f4b;
-  --color-danger-muted: #d64545;
-  --color-danger-control: #e5484d;
-  --color-danger-soft: rgba(239, 68, 68, 0.10);
-  --color-warning: #d97706;
-  --color-success: #22a06b;
-  --color-success-strong: #16885b;
-  --color-success-soft: rgba(34, 160, 107, 0.12);
+  --color-surface-subtle: var(--color-canvas);
+  --color-surface-hover: #f4f7fb;
+  --color-text-primary: #202c3e;
+  --color-text-secondary: #627289;
+  --color-text-muted: #627289;
+  --color-border-subtle: #dce3ed;
+  --color-border-strong: #a3b2c7;
+  --color-accent: #253a71;
+  --color-accent-hover: #1c2f60;
+  --color-accent-soft: #eaf0fa;
+  --color-accent-emphasis: #142448;
+  --color-accent-shadow: rgba(13, 39, 69, .06);
+  --color-accent-shadow-strong: rgba(13, 39, 69, .12);
+  --color-accent-selection: #dce8ff;
+  --color-accent-selection-strong: var(--color-accent-selection);
+  --color-accent-selection-border: var(--color-accent-soft);
+  --color-accent-outline: var(--color-focus-ring);
+  --color-accent-control-shadow: rgba(13, 39, 69, .06);
+  --color-accent-gradient-start: #2061ab;
+  --color-accent-gradient-end: #0d2745;
+  --color-danger: #b42336;
+  --color-danger-muted: var(--color-danger);
+  --color-danger-control: var(--color-danger);
+  --color-danger-soft: #fff1f3;
+  --color-warning: #895600;
+  --color-success: var(--color-success-strong);
+  --color-success-strong: #167465;
+  --color-success-soft: #edf7f3;
   --color-highlight: #fff3a3;
   --color-highlight-strong: #facc15;
   --color-highlight-ink: #1a1d23;
   --color-on-accent: #ffffff;
   --color-on-dark-muted: rgba(255, 255, 255, 0.85);
-  --color-overlay-scrim: rgba(0, 0, 0, 0.35);
-  --color-overlay-scrim-soft: rgba(9, 14, 23, 0.42);
-  --color-toast-background: rgba(26, 29, 35, 0.92);
-  --color-drop-target: rgba(79, 70, 229, 0.06);
+  --color-overlay-scrim: rgba(13, 39, 69, 0.27843138575553894);
+  --color-overlay-scrim-soft: var(--color-overlay-scrim);
+  --color-toast-background: var(--color-tooltip);
+  --color-drop-target: var(--color-accent-soft);
   --color-control-inset-border: rgba(0, 0, 0, 0.08);
   --color-control-inset-highlight: rgba(255, 255, 255, 0.28);
   --color-chrome-highlight: rgba(255, 255, 255, 0.45);
-  --color-shadow-faint: rgba(15, 23, 42, 0.06);
-  --color-shadow-subtle: rgba(15, 23, 42, 0.08);
-  --color-dark-panel-border: rgba(255, 255, 255, 0.10);
-  --color-dark-panel-background: rgba(20, 25, 34, 0.92);
+  --color-shadow-faint: rgba(13, 39, 69, .06);
+  --color-shadow-subtle: rgba(13, 39, 69, 0.10196078568696976);
+  --color-shadow-dialog: rgba(13, 39, 69, .16);
+  --color-dark-panel-border: var(--color-border-subtle);
+  --color-dark-panel-background: var(--color-tooltip);
   --color-export-paper: #ffffff;
   --color-export-ink: #000000;
   --color-export-code-background: #f5f5f5;
   --color-embedded-page: #ffffff;
-  --color-chrome: rgba(248, 250, 252, 0.88);
-  --color-card: #ffffff;
-  --color-editor-text: #202530;
-  --color-editor-active-line: rgba(37, 99, 235, 0.055);
-
-  /* Editor color presets */
+  --color-chrome: var(--color-surface-raised);
+  --color-card: var(--color-surface-raised);
+  --color-editor-text: var(--color-text-primary);
+  --color-editor-active-line: var(--color-accent-soft);
   --color-preset-text-ink: #1a1d23;
   --color-preset-text-gray: #6b7280;
   --color-preset-text-red: #dc2626;
@@ -81,23 +74,17 @@
   --color-preset-highlight-purple: #ddd6fe;
   --color-preset-highlight-pink: #fbcfe8;
   --color-preset-highlight-gray: #e5e7eb;
-
-  /* Base elevation */
-  --shadow-low: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-raised: 0 6px 18px rgba(15, 23, 42, 0.055);
-  --shadow-floating: 0 14px 36px rgba(15, 23, 42, 0.10);
-  --shadow-overlay: 0 28px 70px rgba(15, 23, 42, 0.16);
-
-  /* Content media */
+  --shadow-low: 0 1px 2px rgba(13,39,69,.06);
+  --shadow-raised: 0 1px 2px rgba(13,39,69,.06);
+  --shadow-floating: 0 4px 12px rgba(13,39,69,.12);
+  --shadow-overlay: 0 8px 24px rgba(13,39,69,.16);
   --content-image-opacity: 1;
-
-  /* Code presentation */
-  --code-background: #f5f7fb;
+  --code-background: var(--color-code-background);
   --code-text: #273244;
-  --code-border: rgba(37, 99, 235, 0.15);
-  --code-toolbar-background: #edf2f8;
-  --code-toolbar-text: #667085;
-  --code-action-text: #526075;
+  --code-border: var(--color-border-subtle);
+  --code-toolbar-background: var(--color-canvas);
+  --code-toolbar-text: var(--color-text-secondary);
+  --code-action-text: var(--color-accent);
   --code-action-hover-background: rgba(37, 99, 235, 0.09);
   --code-line-number: #94a3b8;
   --code-line-hover: rgba(37, 99, 235, 0.045);
@@ -109,4 +96,18 @@
   --code-token-property: #0369a1;
   --code-token-operator: #0f766e;
   --code-token-punctuation: #64748b;
+  --color-text-heading: #0d2745;
+  --color-link: #2061ab;
+  --color-teal: #2790a5;
+  --color-nav-selected: #253a71;
+  --color-control-disabled: #e9edf3;
+  --color-text-disabled: #65748a;
+  --color-focus-ring: #2061ab;
+  --color-warning-soft: #fff6e3;
+  --color-tooltip: #102a46;
+  --color-tooltip-text: #ffffff;
+  --color-editor-caret: var(--color-accent);
+  --color-scrollbar-thumb: #b3c0d2;
+  --color-code-background: #f4f7fb;
+  --color-scheme: light;
 }

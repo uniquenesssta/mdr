@@ -119,12 +119,12 @@ test('immediate commit persists before state mutation and safely rebases an open
   const spy = createPersistSpy();
   const store = createSettingsStore({ initialSnapshot: snapshot(), persist: spy.persist });
   store.openDraft();
-  store.updateDraft({ editorFontSize: 18 });
+  store.updateDraft({ editorFontSize: 14 });
   const committed = store.commit({ theme: 'dark', editorFontSize: 20 });
   assert.equal(committed.theme, 'dark');
   assert.equal(committed.editorFontSize, 20);
   assert.equal(store.draft.theme, 'dark');
-  assert.equal(store.draft.editorFontSize, 18);
+  assert.equal(store.draft.editorFontSize, 14);
   assert.deepEqual(spy.calls[0], { theme: 'dark', editorFontSize: 20 });
 });
 

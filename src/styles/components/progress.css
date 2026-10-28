@@ -66,3 +66,9 @@
 .export-progress-overlay {
   z-index: var(--layer-progress-overlay);
 }
+
+.export-progress-modal { width:384px;max-width:calc(100vw - 32px); }
+.export-progress-modal .modal-body { display:flex;flex-direction:column;gap:10px; }
+.export-progress-track { height:4px;border:0;border-radius:1px;background:var(--color-accent-soft); }
+.export-progress-modal .export-progress-status { min-height:22px;margin:0;font-size:14px;line-height:22px; }
+.export-progress-modal .hint { display:none; }

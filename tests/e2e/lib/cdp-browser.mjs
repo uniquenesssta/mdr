@@ -4,6 +4,7 @@ import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { delimiter, extname, isAbsolute, join, resolve } from 'node:path';
 import { spawn, execFileSync } from 'node:child_process';
+import { readRemoteString } from './cdp-result-reader.mjs';
 
 function cleanCandidate(value) {
   return String(value || '').trim().replace(/^['"]|['"]$/g, '');
@@ -165,10 +166,10 @@ export class CdpConnection {
       this.socket.addEventListener('error', reject, { once: true });
     });
     this.socket.addEventListener('message', event => this.#handleMessage(event.data));
-    this.socket.addEventListener('close', () => {
+    this.socket.addEventListener('close', event => {
       for (const { reject, timer } of this.pending.values()) {
         clearTimeout(timer);
-        reject(new Error('CDP connection closed'));
+        reject(new Error(`CDP connection closed (${event.code}: ${event.reason || 'no reason'})`));
       }
       this.pending.clear();
     });
@@ -273,6 +274,7 @@ export class CdpPage {
   }
 
   async evaluate(expression, options = {}) {
+    if (options.chunkedString) return this.readString(expression);
     const result = await this.connection.send('Runtime.evaluate', {
       expression: String(expression),
       awaitPromise: options.awaitPromise !== false,
@@ -283,6 +285,17 @@ export class CdpPage {
       throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text || 'Page evaluation failed');
     }
     return result.result?.value;
+  }
+
+  // Keep large Unicode responses below the transport frame boundary. The public
+  // query runs once; slices read its immutable result, never changing app state.
+  async readString(expression) {
+    const result = await this.connection.send('Runtime.evaluate', {
+      expression: `(async () => ({ value: await (${String(expression)}) }))()`,
+      awaitPromise: true, returnByValue: false, userGesture: true
+    });
+    if (result.exceptionDetails) throw new Error(result.exceptionDetails.exception?.description || result.exceptionDetails.text);
+    return readRemoteString(this.connection, result.result?.objectId);
   }
 
   async waitFor(predicate, options = {}) {
@@ -467,7 +480,16 @@ export async function confirmTaskkillExit(error, rootPid, {
   isRunning = pid => { try { process.kill(pid, 0); return true; } catch (probeError) { if (probeError.code === 'ESRCH') return false; throw probeError; } },
   wait = () => new Promise(resolvePromise => setTimeout(resolvePromise, 50)), attempts = 20
 } = {}) {
-  const failedPids = [...String(error?.stderr || '').matchAll(/\bPID\s+(\d+)\b/gi)].map(match => Number(match[1]));
+  const stderr = String(error?.stderr || '');
+  // Each failure line names its target first, then may name a surviving parent
+  // (including this Node runner). Parent context is not a failed termination target.
+  const failedPids = stderr.split(/\r?\n/).map(line => line.match(/\bPID\s+(\d+)\b/i))
+    .filter(Boolean).map(match => Number(match[1]));
+  // Localized Windows reports an already-exited root as quoted digits without "PID".
+  // Only recognize the observed status and owned root, then still probe every target.
+  if (error?.status === 128 && stderr.includes('"' + rootPid + '"')) {
+    failedPids.push(...[...stderr.matchAll(/"(\d+)"/g)].map(match => Number(match[1])));
+  }
   if (!Number.isInteger(error?.status) || !failedPids.length) throw error;
   const targets = new Set([rootPid, ...failedPids]);
   for (let attempt = 0; attempt < attempts; attempt++) {
@@ -582,6 +604,11 @@ async function launchChromiumOnce(options) {
       process: processHandle,
       page,
       async close() {
+        // Ask the owned browser to exit before falling back to process termination.
+        if (processHandle.exitCode === null && processHandle.signalCode === null) {
+          await connection.send('Browser.close').catch(() => {});
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
         connection.close();
         await stopChromium(processHandle);
         // Retain the owned profile; repository policy prohibits recursive deletion.

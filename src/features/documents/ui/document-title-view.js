@@ -7,7 +7,7 @@
  */
 import { createEventScope } from '../../../ui/dom/index.js';
 
-export function createDocumentTitleView({ input, session, updateTitleDraft, fallbackTitle = '未命名文档' } = {}) {
+export function createDocumentTitleView({ input, windowTitle = null, session, updateTitleDraft, fallbackTitle = '未命名文档' } = {}) {
   if (!input?.ownerDocument) throw new TypeError('Document Title View requires an input element.');
   if (!session || typeof session.subscribe !== 'function') throw new TypeError('Document Title View requires a session contract.');
   if (typeof updateTitleDraft !== 'function') throw new TypeError('Document Title View requires an updateTitleDraft command.');
@@ -20,6 +20,8 @@ export function createDocumentTitleView({ input, session, updateTitleDraft, fall
     const active = records.find(record => record.id === activeId) || null;
     const next = String(active?.title || fallbackTitle);
     if (input.value !== next) input.value = next;
+    input.title = next;
+    if (windowTitle) windowTitle.textContent = `${next} — MDR`;
   };
   events.listen(input, 'input', () => updateTitleDraft(input.value));
   const unsubscribe = session.subscribe(event => render(event?.snapshot));

@@ -12,6 +12,7 @@ export { createEditorSelectionService } from './application/editor-selection-ser
 export { createEditorFocusService } from './application/editor-focus-service.js';
 export { createEditorPaneView } from './ui/editor-pane-view.js';
 export { createEditorToolbarView } from './ui/editor-toolbar-view.js';
+export { canRunEditorAction } from './domain/reading-policy.js';
 export { createInlineColorMenuView } from './ui/inline-color-menu-view.js';
 export { createFindReplaceDialogView } from './ui/find-replace-dialog-view.js';
 export { createLinkDialogView } from './ui/link-dialog-view.js';

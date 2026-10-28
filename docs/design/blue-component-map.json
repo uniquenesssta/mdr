@@ -1,0 +1,4835 @@
+{
+  "schemaVersion": 1,
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "date": "2026-10-27",
+  "status": "implemented_runtime_verified_ui_baselines_synchronized",
+  "codeConnect": false,
+  "activeVariantCount": 361,
+  "excludedLegacyVariants": [
+    "98:5367",
+    "98:5389",
+    "98:5829"
+  ],
+  "components": [
+    {
+      "id": "78:1065",
+      "name": "MDR Blue/Button",
+      "description": "主、描边、轻量按钮。默认/悬停/按下/焦点/禁用/处理中。高度36，窄空间可32；文本属性Label。",
+      "properties": [
+        {
+          "key": "Label#78:15",
+          "type": "TEXT",
+          "default": "按钮"
+        },
+        {
+          "key": "Tone",
+          "type": "VARIANT",
+          "default": "primary",
+          "options": [
+            "primary",
+            "secondary",
+            "quiet"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "pressed",
+            "focus",
+            "disabled",
+            "loading"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "78:1035",
+          "name": "Tone=primary, State=default",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1037",
+          "name": "Tone=primary, State=hover",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1039",
+          "name": "Tone=primary, State=pressed",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1041",
+          "name": "Tone=primary, State=focus",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1043",
+          "name": "Tone=primary, State=disabled",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1045",
+          "name": "Tone=secondary, State=default",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1047",
+          "name": "Tone=secondary, State=hover",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1049",
+          "name": "Tone=secondary, State=pressed",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1051",
+          "name": "Tone=secondary, State=focus",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1053",
+          "name": "Tone=secondary, State=disabled",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1055",
+          "name": "Tone=quiet, State=default",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1057",
+          "name": "Tone=quiet, State=hover",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1059",
+          "name": "Tone=quiet, State=pressed",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1061",
+          "name": "Tone=quiet, State=focus",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "78:1063",
+          "name": "Tone=quiet, State=disabled",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "94:1053",
+          "name": "Tone=primary, State=loading",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "94:1055",
+          "name": "Tone=secondary, State=loading",
+          "w": 104,
+          "h": 36
+        },
+        {
+          "id": "94:1057",
+          "name": "Tone=quiet, State=loading",
+          "w": 104,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=78-1065",
+      "owners": [
+        "src/ui/dom/safe-element.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Adapt existing native button usage and shared CSS; do not create a dummy component framework or change command ownership.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "78:1098",
+      "name": "MDR Blue/Navigation",
+      "description": "文档、设置及树行共用。选中态浅蓝，14/22；图标可替换。关闭动作独立按钮，不能嵌套按钮。",
+      "properties": [
+        {
+          "key": "Label#78:20",
+          "type": "TEXT",
+          "default": "慢慢写，也很好.md"
+        },
+        {
+          "key": "Icon#94:6",
+          "type": "INSTANCE_SWAP",
+          "default": "109:8809"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "selected",
+            "focus"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "78:1066",
+          "name": "State=default",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "78:1074",
+          "name": "State=hover",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "78:1082",
+          "name": "State=selected",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "78:1090",
+          "name": "State=focus",
+          "w": 208,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=78-1098",
+      "owners": [
+        "src/features/sidebar/ui/sidebar-content-view.js",
+        "src/styles/features/sidebar-navigation.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Navigation focus uses 2px semantic focus border; preserve selection, labels, independent close controls and keyboard navigation.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "78:1123",
+      "name": "MDR Blue/Field",
+      "description": "",
+      "properties": [
+        {
+          "key": "Value#78:25",
+          "type": "TEXT",
+          "default": "简体中文"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "focus",
+            "error",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "78:1099",
+          "name": "State=default",
+          "w": 224,
+          "h": 36
+        },
+        {
+          "id": "78:1105",
+          "name": "State=focus",
+          "w": 224,
+          "h": 36
+        },
+        {
+          "id": "78:1111",
+          "name": "State=error",
+          "w": 224,
+          "h": 36
+        },
+        {
+          "id": "78:1117",
+          "name": "State=disabled",
+          "w": 224,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=78-1123",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Select field keeps default/focus/error/disabled variants; disabled label uses disabledText. Connect native control and validation.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "78:1128",
+      "name": "MDR Blue/Toggle",
+      "description": "",
+      "properties": [
+        {
+          "key": "Checked",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "78:1124",
+          "name": "Checked=false, State=default",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "78:1126",
+          "name": "Checked=true, State=default",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1110",
+          "name": "Checked=false, State=hover",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1112",
+          "name": "Checked=false, State=focus",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1114",
+          "name": "Checked=false, State=disabled",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1116",
+          "name": "Checked=true, State=hover",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1118",
+          "name": "Checked=true, State=focus",
+          "w": 36,
+          "h": 20
+        },
+        {
+          "id": "94:1120",
+          "name": "Checked=true, State=disabled",
+          "w": 36,
+          "h": 20
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=78-1128",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Real input semantics and preference binding, keyboard support, persistence failure rollback.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1182",
+      "name": "MDR Blue/Icon button",
+      "description": "独立图标按钮；28/36命中区，16px图标，必须提供可访问名称。",
+      "properties": [
+        {
+          "key": "Icon#94:21",
+          "type": "INSTANCE_SWAP",
+          "default": "109:8848"
+        },
+        {
+          "key": "Size",
+          "type": "VARIANT",
+          "default": "compact",
+          "options": [
+            "compact",
+            "standard"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "pressed",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1122",
+          "name": "Size=compact, State=default",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1137",
+          "name": "Size=compact, State=hover",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1142",
+          "name": "Size=compact, State=pressed",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1147",
+          "name": "Size=compact, State=focus",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1152",
+          "name": "Size=compact, State=disabled",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1157",
+          "name": "Size=standard, State=default",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "id": "94:1162",
+          "name": "Size=standard, State=hover",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "id": "94:1167",
+          "name": "Size=standard, State=pressed",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "id": "94:1172",
+          "name": "Size=standard, State=focus",
+          "w": 36,
+          "h": 36
+        },
+        {
+          "id": "94:1177",
+          "name": "Size=standard, State=disabled",
+          "w": 36,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1182",
+      "owners": [
+        "src/ui/components/icon-view.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1239",
+      "name": "MDR Blue/Checkbox",
+      "description": "勾选、混合与键盘焦点；32px行高，标签14px。",
+      "properties": [
+        {
+          "key": "Label#94:34",
+          "type": "TEXT",
+          "default": "加粗"
+        },
+        {
+          "key": "Checked",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true",
+            "mixed"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1183",
+          "name": "Checked=false, State=default",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1186",
+          "name": "Checked=false, State=hover",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1189",
+          "name": "Checked=false, State=focus",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1192",
+          "name": "Checked=false, State=disabled",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1195",
+          "name": "Checked=true, State=default",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1202",
+          "name": "Checked=true, State=hover",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1209",
+          "name": "Checked=true, State=focus",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1216",
+          "name": "Checked=true, State=disabled",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1223",
+          "name": "Checked=mixed, State=default",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1227",
+          "name": "Checked=mixed, State=hover",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1231",
+          "name": "Checked=mixed, State=focus",
+          "w": 160,
+          "h": 32
+        },
+        {
+          "id": "94:1235",
+          "name": "Checked=mixed, State=disabled",
+          "w": 160,
+          "h": 32
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1239",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1250",
+      "name": "MDR Blue/Mode item",
+      "description": "写作/分栏/源码/纯阅读分段选择，互斥，32px。",
+      "properties": [
+        {
+          "key": "Label#94:40",
+          "type": "TEXT",
+          "default": "写作"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "selected",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1240",
+          "name": "State=default",
+          "w": 64,
+          "h": 32
+        },
+        {
+          "id": "94:1242",
+          "name": "State=hover",
+          "w": 64,
+          "h": 32
+        },
+        {
+          "id": "94:1244",
+          "name": "State=selected",
+          "w": 64,
+          "h": 32
+        },
+        {
+          "id": "94:1246",
+          "name": "State=focus",
+          "w": 64,
+          "h": 32
+        },
+        {
+          "id": "94:1248",
+          "name": "State=disabled",
+          "w": 64,
+          "h": 32
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1250",
+      "owners": [
+        "src/features/editor/ui/editor-toolbar-view.js",
+        "src/features/layout/state/layout-state.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1287",
+      "name": "MDR Blue/Sidebar action",
+      "description": "两种动作均208×40、14/22，底部固定槽位；位置与字重保持一致。",
+      "properties": [
+        {
+          "key": "Label#94:47",
+          "type": "TEXT",
+          "default": "最近打开"
+        },
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "recent",
+          "options": [
+            "recent",
+            "back"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "focus"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1251",
+          "name": "Kind=recent, State=default",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "94:1257",
+          "name": "Kind=recent, State=hover",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "94:1263",
+          "name": "Kind=recent, State=focus",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "94:1269",
+          "name": "Kind=back, State=default",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "94:1275",
+          "name": "Kind=back, State=hover",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "94:1281",
+          "name": "Kind=back, State=focus",
+          "w": 208,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1287",
+      "owners": [
+        "src/features/menu/ui/workspace-actions-view.js",
+        "src/features/settings/ui/settings-dialog-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Recent and return share 208x40, 14/22 Regular, label x8/y9; same footer slot. Actual screen contexts choose one.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1296",
+      "name": "MDR Blue/Text input",
+      "description": "文字、URL、数值字段共用。Label在外层，错误说明另起行。",
+      "properties": [
+        {
+          "key": "Value#94:52",
+          "type": "TEXT",
+          "default": "请输入内容"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "focus",
+            "error",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1288",
+          "name": "State=default",
+          "w": 240,
+          "h": 36
+        },
+        {
+          "id": "94:1290",
+          "name": "State=focus",
+          "w": 240,
+          "h": 36
+        },
+        {
+          "id": "94:1292",
+          "name": "State=error",
+          "w": 240,
+          "h": 36
+        },
+        {
+          "id": "94:1294",
+          "name": "State=disabled",
+          "w": 240,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1296",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/styles/components/form.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "External field label and separate error line; disabled text uses disabledText. Preserve validation, input and native focus behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "94:1357",
+      "name": "MDR Blue/Menu item",
+      "description": "菜单、上下文菜单与列表动作；32px行高，快捷键右对齐，危险操作独立颜色。 默认无装饰图标，标签与快捷键按固定列对齐；有语义需要时可开启图标属性。",
+      "properties": [
+        {
+          "key": "Icon#94:71",
+          "type": "INSTANCE_SWAP",
+          "default": "109:8809"
+        },
+        {
+          "key": "Label#94:72",
+          "type": "TEXT",
+          "default": "打开文件"
+        },
+        {
+          "key": "Shortcut#94:73",
+          "type": "TEXT",
+          "default": "Ctrl+O"
+        },
+        {
+          "key": "Has icon#123:0",
+          "type": "BOOLEAN",
+          "default": false
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "focus",
+            "selected",
+            "disabled",
+            "danger"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1297",
+          "name": "State=default",
+          "w": 248,
+          "h": 32
+        },
+        {
+          "id": "94:1307",
+          "name": "State=hover",
+          "w": 248,
+          "h": 32
+        },
+        {
+          "id": "94:1317",
+          "name": "State=focus",
+          "w": 248,
+          "h": 32
+        },
+        {
+          "id": "94:1327",
+          "name": "State=selected",
+          "w": 248,
+          "h": 32
+        },
+        {
+          "id": "94:1337",
+          "name": "State=disabled",
+          "w": 248,
+          "h": 32
+        },
+        {
+          "id": "94:1347",
+          "name": "State=danger",
+          "w": 248,
+          "h": 32
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1357",
+      "owners": [
+        "src/features/menu/ui/menu-content-view.js",
+        "src/styles/components/menu.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1374",
+      "name": "MDR Blue/Format item",
+      "description": "格式命令字符是文字，不作装饰图标。紧凑28、标准32；活动状态可读。",
+      "properties": [
+        {
+          "key": "Label#94:82",
+          "type": "TEXT",
+          "default": "B"
+        },
+        {
+          "key": "Size",
+          "type": "VARIANT",
+          "default": "compact",
+          "options": [
+            "compact",
+            "standard"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "selected",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1358",
+          "name": "Size=compact, State=default",
+          "w": 36,
+          "h": 28
+        },
+        {
+          "id": "94:1360",
+          "name": "Size=compact, State=selected",
+          "w": 36,
+          "h": 28
+        },
+        {
+          "id": "94:1362",
+          "name": "Size=compact, State=focus",
+          "w": 36,
+          "h": 28
+        },
+        {
+          "id": "94:1364",
+          "name": "Size=compact, State=disabled",
+          "w": 36,
+          "h": 28
+        },
+        {
+          "id": "94:1366",
+          "name": "Size=standard, State=default",
+          "w": 36,
+          "h": 32
+        },
+        {
+          "id": "94:1368",
+          "name": "Size=standard, State=selected",
+          "w": 36,
+          "h": 32
+        },
+        {
+          "id": "94:1370",
+          "name": "Size=standard, State=focus",
+          "w": 36,
+          "h": 32
+        },
+        {
+          "id": "94:1372",
+          "name": "Size=standard, State=disabled",
+          "w": 36,
+          "h": 32
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1374",
+      "owners": [
+        "src/features/editor/ui/editor-toolbar-view.js",
+        "src/features/editor/ui/selection-toolbar-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1387",
+      "name": "MDR Blue/Search option",
+      "description": "查找三个筛选选项互相独立，aria-pressed同步。",
+      "properties": [
+        {
+          "key": "Label#94:89",
+          "type": "TEXT",
+          "default": "区分大小写"
+        },
+        {
+          "key": "Selected",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1375",
+          "name": "Selected=false, State=default",
+          "w": 88,
+          "h": 28
+        },
+        {
+          "id": "94:1377",
+          "name": "Selected=false, State=focus",
+          "w": 88,
+          "h": 28
+        },
+        {
+          "id": "94:1379",
+          "name": "Selected=false, State=disabled",
+          "w": 88,
+          "h": 28
+        },
+        {
+          "id": "94:1381",
+          "name": "Selected=true, State=default",
+          "w": 88,
+          "h": 28
+        },
+        {
+          "id": "94:1383",
+          "name": "Selected=true, State=focus",
+          "w": 88,
+          "h": 28
+        },
+        {
+          "id": "94:1385",
+          "name": "Selected=true, State=disabled",
+          "w": 88,
+          "h": 28
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1387",
+      "owners": [
+        "src/features/editor/ui/find-replace-dialog-view.js",
+        "src/features/editor/commands/find-replace-command.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1400",
+      "name": "MDR Blue/Swatch",
+      "description": "文字和高亮色板；颜色名称作为可访问标签，允许自定义值。",
+      "properties": [
+        {
+          "key": "Selected",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1388",
+          "name": "Selected=false, State=default",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1390",
+          "name": "Selected=false, State=focus",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1392",
+          "name": "Selected=false, State=disabled",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1394",
+          "name": "Selected=true, State=default",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1396",
+          "name": "Selected=true, State=focus",
+          "w": 28,
+          "h": 28
+        },
+        {
+          "id": "94:1398",
+          "name": "Selected=true, State=disabled",
+          "w": 28,
+          "h": 28
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1400",
+      "owners": [
+        "src/features/editor/ui/inline-color-menu-view.js",
+        "src/features/settings/ui/color-field-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Selected color has 2px primary boundary; selected+focus has 3px focus boundary. Expose color names and custom values; do not rely on color alone.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "94:1403",
+      "name": "MDR Blue/Divider",
+      "description": "语义细分隔线，固定1px，不表示可拖动区域。",
+      "properties": [
+        {
+          "key": "Orientation",
+          "type": "VARIANT",
+          "default": "horizontal",
+          "options": [
+            "horizontal",
+            "vertical"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1401",
+          "name": "Orientation=horizontal",
+          "w": 160,
+          "h": 1
+        },
+        {
+          "id": "94:1402",
+          "name": "Orientation=vertical",
+          "w": 1,
+          "h": 20
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1403",
+      "owners": [
+        "src/styles/foundation/tokens.css",
+        "src/styles/shell/menu-bar.css",
+        "src/styles/shell/status-bar.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "94:1406",
+      "name": "MDR Blue/Tooltip",
+      "description": "悬停或焦点显示；不承载必须操作，不截获键盘焦点。",
+      "properties": [
+        {
+          "key": "Label#94:91",
+          "type": "TEXT",
+          "default": "查找  Ctrl+F"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "visible",
+          "options": [
+            "visible"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "94:1404",
+          "name": "State=visible",
+          "w": 80,
+          "h": 28
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=94-1406",
+      "owners": [
+        "src/ui/dom/safe-element.js",
+        "src/styles/components/menu.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Intrinsic width80x28 for current63px text;long descriptions wrap to viewport maximum rather than fixed empty width.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:1963",
+      "name": "MDR Blue/Mode switch",
+      "description": "四种实际layoutMode：hybrid/both/edit/preview；纯阅读关闭编辑命令，保留选择和查找。",
+      "properties": [
+        {
+          "key": "Selected",
+          "type": "VARIANT",
+          "default": "hybrid",
+          "options": [
+            "hybrid",
+            "both",
+            "edit",
+            "preview"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:1927",
+          "name": "Selected=hybrid",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "95:1936",
+          "name": "Selected=both",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "95:1945",
+          "name": "Selected=edit",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "95:1954",
+          "name": "Selected=preview",
+          "w": 208,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-1963",
+      "owners": [
+        "src/features/editor/ui/editor-toolbar-view.js",
+        "src/features/layout/state/layout-state.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Top controls only: writinghybrid/splitboth/readonlypreview,208x40. Existing Selected=edit state retained for advanced compatibility; no Source tab. Empty sessions lock writing.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "availabilityContract": "No active document: hybrid selected, all four controls disabled, central mode command clamped. Creating/opening enables controls in writing mode; closing the last document locks writing again. Preserve saved preferences and the mode of an already active document."
+    },
+    {
+      "id": "95:2036",
+      "name": "MDR Blue/Titlebar",
+      "description": "Windows标题栏40px；菜单挤压时窗口控制始终右对齐，拖动区域排除按钮。 菜单栏底部固定1px border语义细线，与侧栏和状态栏边界同色同粗；不改变40px高度或按钮位置。",
+      "properties": [
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:1964",
+          "name": "Width=desktop",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2000",
+          "name": "Width=narrow",
+          "w": 600,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2036",
+      "owners": [
+        "src/ui/shell/menu-bar-shell.js",
+        "src/styles/shell/menu-bar.css",
+        "src/features/window/window-controls-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "40px; bottom 1px semantic border across Light/Dark and desktop/narrow, same width as sidebar/footer separators. Window controls remain far right.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:2102",
+      "name": "MDR Blue/Statusbar",
+      "description": "40px状态栏；左右24px，文字12/20；状态来自真实文档/任务，不模拟成功。",
+      "properties": [
+        {
+          "key": "Status#95:26",
+          "type": "TEXT",
+          "default": "已保存到本地"
+        },
+        {
+          "key": "Count#95:27",
+          "type": "TEXT",
+          "default": "286 字"
+        },
+        {
+          "key": "Status",
+          "type": "VARIANT",
+          "default": "saved",
+          "options": [
+            "saved",
+            "modified",
+            "saving",
+            "failed",
+            "loading",
+            "reading",
+            "previewRecovering",
+            "previewFailed"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2037",
+          "name": "Status=saved",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2048",
+          "name": "Status=modified",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2059",
+          "name": "Status=saving",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2070",
+          "name": "Status=failed",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2081",
+          "name": "Status=loading",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "95:2092",
+          "name": "Status=reading",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "144:9108",
+          "name": "Status=previewRecovering",
+          "w": 1280,
+          "h": 40
+        },
+        {
+          "id": "144:9127",
+          "name": "Status=previewFailed",
+          "w": 1280,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2102",
+      "owners": [
+        "src/features/persistence/ui/status-content-view.js",
+        "src/styles/shell/status-bar.css",
+        "src/features/preview/ui/preview-recovery-view.js",
+        "src/features/preview/application/preview-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "40high; top1px border; left24px status slot. Preview recovering/failed are new display projections, not persistence state. Save failure and active load/save take priority; lower-priority status stays in its owning feature. Never convert preview success to saved state.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:2124",
+      "name": "MDR Blue/Sidebar tabs",
+      "description": "3个侧栏标签，36px容器，当前标签描边。",
+      "properties": [
+        {
+          "key": "Selected",
+          "type": "VARIANT",
+          "default": "documents",
+          "options": [
+            "documents",
+            "files",
+            "outline"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2103",
+          "name": "Selected=documents",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "95:2110",
+          "name": "Selected=files",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "95:2117",
+          "name": "Selected=outline",
+          "w": 208,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2124",
+      "owners": [
+        "src/features/sidebar/ui/sidebar-content-view.js",
+        "src/styles/features/sidebar-navigation.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:2249",
+      "name": "MDR Blue/Sidebar content",
+      "description": "文档/文件树/大纲/空会话的真实信息层级；最近打开在独立底部槽位。",
+      "properties": [
+        {
+          "key": "View",
+          "type": "VARIANT",
+          "default": "documents",
+          "options": [
+            "documents",
+            "files",
+            "outline",
+            "empty"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2125",
+          "name": "View=documents",
+          "w": 208,
+          "h": 317
+        },
+        {
+          "id": "95:2162",
+          "name": "View=files",
+          "w": 208,
+          "h": 257
+        },
+        {
+          "id": "95:2199",
+          "name": "View=outline",
+          "w": 208,
+          "h": 257
+        },
+        {
+          "id": "95:2234",
+          "name": "View=empty",
+          "w": 208,
+          "h": 296
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2249",
+      "owners": [
+        "src/features/sidebar/ui/sidebar-content-view.js",
+        "src/features/documents/ui/document-list-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:2460",
+      "name": "MDR Blue/Settings navigation",
+      "description": "设置替换工作区，左侧变为分类；返回文档固定在与最近打开相同的底部槽位。",
+      "properties": [
+        {
+          "key": "Selected",
+          "type": "VARIANT",
+          "default": "general",
+          "options": [
+            "general",
+            "editor",
+            "save",
+            "toolbar",
+            "performance"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2250",
+          "name": "Selected=general",
+          "w": 208,
+          "h": 268
+        },
+        {
+          "id": "95:2292",
+          "name": "Selected=editor",
+          "w": 208,
+          "h": 268
+        },
+        {
+          "id": "95:2334",
+          "name": "Selected=save",
+          "w": 208,
+          "h": 268
+        },
+        {
+          "id": "95:2376",
+          "name": "Selected=toolbar",
+          "w": 208,
+          "h": 268
+        },
+        {
+          "id": "95:2418",
+          "name": "Selected=performance",
+          "w": 208,
+          "h": 268
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2460",
+      "owners": [
+        "src/features/settings/ui/settings-navigation-view.js",
+        "src/features/settings/application/settings-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Navigation height hugs all five categories; Back uses same footer slot and typography as Recent. Preserve document state while settings is open.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "95:2500",
+      "name": "MDR Blue/Settings row",
+      "description": "统一控件列与垂直对齐；桌面行最小64px，窄选择行当前90px，窄开关行56px。长说明按内容增长，保存失败保留草稿。",
+      "properties": [
+        {
+          "key": "Control",
+          "type": "VARIANT",
+          "default": "select",
+          "options": [
+            "select",
+            "toggle",
+            "text",
+            "color",
+            "directory"
+          ]
+        },
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2461",
+          "name": "Control=select, Width=desktop",
+          "w": 712,
+          "h": 64
+        },
+        {
+          "id": "95:2471",
+          "name": "Control=toggle, Width=desktop",
+          "w": 712,
+          "h": 64
+        },
+        {
+          "id": "95:2478",
+          "name": "Control=text, Width=desktop",
+          "w": 712,
+          "h": 64
+        },
+        {
+          "id": "95:2484",
+          "name": "Control=color, Width=desktop",
+          "w": 712,
+          "h": 64
+        },
+        {
+          "id": "95:2492",
+          "name": "Control=directory, Width=desktop",
+          "w": 712,
+          "h": 64
+        },
+        {
+          "id": "101:7438",
+          "name": "Control=select, Width=narrow",
+          "w": 376,
+          "h": 90
+        },
+        {
+          "id": "101:7449",
+          "name": "Control=toggle, Width=narrow",
+          "w": 376,
+          "h": 56
+        },
+        {
+          "id": "101:7457",
+          "name": "Control=text, Width=narrow",
+          "w": 376,
+          "h": 90
+        },
+        {
+          "id": "101:7464",
+          "name": "Control=color, Width=narrow",
+          "w": 376,
+          "h": 90
+        },
+        {
+          "id": "101:7473",
+          "name": "Control=directory, Width=narrow",
+          "w": 376,
+          "h": 90
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2500",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/features/settings/domain/settings-schema.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Desktop rows min64px; narrow select/text/color/directory90px for current content, narrow toggle56px. Descriptions and controls vertically aligned; longer copy grows. Color reset is secondary outlined.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "95:2571",
+      "name": "MDR Blue/Selection toolbar",
+      "description": "格式工具条仅用于写作或源码编辑选区；纯阅读和分栏右侧预览划词仅显示实际文字选区高亮，绝不唤出格式工具条，包括已固定状态。编辑器保留正常闪烁光标，不绘制当前行背景或左侧高光条；旧当前行颜色设置退役。",
+      "properties": [
+        {
+          "key": "Density",
+          "type": "VARIANT",
+          "default": "compact",
+          "options": [
+            "compact",
+            "standard"
+          ]
+        },
+        {
+          "key": "Pinned",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2501",
+          "name": "Density=compact, Pinned=false",
+          "w": 362,
+          "h": 36
+        },
+        {
+          "id": "95:2516",
+          "name": "Density=compact, Pinned=true",
+          "w": 392,
+          "h": 36
+        },
+        {
+          "id": "95:2536",
+          "name": "Density=standard, Pinned=false",
+          "w": 362,
+          "h": 40
+        },
+        {
+          "id": "95:2551",
+          "name": "Density=standard, Pinned=true",
+          "w": 392,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2571",
+      "owners": [
+        "src/features/editor/ui/selection-toolbar-view.js",
+        "src/features/settings/sections/toolbar-settings.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Compact362x36/standard362x40; pinned392 wide. Editor selections only. Pure reading and split rendered preview never show formatting controls, including pinned/Alt+F10; selected characters retain strong semantic blue highlighting. More opens toolbar settings. Editor-to-preview selection keeps already-visible content fixed and only reveals offscreen text by minimal edge scrolling. Virtual chapter measurements settle before completing a reveal; later refreshes restore highlights without same-height alignment. Rendered Mermaid corresponds to the complete source fence in both directions; this is component correspondence, never character-exact mapping. Native SVG label selection stays visible; pending/error code retains ordinary text mapping. Replaced diagram DOM invalidates structural anchors. Main/context menus temporarily hide the selection toolbar and its submenus; closing a menu restores a still-valid editor selection or pinned state without clearing the source range.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "392unpinned/424pinned width by content,H36/40. More routes to toolbar settings;pin/unpin/AltF10 and preference IDs retained."
+    },
+    {
+      "id": "95:2731",
+      "name": "MDR Blue/Find panel",
+      "description": "非模态查找，固定右上但不遮挡目标；Enter/Shift+Enter前后查找，Esc返回编辑焦点。只读不显示替换行。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "results",
+          "options": [
+            "results",
+            "empty",
+            "invalid",
+            "reading"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2572",
+          "name": "State=results",
+          "w": 456,
+          "h": 140
+        },
+        {
+          "id": "95:2613",
+          "name": "State=empty",
+          "w": 456,
+          "h": 140
+        },
+        {
+          "id": "95:2654",
+          "name": "State=invalid",
+          "w": 456,
+          "h": 140
+        },
+        {
+          "id": "95:2696",
+          "name": "State=reading",
+          "w": 456,
+          "h": 100
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2731",
+      "owners": [
+        "src/features/editor/ui/find-replace-dialog-view.js",
+        "src/features/editor/commands/find-replace-command.js",
+        "src/features/editor/domain/reading-policy.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "456px wide; results/empty/invalid140 high,reading100. Equal264px inputs;right160px group. Replace/all76x32,8px gap,secondary outlined;disabled invalid/empty. Three bottom options unchanged. Regex error is separate state,not dark theme.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestAlignment": {
+        "reference": "find-color-alignment.json",
+        "inputs": "264px equal widths",
+        "actions": "160px shared right column; 76px replacement buttons; 8px gap",
+        "options": "unchanged",
+        "buttonTone": "secondary outlined",
+        "buttonStates": "disabled when no matches or invalid regex; absent in read-only mode"
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "440x124,reading440x84. Inputs fill remaining row width;preserve counters,options,validation and readonly replace guard."
+    },
+    {
+      "id": "95:2756",
+      "name": "MDR Blue/Notice",
+      "description": "反馈说明原因和恢复动作；保存失败不能显示成功，文档内容保留。",
+      "properties": [
+        {
+          "key": "Tone",
+          "type": "VARIANT",
+          "default": "info",
+          "options": [
+            "info",
+            "success",
+            "warning",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2732",
+          "name": "Tone=info",
+          "w": 384,
+          "h": 70
+        },
+        {
+          "id": "95:2738",
+          "name": "Tone=success",
+          "w": 384,
+          "h": 70
+        },
+        {
+          "id": "95:2744",
+          "name": "Tone=warning",
+          "w": 384,
+          "h": 70
+        },
+        {
+          "id": "95:2750",
+          "name": "Tone=error",
+          "w": 384,
+          "h": 70
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2756",
+      "owners": [
+        "src/features/persistence/ui/status-content-view.js",
+        "src/features/preview/ui/preview-recovery-view.js",
+        "src/features/settings/ui/settings-dialog-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Current notice384x70, content-driven height. Retry/close are outlined secondary. Save failure centered over content excluding sidebar,24px above footer/16px narrow; preserve draft and retry.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "360x64 for current content;height grows for long messages. Save failures center over content,24px above footer/16px narrow;draft/retry preserved."
+    },
+    {
+      "id": "95:2798",
+      "name": "MDR Blue/Empty state",
+      "description": "空与读取失败有明确下一步；无在线账户或同步前提。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "document",
+          "options": [
+            "document",
+            "files",
+            "outline",
+            "failed"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2757",
+          "name": "Kind=document",
+          "w": 440,
+          "h": 192
+        },
+        {
+          "id": "95:2768",
+          "name": "Kind=files",
+          "w": 440,
+          "h": 192
+        },
+        {
+          "id": "95:2776",
+          "name": "Kind=outline",
+          "w": 440,
+          "h": 192
+        },
+        {
+          "id": "95:2787",
+          "name": "Kind=failed",
+          "w": 440,
+          "h": 192
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2798",
+      "owners": [
+        "src/features/documents/ui/document-list-view.js",
+        "src/features/sidebar/ui/sidebar-content-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "emptySessionContract": "One full available paper with centered 440x192 content and 112x36 real New Document action; underlying panes and splitter cannot cover or receive pointer hits. Figma screen104:1838, paper210:7542."
+    },
+    {
+      "id": "95:2841",
+      "name": "MDR Blue/Progress",
+      "description": "进度使用实际任务阶段；准备可取消，写入开始后禁用取消并等待结果；未知结果先核查。",
+      "properties": [
+        {
+          "key": "Title#95:34",
+          "type": "TEXT",
+          "default": "准备导出"
+        },
+        {
+          "key": "Stage",
+          "type": "VARIANT",
+          "default": "preparing",
+          "options": [
+            "preparing",
+            "rendering",
+            "writing",
+            "complete",
+            "failed",
+            "cancelled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2799",
+          "name": "Stage=preparing",
+          "w": 384,
+          "h": 160
+        },
+        {
+          "id": "95:2806",
+          "name": "Stage=rendering",
+          "w": 384,
+          "h": 160
+        },
+        {
+          "id": "95:2813",
+          "name": "Stage=writing",
+          "w": 384,
+          "h": 160
+        },
+        {
+          "id": "95:2820",
+          "name": "Stage=complete",
+          "w": 384,
+          "h": 160
+        },
+        {
+          "id": "95:2827",
+          "name": "Stage=failed",
+          "w": 384,
+          "h": 160
+        },
+        {
+          "id": "95:2834",
+          "name": "Stage=cancelled",
+          "w": 384,
+          "h": 160
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2841",
+      "owners": [
+        "src/features/export/ui/export-progress-dialog-view.js",
+        "src/features/export/task/export-task-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "384x160 current content.32px outlined cancel/close/retry in footer. Preparing/rendering cancellable;writing disables cancel;preserve task completion/failure/cancel lifecycle.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "360x142 for current content. Bind live task progress andcancelEnabled;writing protected. Terminal text reflects complete/cancelled states."
+    },
+    {
+      "id": "95:2990",
+      "name": "MDR Blue/Table picker",
+      "description": "8×8实际尺寸选择器；键盘路径通过现有3×3插入菜单可达；不删除尺寸功能。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "selected"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2842",
+          "name": "State=default",
+          "w": 212,
+          "h": 244
+        },
+        {
+          "id": "95:2916",
+          "name": "State=selected",
+          "w": 212,
+          "h": 244
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-2990",
+      "owners": [
+        "src/features/editor/ui/table-dialog-view.js",
+        "src/features/editor/ui/editor-toolbar-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "188x214 retained with complete8x8 grid;16px visible cells andkeyboard/pointer semantics retained.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:3041",
+      "name": "MDR Blue/Color palette",
+      "description": "色板、十六进制输入和恢复默认；无选区或只读时禁用改变正文的操作。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "text",
+          "options": [
+            "text",
+            "highlight"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:2991",
+          "name": "Kind=text",
+          "w": 232,
+          "h": 232
+        },
+        {
+          "id": "95:3016",
+          "name": "Kind=highlight",
+          "w": 232,
+          "h": 232
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-3041",
+      "owners": [
+        "src/features/editor/ui/inline-color-menu-view.js",
+        "src/features/settings/ui/color-field-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Both palettes232x232. Inner200px; text2x5 with38.4x38 cells, highlight2x4 with48.5x38 cells;2px gutters. Custom hex and all10/8presets retained. Reset/apply96x32,8px gap; readonly/no selection disables document changes.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestAlignment": {
+        "reference": "find-color-alignment.json",
+        "textPaletteGrid": "200px wide; 5 equal columns; 2px gutters; 38px row height",
+        "footer": "two 96x32 buttons with 8px gap"
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "224x206;all10text/8highlight presets,custom hex,restore/apply preserved;32px input/actions,14px label."
+    },
+    {
+      "id": "95:3046",
+      "name": "MDR Blue/Scrollbar",
+      "description": "细滚动条带对比；8px宽，可拖动目标按系统可用性扩大，不隐藏滚动能力。",
+      "properties": [
+        {
+          "key": "Orientation",
+          "type": "VARIANT",
+          "default": "vertical",
+          "options": [
+            "vertical",
+            "horizontal"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:3042",
+          "name": "Orientation=vertical",
+          "w": 8,
+          "h": 120
+        },
+        {
+          "id": "95:3044",
+          "name": "Orientation=horizontal",
+          "w": 120,
+          "h": 8
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-3046",
+      "owners": [
+        "src/styles/foundation/tokens.css",
+        "src/styles/layout/compact-shell.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "95:3053",
+      "name": "MDR Blue/Resize handle",
+      "description": "1px可见分隔，9px拖动命中区；不能把视觉细线当作完整命中区。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "focus"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "95:3047",
+          "name": "State=default",
+          "w": 9,
+          "h": 128
+        },
+        {
+          "id": "95:3049",
+          "name": "State=hover",
+          "w": 9,
+          "h": 128
+        },
+        {
+          "id": "95:3051",
+          "name": "State=focus",
+          "w": 9,
+          "h": 128
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=95-3053",
+      "owners": [
+        "src/features/layout/sidebar/sidebar-resize-controller.js",
+        "src/styles/layout/split-pane.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "98:4857",
+      "name": "MDR Blue/Export dialog",
+      "description": "单一文件名、格式组、按需选项和操作，不重复说明。图片完整长图，1080/1920及浅/深背景；HTML/Word/Markdown/系统打印真实路径。 图片格式底栏提供图片高级选项，直达五种比例、裁剪、预览与PNG下载。",
+      "properties": [
+        {
+          "key": "Format",
+          "type": "VARIANT",
+          "default": "markdown",
+          "options": [
+            "markdown",
+            "html",
+            "word",
+            "image",
+            "pdf"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:4508",
+          "name": "Format=markdown, State=default",
+          "w": 420,
+          "h": 234
+        },
+        {
+          "id": "98:4539",
+          "name": "Format=markdown, State=error",
+          "w": 420,
+          "h": 264
+        },
+        {
+          "id": "98:4571",
+          "name": "Format=html, State=default",
+          "w": 420,
+          "h": 234
+        },
+        {
+          "id": "98:4602",
+          "name": "Format=html, State=error",
+          "w": 420,
+          "h": 264
+        },
+        {
+          "id": "98:4634",
+          "name": "Format=word, State=default",
+          "w": 420,
+          "h": 234
+        },
+        {
+          "id": "98:4665",
+          "name": "Format=word, State=error",
+          "w": 420,
+          "h": 264
+        },
+        {
+          "id": "98:4697",
+          "name": "Format=image, State=default",
+          "w": 420,
+          "h": 286
+        },
+        {
+          "id": "98:4745",
+          "name": "Format=image, State=error",
+          "w": 420,
+          "h": 316
+        },
+        {
+          "id": "98:4794",
+          "name": "Format=pdf, State=default",
+          "w": 420,
+          "h": 234
+        },
+        {
+          "id": "98:4825",
+          "name": "Format=pdf, State=error",
+          "w": 420,
+          "h": 264
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-4857",
+      "owners": [
+        "src/features/export/ui/export-dialog-view.js",
+        "src/features/export/application/export-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "420x234 normal /420x286 image; error264/316 high. Five formats, real filename, advanced image action and actual export/print commands retained. Footer cancel and primary80x32,8px gap.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "400x200 base/400x250 image,error228/278.5formats,real filenames,advanced image entry and actual commands retained."
+    },
+    {
+      "id": "98:5130",
+      "name": "MDR Blue/Help panel",
+      "description": "520px紧凑帮助，六分类使用顶部单行页签，正文按页Hug高度；关于不占满固定360px。真实完整帮助内容仍来自registry，长内容在视口内滚动。",
+      "properties": [
+        {
+          "key": "Page",
+          "type": "VARIANT",
+          "default": "start",
+          "options": [
+            "start",
+            "markdown",
+            "shortcuts",
+            "about",
+            "views",
+            "files"
+          ]
+        },
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:4858",
+          "name": "Page=start, Width=desktop",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "98:4930",
+          "name": "Page=markdown, Width=desktop",
+          "w": 520,
+          "h": 292
+        },
+        {
+          "id": "98:4998",
+          "name": "Page=shortcuts, Width=desktop",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "98:5070",
+          "name": "Page=about, Width=desktop",
+          "w": 520,
+          "h": 236
+        },
+        {
+          "id": "100:6696",
+          "name": "Page=views, Width=desktop",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "100:6765",
+          "name": "Page=files, Width=desktop",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "105:13986",
+          "name": "Page=start, Width=narrow",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "105:14071",
+          "name": "Page=markdown, Width=narrow",
+          "w": 520,
+          "h": 292
+        },
+        {
+          "id": "105:14152",
+          "name": "Page=shortcuts, Width=narrow",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "105:14237",
+          "name": "Page=about, Width=narrow",
+          "w": 520,
+          "h": 236
+        },
+        {
+          "id": "105:14310",
+          "name": "Page=views, Width=narrow",
+          "w": 520,
+          "h": 320
+        },
+        {
+          "id": "105:14395",
+          "name": "Page=files, Width=narrow",
+          "w": 520,
+          "h": 320
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-5130",
+      "owners": [
+        "src/features/help/ui/help-dialog-view.js",
+        "src/features/help/help-content-registry.js",
+        "src/features/help/help-state.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "520px width for current600px minimum-window design;start/shortcuts/views/files320 high,Markdown292,about236. Six help sections retained; body layout follows content.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "520px wide;top6category tabs and content-based heights224about/280markdown/308common. Real registry content preserved;long translations andbody scroll within viewport."
+    },
+    {
+      "id": "98:5457",
+      "name": "MDR Blue/Insert form",
+      "description": "表单尺寸随内容收缩；链接、图片、图表、网页导入和重命名均接原命令。Esc/取消保留正文，错误保留输入。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "link",
+          "options": [
+            "link",
+            "imageUrl",
+            "imageFile",
+            "mermaid",
+            "import",
+            "rename"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:5131",
+          "name": "Kind=link, State=default",
+          "w": 384,
+          "h": 188
+        },
+        {
+          "id": "98:5153",
+          "name": "Kind=link, State=error",
+          "w": 384,
+          "h": 218
+        },
+        {
+          "id": "98:5176",
+          "name": "Kind=imageUrl, State=default",
+          "w": 400,
+          "h": 340
+        },
+        {
+          "id": "98:5208",
+          "name": "Kind=imageUrl, State=error",
+          "w": 400,
+          "h": 370
+        },
+        {
+          "id": "98:5241",
+          "name": "Kind=imageFile, State=default",
+          "w": 400,
+          "h": 332
+        },
+        {
+          "id": "98:5273",
+          "name": "Kind=imageFile, State=error",
+          "w": 400,
+          "h": 362
+        },
+        {
+          "id": "98:5306",
+          "name": "Kind=mermaid, State=default",
+          "w": 440,
+          "h": 326
+        },
+        {
+          "id": "98:5336",
+          "name": "Kind=mermaid, State=error",
+          "w": 440,
+          "h": 356
+        },
+        {
+          "id": "98:5367",
+          "name": "Kind=import, State=default",
+          "w": 480,
+          "h": 182
+        },
+        {
+          "id": "98:5389",
+          "name": "Kind=import, State=error",
+          "w": 480,
+          "h": 214
+        },
+        {
+          "id": "98:5412",
+          "name": "Kind=rename, State=default",
+          "w": 384,
+          "h": 188
+        },
+        {
+          "id": "98:5434",
+          "name": "Kind=rename, State=error",
+          "w": 384,
+          "h": 218
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-5457",
+      "owners": [
+        "src/features/editor/ui/link-dialog-view.js",
+        "src/features/editor/ui/image-dialog-view.js",
+        "src/features/editor/ui/mermaid-dialog-view.js",
+        "src/features/editor/ui/math-dialog-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Link/rename384x188,error218; imageURL400x340,error370; imageFile400x332,error362; Mermaid440x326,error356. Error submit disabled; values/source retained. Footer short actions80x32,8px gap. Old URL sketches excluded.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Link/rename360x164,error192;image400x288/296,error316/324 retained;Mermaid440x306,error334 with128px scrollable source. Obsolete URL sketches excluded."
+    },
+    {
+      "id": "98:6043",
+      "name": "MDR Blue/Menu panel",
+      "description": "按命令、快捷键、箭头分配宽度；28px普通行，无额外逐行间隔；32px开关行。legacyMore停用。",
+      "properties": [
+        {
+          "key": "Menu",
+          "type": "VARIANT",
+          "default": "file",
+          "options": [
+            "file",
+            "edit",
+            "view",
+            "insert",
+            "help",
+            "recent",
+            "legacyMore",
+            "headings",
+            "export"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:5458",
+          "name": "Menu=file",
+          "w": 288,
+          "h": 327
+        },
+        {
+          "id": "98:5550",
+          "name": "Menu=edit",
+          "w": 216,
+          "h": 263
+        },
+        {
+          "id": "98:5623",
+          "name": "Menu=view",
+          "w": 272,
+          "h": 254
+        },
+        {
+          "id": "98:5695",
+          "name": "Menu=insert",
+          "w": 264,
+          "h": 391
+        },
+        {
+          "id": "98:5786",
+          "name": "Menu=help",
+          "w": 160,
+          "h": 44
+        },
+        {
+          "id": "98:5797",
+          "name": "Menu=recent",
+          "w": 248,
+          "h": 117
+        },
+        {
+          "id": "98:5829",
+          "name": "Menu=legacyMore",
+          "w": 280,
+          "h": 360
+        },
+        {
+          "id": "98:5921",
+          "name": "Menu=headings",
+          "w": 208,
+          "h": 245
+        },
+        {
+          "id": "98:5992",
+          "name": "Menu=export",
+          "w": 192,
+          "h": 181
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-6043",
+      "owners": [
+        "src/features/menu/ui/menu-content-view.js",
+        "src/features/menu/shell-menus.js",
+        "src/features/editor/ui/editor-toolbar-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Menu rows32px with6px outer padding and semantic separators; width content-based per variants. All commands retained. legacyMore hidden; toolbar More routes to settings primary-items section.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Role-based widths144–240,ordinary rows28,4px outer padding,no extra row gap; preserve shortcuts/toggles/commands. legacyMore remains hidden."
+    },
+    {
+      "id": "98:6072",
+      "name": "MDR Blue/Code block",
+      "description": "围栏代码与图表失败保留源码；复制、双击编辑和完成入口真实可达。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "preview",
+          "options": [
+            "preview",
+            "editing",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:6044",
+          "name": "State=preview",
+          "w": 640,
+          "h": 136
+        },
+        {
+          "id": "98:6053",
+          "name": "State=editing",
+          "w": 640,
+          "h": 136
+        },
+        {
+          "id": "98:6062",
+          "name": "State=error",
+          "w": 640,
+          "h": 164
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-6072",
+      "owners": [
+        "src/features/hybrid-editor/widgets/code-block/code-block-view.js",
+        "src/styles/features/hybrid.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Code block hugs rendered content:640x136 preview/editing and164 error for current sample. Toolbar32px, inner actions28px; no clipping. Code13/24 and copy/edit/line numbers/readonly policy retained.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Rendered code style13/24; existing copy/edit/line numbers/readonly policy preserved."
+    },
+    {
+      "id": "98:6127",
+      "name": "MDR Blue/Document block",
+      "description": "Markdown展示规范，全部可编辑图层。图片区域标为示例，不把占位图作为实现资源；源码、渲染与模型由现有模块维护。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "paragraph",
+          "options": [
+            "paragraph",
+            "heading",
+            "quote",
+            "task",
+            "list",
+            "table",
+            "image",
+            "math",
+            "diagram",
+            "divider"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:6073",
+          "name": "Kind=paragraph",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6075",
+          "name": "Kind=heading",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6078",
+          "name": "Kind=quote",
+          "w": 640,
+          "h": 80
+        },
+        {
+          "id": "98:6080",
+          "name": "Kind=task",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6091",
+          "name": "Kind=list",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6093",
+          "name": "Kind=table",
+          "w": 640,
+          "h": 108
+        },
+        {
+          "id": "98:6106",
+          "name": "Kind=image",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6115",
+          "name": "Kind=math",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6117",
+          "name": "Kind=diagram",
+          "w": 640,
+          "h": 112
+        },
+        {
+          "id": "98:6125",
+          "name": "Kind=divider",
+          "w": 640,
+          "h": 112
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-6127",
+      "owners": [
+        "src/features/editor/ui/editor-pane-view.js",
+        "src/features/documents/ui/document-content-view.js",
+        "src/styles/features/hybrid.css",
+        "src/styles/features/document-surface.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Body17/32 sample; source18/32 follows preference. Table rows36px, equal columns,1px bottom boundaries, content-driven height. Preserve widgets, tasks and source mapping. Quotes HUG actual content with 24px top/bottom padding and no fixed 112px minimum.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Rendered Body17/32 is visual sample; source editor18/32 follows persisted font size. Preserve syntax widgets, task inputs and source mapping."
+    },
+    {
+      "id": "98:6172",
+      "name": "MDR Blue/Workspace header",
+      "description": "桌面单行、600px两行；去除重复快捷插入入口。文档名可截断，完整名称通过tooltip和可访问名称提供。",
+      "properties": [
+        {
+          "key": "Title#98:3",
+          "type": "TEXT",
+          "default": "慢慢写，也很好.md"
+        },
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "98:6128",
+          "name": "Width=desktop",
+          "w": 1040,
+          "h": 76
+        },
+        {
+          "id": "98:6150",
+          "name": "Width=narrow",
+          "w": 600,
+          "h": 76
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=98-6172",
+      "owners": [
+        "src/ui/shell/toolbar-shell.js",
+        "src/features/editor/ui/editor-toolbar-view.js",
+        "src/features/menu/ui/workspace-actions-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Single centered208x40 mode group inside76px header at all widths. No visible title/actions or top Source entry; File menu owns export options, existing menu/shortcut commands retained.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Desktop three columns with centered 272px mode group; narrow two rows. No duplicate quick-insert button."
+    },
+    {
+      "id": "99:5384",
+      "name": "MDR Blue/Pane header",
+      "description": "分栏两侧头部36px；相同正文起点，收起命令保留。",
+      "properties": [
+        {
+          "key": "Label#99:2",
+          "type": "TEXT",
+          "default": "编辑"
+        },
+        {
+          "key": "Role",
+          "type": "VARIANT",
+          "default": "editor",
+          "options": [
+            "editor",
+            "preview"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:5364",
+          "name": "Role=editor",
+          "w": 480,
+          "h": 36
+        },
+        {
+          "id": "99:5374",
+          "name": "Role=preview",
+          "w": 480,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-5384",
+      "owners": [
+        "src/ui/shell/workspace-shell.js",
+        "src/styles/layout/split-pane.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "99:5527",
+      "name": "MDR Blue/Toolbar checklist",
+      "description": "16个真实Toolbar Item ID，常驻与隐藏使用不同含义；冲突时隐藏优先；尺寸与项目持久化。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "primary",
+          "options": [
+            "primary",
+            "hidden"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:5385",
+          "name": "Kind=primary",
+          "w": 712,
+          "h": 414
+        },
+        {
+          "id": "99:5468",
+          "name": "Kind=hidden",
+          "w": 712,
+          "h": 414
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-5527",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/features/settings/sections/toolbar-settings.js",
+        "src/features/settings/domain/settings-schema.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "16 real toolbar IDs; two equal responsive columns at712 desktop/376 narrow; labels wrap and rows fill available width. Hidden items override pinned items; menu commands remain available. Persist settings.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "99:5851",
+      "name": "MDR Blue/Settings panel",
+      "description": "完整五分类；14个设置页字段、2个菜单可视化开关及1个退役兼容字段。当前行背景已取消，activeLineColor旧值仅保留兼容读取，不显示控件、不绘制高光。工具条长页独立滚动；返回前持久化失败仍保留草稿，恢复默认需确认。",
+      "properties": [
+        {
+          "key": "Section",
+          "type": "VARIANT",
+          "default": "general",
+          "options": [
+            "general",
+            "editor",
+            "save",
+            "toolbar",
+            "performance"
+          ]
+        },
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:5528",
+          "name": "Section=general, Width=desktop",
+          "w": 760,
+          "h": 525
+        },
+        {
+          "id": "99:5577",
+          "name": "Section=editor, Width=desktop",
+          "w": 760,
+          "h": 253
+        },
+        {
+          "id": "99:5615",
+          "name": "Section=save, Width=desktop",
+          "w": 760,
+          "h": 373
+        },
+        {
+          "id": "99:5647",
+          "name": "Section=toolbar, Width=desktop",
+          "w": 760,
+          "h": 1197
+        },
+        {
+          "id": "99:5831",
+          "name": "Section=performance, Width=desktop",
+          "w": 760,
+          "h": 255
+        },
+        {
+          "id": "101:7547",
+          "name": "Section=general, Width=narrow",
+          "w": 408,
+          "h": 571
+        },
+        {
+          "id": "101:7633",
+          "name": "Section=editor, Width=narrow",
+          "w": 408,
+          "h": 263
+        },
+        {
+          "id": "101:7697",
+          "name": "Section=save, Width=narrow",
+          "w": 408,
+          "h": 401
+        },
+        {
+          "id": "101:7750",
+          "name": "Section=toolbar, Width=narrow",
+          "w": 408,
+          "h": 1199
+        },
+        {
+          "id": "101:7951",
+          "name": "Section=performance, Width=narrow",
+          "w": 408,
+          "h": 265
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-5851",
+      "owners": [
+        "src/features/settings/ui/settings-dialog-view.js",
+        "src/features/settings/application/settings-controller.js",
+        "src/features/settings/domain/settings-schema.js",
+        "src/features/settings/ui/launch-policy-field-view.js",
+        "src/features/settings/application/launch-policy-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Five settings categories; 14 visible fields, 2 external visual-editing menu toggles and exactly one retired activeLineColor compatibility descriptor. No active-line background control; preserve old storage, actual persistence/rollback and document/selection/scroll. One backend-owned desktop launch toggle defaults on; secondary launches join the existing session when on and create independent windows when off.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Full workspace route with existing sidebar replaced by settings navigation. Retain live document/editor/selection/scroll and existing immediate-save/rollback chain."
+    },
+    {
+      "id": "99:6098",
+      "name": "MDR Blue/Sidebar shell",
+      "description": "240px侧栏；最近打开与返回文档共享末行，16px侧距、40px操作。设置时替换导航，不叠加菜单。",
+      "properties": [
+        {
+          "key": "View",
+          "type": "VARIANT",
+          "default": "documents",
+          "options": [
+            "documents",
+            "files",
+            "outline",
+            "empty",
+            "settings"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:5852",
+          "name": "View=documents",
+          "w": 240,
+          "h": 780
+        },
+        {
+          "id": "99:5908",
+          "name": "View=files",
+          "w": 240,
+          "h": 780
+        },
+        {
+          "id": "99:5959",
+          "name": "View=outline",
+          "w": 240,
+          "h": 780
+        },
+        {
+          "id": "99:6013",
+          "name": "View=empty",
+          "w": 240,
+          "h": 780
+        },
+        {
+          "id": "99:6047",
+          "name": "View=settings",
+          "w": 240,
+          "h": 780
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-6098",
+      "owners": [
+        "src/features/sidebar/ui/sidebar-content-view.js",
+        "src/ui/shell/app-shell-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior. Collapsed state reserves zero space, hides descendants/resizer and restores the original width on expand.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "99:6149",
+      "name": "MDR Blue/Document surface",
+      "description": "单一正文滚动视口；外层画布保留24/16px四周留白。纯阅读仅选择与查找，输入、粘贴、格式、可视编辑和替换全部关闭。",
+      "properties": [
+        {
+          "key": "Mode",
+          "type": "VARIANT",
+          "default": "rendered",
+          "options": [
+            "rendered",
+            "source",
+            "reading"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:6099",
+          "name": "Mode=rendered",
+          "w": 992,
+          "h": 656
+        },
+        {
+          "id": "99:6122",
+          "name": "Mode=source",
+          "w": 992,
+          "h": 656
+        },
+        {
+          "id": "99:6126",
+          "name": "Mode=reading",
+          "w": 992,
+          "h": 656
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-6149",
+      "owners": [
+        "src/features/documents/ui/document-content-view.js",
+        "src/features/editor/ui/editor-pane-view.js",
+        "src/styles/shell/writing-workspace.css",
+        "src/features/sync/selection/preview-component-mapping.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "FILL viewport/body, max-width720, min-width0. Code/source text follows editorFontSize18 default; sample paragraphs are illustrative. Rendered Mermaid corresponds to the complete source fence in both directions; this is component correspondence, never character-exact mapping. Native SVG label selection stays visible; pending/error code retains ordinary text mapping. Replaced diagram DOM invalidates structural anchors.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "99:6177",
+      "name": "MDR Blue/Confirmation",
+      "description": "破坏性本地动作确认；使用已有确认机制，原生确认由系统绘制时保留系统样式，文案与行为共用此契约。",
+      "properties": [
+        {
+          "key": "Action",
+          "type": "VARIANT",
+          "default": "reset",
+          "options": [
+            "reset",
+            "clear",
+            "clearRecent"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "99:6150",
+          "name": "Action=reset",
+          "w": 384,
+          "h": 146
+        },
+        {
+          "id": "99:6159",
+          "name": "Action=clear",
+          "w": 384,
+          "h": 146
+        },
+        {
+          "id": "99:6168",
+          "name": "Action=clearRecent",
+          "w": 384,
+          "h": 146
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=99-6177",
+      "owners": [
+        "src/ui/components/modal-shell.js",
+        "src/features/settings/application/settings-controller.js",
+        "src/features/menu/shell-menus.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "384x146 current content; header/content/footer. Cancel and confirm96x32,8px gap. Copy grows; preserve confirmation and native OS dialog policy.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "360x130 for current content,16px padding/8px group gaps. Description wraps and height grows;preserve cancel/destructive command policy."
+    },
+    {
+      "id": "100:7134",
+      "name": "MDR Blue/Document row",
+      "description": "真实文档行：打开与关闭是同级按钮，hover/focus显露关闭，未保存点独立，长名截断但完整名称可访问。",
+      "properties": [
+        {
+          "key": "Label#100:8",
+          "type": "TEXT",
+          "default": "慢慢写，也很好.md"
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "selected",
+            "focus"
+          ]
+        },
+        {
+          "key": "Dirty",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:6994",
+          "name": "State=default, Dirty=false",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7011",
+          "name": "State=default, Dirty=true",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7029",
+          "name": "State=hover, Dirty=false",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7046",
+          "name": "State=hover, Dirty=true",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7064",
+          "name": "State=selected, Dirty=false",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7081",
+          "name": "State=selected, Dirty=true",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7099",
+          "name": "State=focus, Dirty=false",
+          "w": 208,
+          "h": 40
+        },
+        {
+          "id": "100:7116",
+          "name": "State=focus, Dirty=true",
+          "w": 208,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7134",
+      "owners": [
+        "src/features/documents/ui/document-list-item-view.js",
+        "src/features/documents/ui/document-context-menu-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "100:7155",
+      "name": "MDR Blue/Menu switch",
+      "description": "插入菜单保留tableVisualEditing与codeVisualEditing两个实际设置，纯阅读时禁用修改。",
+      "properties": [
+        {
+          "key": "Label#100:13",
+          "type": "TEXT",
+          "default": "表格可视化编辑"
+        },
+        {
+          "key": "Checked",
+          "type": "VARIANT",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7135",
+          "name": "Checked=false, State=default",
+          "w": 264,
+          "h": 36
+        },
+        {
+          "id": "100:7140",
+          "name": "Checked=false, State=disabled",
+          "w": 264,
+          "h": 36
+        },
+        {
+          "id": "100:7145",
+          "name": "Checked=true, State=default",
+          "w": 264,
+          "h": 36
+        },
+        {
+          "id": "100:7150",
+          "name": "Checked=true, State=disabled",
+          "w": 264,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7155",
+      "owners": [
+        "src/features/menu/ui/menu-content-view.js",
+        "src/features/menu/menu-state.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "100:7286",
+      "name": "MDR Blue/Web clipper",
+      "description": "保留原生/浏览器代理与手动HTML恢复路径；抓取策略不因设计放宽。文档插入通过现有Import Controller。 本地代理控件仅浏览器环境显示（state.native=false）；Native界面保留原生抓取及手动HTML恢复。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "ready",
+          "options": [
+            "ready",
+            "fetching",
+            "success",
+            "manual",
+            "proxy"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7176",
+          "name": "State=ready",
+          "w": 440,
+          "h": 220
+        },
+        {
+          "id": "100:7203",
+          "name": "State=fetching",
+          "w": 440,
+          "h": 220
+        },
+        {
+          "id": "100:7230",
+          "name": "State=success",
+          "w": 440,
+          "h": 220
+        },
+        {
+          "id": "100:7257",
+          "name": "State=manual",
+          "w": 440,
+          "h": 340
+        },
+        {
+          "id": "107:8973",
+          "name": "State=proxy",
+          "w": 440,
+          "h": 304
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7286",
+      "owners": [
+        "src/features/import/web-clipper/web-clipper-view.js",
+        "src/features/import/web-clipper/web-fetch-coordinator.js",
+        "src/features/import/web-clipper/web-clipper-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "440px wide; normal/fetching/success220 high,manual340,proxy304. Input/actions32px; cancel80 outlined. Preserve native fetch,browser-only proxy,manual HTML fallback and validation; use existing Import Controller.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "440px width,200normal/318manual/280proxy;preserve native fetch/browserproxy/manual HTML and validation. Inputs/actions32px."
+    },
+    {
+      "id": "100:7382",
+      "name": "MDR Blue/Image export advanced",
+      "description": "菜单中原有高级图片导出能力完整保留：五种比例、默认长图、可选裁剪、刷新预览和下载PNG。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "empty",
+          "options": [
+            "empty",
+            "ready",
+            "failed"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7287",
+          "name": "State=empty",
+          "w": 480,
+          "h": 284
+        },
+        {
+          "id": "100:7318",
+          "name": "State=ready",
+          "w": 480,
+          "h": 406
+        },
+        {
+          "id": "100:7351",
+          "name": "State=failed",
+          "w": 480,
+          "h": 284
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7382",
+      "owners": [
+        "src/features/export/ui/export-image-dialog-view.js",
+        "src/features/export/formats/image/image-ratio-presets.js",
+        "src/features/export/formats/image/image-export-surface.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "480x284 empty/failed,480x406 ready. Five ratios,crop,refresh,PNG retained;160px preview viewport scrolls without discarding full image. Cancel outlined; unavailable download disabled.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "480x256 empty/failed,480x378 ready.5ratios/crop/refresh/PNG preserved;160px preview viewport scrolls vertically andkeeps full generated image."
+    },
+    {
+      "id": "100:7416",
+      "name": "MDR Blue/Link preview",
+      "description": "成功态保留真实网页阅读区域；加载/不可嵌入仅展示紧凑信息，不保留空的网页视口。原有安全iframe与系统浏览器打开链路不变。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "loading",
+          "options": [
+            "loading",
+            "ready",
+            "blocked"
+          ]
+        },
+        {
+          "key": "Width",
+          "type": "VARIANT",
+          "default": "desktop",
+          "options": [
+            "desktop",
+            "narrow"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7383",
+          "name": "State=loading, Width=desktop",
+          "w": 400,
+          "h": 146
+        },
+        {
+          "id": "100:7394",
+          "name": "State=ready, Width=desktop",
+          "w": 720,
+          "h": 468
+        },
+        {
+          "id": "100:7405",
+          "name": "State=blocked, Width=desktop",
+          "w": 400,
+          "h": 146
+        },
+        {
+          "id": "109:11812",
+          "name": "State=loading, Width=narrow",
+          "w": 400,
+          "h": 146
+        },
+        {
+          "id": "109:11823",
+          "name": "State=ready, Width=narrow",
+          "w": 568,
+          "h": 388
+        },
+        {
+          "id": "109:11834",
+          "name": "State=blocked, Width=narrow",
+          "w": 400,
+          "h": 146
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7416",
+      "owners": [
+        "src/features/link-preview/link-preview-controller.js",
+        "src/styles/components/link-preview.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Loading/blocked400x146;ready desktop720x468,narrow568x388. Header buttons separated8px; Close80px outlined. Preserve real safe iframe and system-browser action.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Loading/blocked400x138. Ready desktop720x460/narrow568x380 retains real safe webpage viewport;system browser action retained."
+    },
+    {
+      "id": "100:7426",
+      "name": "MDR Blue/Drag overlay",
+      "description": "拖入显示，离开/取消/完成后撤销；不修改原有文件类型与导入策略。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "active",
+          "options": [
+            "active"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7417",
+          "name": "State=active",
+          "w": 360,
+          "h": 122
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7426",
+      "owners": [
+        "src/features/import/files/drop-overlay-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "360x122 prompt card;whole-window drop receiving area retained. Do not shrink actual gesture target to card bounds.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "100:7433",
+      "name": "MDR Blue/Preview recovery",
+      "description": "底栏左侧的非阻塞预览状态，替代正文中的恢复面板。恢复中显示12/20文字；失败可重试。保存/读取任务优先展示，预览状态保留于实际任务状态中。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "recovering",
+          "options": [
+            "recovering",
+            "failed"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7427",
+          "name": "State=recovering",
+          "w": 96,
+          "h": 24
+        },
+        {
+          "id": "100:7430",
+          "name": "State=failed",
+          "w": 144,
+          "h": 24
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7433",
+      "owners": [
+        "src/features/preview/ui/preview-recovery-view.js",
+        "src/features/preview/application/preview-controller.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Inline96recovering/144failed by24high,footer-left slot. Preview feature owns state andstable content,failed can retry.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "100:7462",
+      "name": "MDR Blue/Widget toolbar",
+      "description": "代码、HTML、表格、图片相关命令沿用现有Widget；在纯阅读模式不提供编辑操作。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "code",
+          "options": [
+            "code",
+            "html",
+            "table",
+            "image"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "100:7434",
+          "name": "Kind=code",
+          "w": 640,
+          "h": 36
+        },
+        {
+          "id": "100:7441",
+          "name": "Kind=html",
+          "w": 640,
+          "h": 36
+        },
+        {
+          "id": "100:7448",
+          "name": "Kind=table",
+          "w": 640,
+          "h": 36
+        },
+        {
+          "id": "100:7455",
+          "name": "Kind=image",
+          "w": 640,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7462",
+      "owners": [
+        "src/features/hybrid-editor/widgets/code-block/code-block-view.js",
+        "src/features/hybrid-editor/widgets/html/html-block-view.js",
+        "src/features/hybrid-editor/widgets/table/table-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "36high andcontent-block width remains appropriate;not an overlay to shrink.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "101:7532",
+      "name": "MDR Blue/Document surface narrow",
+      "description": "600px及短窗口纸面；宽568，四周外留白16px；正文内边24px，滚动在内层，底部边界始终可见。",
+      "properties": [
+        {
+          "key": "Mode",
+          "type": "VARIANT",
+          "default": "rendered",
+          "options": [
+            "rendered",
+            "source",
+            "reading"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "101:7482",
+          "name": "Mode=rendered",
+          "w": 568,
+          "h": 644
+        },
+        {
+          "id": "101:7505",
+          "name": "Mode=source",
+          "w": 568,
+          "h": 644
+        },
+        {
+          "id": "101:7509",
+          "name": "Mode=reading",
+          "w": 568,
+          "h": 644
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=101-7532",
+      "owners": [
+        "src/features/documents/ui/document-content-view.js",
+        "src/features/editor/ui/editor-pane-view.js",
+        "src/styles/shell/writing-workspace.css",
+        "src/styles/layout/compact-shell.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Outer16px canvas gutter, FILL viewport/body max520; vertically scroll. Never center a fixed720px child in a narrower pane.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "101:8134",
+      "name": "MDR Blue/Context menu",
+      "description": "按内容确定宽度：文档176、侧栏216、大纲192；14px文字、28px命令行、4px外内边距，不在每行额外加间隔。长文件名等动态内容仍省略/提示；真实命令保留。",
+      "properties": [
+        {
+          "key": "Target",
+          "type": "VARIANT",
+          "default": "document",
+          "options": [
+            "document",
+            "sidebar",
+            "outline"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "101:7981",
+          "name": "Target=document",
+          "w": 216,
+          "h": 254
+        },
+        {
+          "id": "101:8052",
+          "name": "Target=sidebar",
+          "w": 256,
+          "h": 149
+        },
+        {
+          "id": "101:8093",
+          "name": "Target=outline",
+          "w": 224,
+          "h": 117
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=101-8134",
+      "owners": [
+        "src/features/documents/ui/document-context-menu-view.js",
+        "src/features/menu/ui/menu-content-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Document216x254,sidebar256x149,outline224x117.32px rows,semantic action groups;preserve native command context and safety.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Document176x204/7commands;sidebar216x120;outline192x92.14px text,28px rows;content-sized widths with viewport-safe positioning."
+    },
+    {
+      "id": "101:8222",
+      "name": "MDR Blue/Embedded block",
+      "description": "HTML安全渲染、图片失败和公式源码状态；保留真实原文、资源策略与重试入口。",
+      "properties": [
+        {
+          "key": "Kind",
+          "type": "VARIANT",
+          "default": "html",
+          "options": [
+            "html",
+            "image",
+            "math"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "rendered",
+          "options": [
+            "rendered",
+            "editing",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "101:8135",
+          "name": "Kind=html, State=rendered",
+          "w": 640,
+          "h": 94
+        },
+        {
+          "id": "101:8144",
+          "name": "Kind=html, State=editing",
+          "w": 640,
+          "h": 96
+        },
+        {
+          "id": "101:8153",
+          "name": "Kind=html, State=error",
+          "w": 640,
+          "h": 142
+        },
+        {
+          "id": "101:8164",
+          "name": "Kind=image, State=rendered",
+          "w": 640,
+          "h": 94
+        },
+        {
+          "id": "101:8173",
+          "name": "Kind=image, State=editing",
+          "w": 640,
+          "h": 96
+        },
+        {
+          "id": "101:8182",
+          "name": "Kind=image, State=error",
+          "w": 640,
+          "h": 142
+        },
+        {
+          "id": "101:8193",
+          "name": "Kind=math, State=rendered",
+          "w": 640,
+          "h": 94
+        },
+        {
+          "id": "101:8202",
+          "name": "Kind=math, State=editing",
+          "w": 640,
+          "h": 96
+        },
+        {
+          "id": "101:8211",
+          "name": "Kind=math, State=error",
+          "w": 640,
+          "h": 142
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=101-8222",
+      "owners": [
+        "src/features/hybrid-editor/widgets/html/html-block-view.js",
+        "src/features/hybrid-editor/widgets/table/table-view.js",
+        "src/features/hybrid-editor/widgets/image/image-error-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Content-driven HTML/image/math widgets: current sample rendered94,editing96,error142 high. Never use sample height to crop real image or math output. Preserve source,sanitization,resource policy and retry.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "HTML/table/image error and loading patterns remain real widgets, sanitized content boundary preserved."
+    },
+    {
+      "id": "107:8433",
+      "name": "MDR Blue/Duration field",
+      "description": "实际AutoSave Field：0.5/1/2/5秒与自定义；提交前换算为整数毫秒；错误保留输入。",
+      "properties": [
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "preset",
+          "options": [
+            "preset",
+            "custom",
+            "error"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "107:8403",
+          "name": "State=preset",
+          "w": 240,
+          "h": 36
+        },
+        {
+          "id": "107:8410",
+          "name": "State=custom",
+          "w": 240,
+          "h": 80
+        },
+        {
+          "id": "107:8421",
+          "name": "State=error",
+          "w": 240,
+          "h": 108
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=107-8433",
+      "owners": [
+        "src/features/settings/ui/autosave-field-view.js",
+        "src/features/settings/domain/settings-schema.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Inline240px settings field,36/80/108heights by state. Not an overlay;real500ms default andcustom validation unchanged.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "107:8791",
+      "name": "MDR Blue/Select menu",
+      "description": "示例240px与现有原生select触发字段等宽，28px选项行；实际原生选项层由系统控制，不为收窄新增自绘选择器。",
+      "properties": [
+        {
+          "key": "Options",
+          "type": "VARIANT",
+          "default": "language",
+          "options": [
+            "language",
+            "theme",
+            "layout",
+            "font",
+            "performance",
+            "density",
+            "autosave"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "107:8464",
+          "name": "Options=language",
+          "w": 240,
+          "h": 332
+        },
+        {
+          "id": "107:8565",
+          "name": "Options=theme",
+          "w": 240,
+          "h": 76
+        },
+        {
+          "id": "107:8586",
+          "name": "Options=layout",
+          "w": 240,
+          "h": 140
+        },
+        {
+          "id": "107:8627",
+          "name": "Options=font",
+          "w": 240,
+          "h": 172
+        },
+        {
+          "id": "107:8678",
+          "name": "Options=performance",
+          "w": 240,
+          "h": 140
+        },
+        {
+          "id": "107:8719",
+          "name": "Options=density",
+          "w": 240,
+          "h": 76
+        },
+        {
+          "id": "107:8740",
+          "name": "Options=autosave",
+          "w": 240,
+          "h": 172
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=107-8791",
+      "owners": [
+        "src/features/settings/ui/settings-field-view.js",
+        "src/features/settings/domain/settings-schema.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Settings select menus240px wide,32px rows with6px padding;all language/theme/layout/font/performance/density/autosave choices retained;actual selection and keyboard behavior use native controls.",
+      "densityReview": "docs/design/overlay-density-review.md",
+      "layoutRevision": {
+        "date": "2026-10-26",
+        "authority": "component-layout-redesign.md",
+        "supersedes": "Previous density-only dimensions and layout descriptions",
+        "semanticGrouping": true,
+        "contentDrivenHeight": true
+      },
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "240px matches existing native select triggers;28px rows with no extra row gaps. Actual OS popup behavior/keyboard semantics stay native."
+    },
+    {
+      "id": "115:8784",
+      "name": "MDR Blue/Window control",
+      "description": "Windows最小化、最大化、恢复和关闭；固定40px，关闭悬停有危险提示，真实命令由Window Controller执行。",
+      "properties": [
+        {
+          "key": "Action",
+          "type": "VARIANT",
+          "default": "minimize",
+          "options": [
+            "minimize",
+            "maximize",
+            "restore",
+            "close"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "pressed",
+            "focus",
+            "disabled"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "115:8694",
+          "name": "Action=minimize, State=default",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8698",
+          "name": "Action=minimize, State=hover",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8702",
+          "name": "Action=minimize, State=pressed",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8706",
+          "name": "Action=minimize, State=focus",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8710",
+          "name": "Action=minimize, State=disabled",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8714",
+          "name": "Action=maximize, State=default",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8718",
+          "name": "Action=maximize, State=hover",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8722",
+          "name": "Action=maximize, State=pressed",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8726",
+          "name": "Action=maximize, State=focus",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8730",
+          "name": "Action=maximize, State=disabled",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8734",
+          "name": "Action=restore, State=default",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8739",
+          "name": "Action=restore, State=hover",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8744",
+          "name": "Action=restore, State=pressed",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8749",
+          "name": "Action=restore, State=focus",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8754",
+          "name": "Action=restore, State=disabled",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8759",
+          "name": "Action=close, State=default",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8764",
+          "name": "Action=close, State=hover",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8769",
+          "name": "Action=close, State=pressed",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8774",
+          "name": "Action=close, State=focus",
+          "w": 40,
+          "h": 40
+        },
+        {
+          "id": "115:8779",
+          "name": "Action=close, State=disabled",
+          "w": 40,
+          "h": 40
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=115-8784",
+      "owners": [
+        "src/features/window/window-controls-view.js",
+        "src/features/window/window-controller.js",
+        "src/styles/shell/window-controls.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Visible SVG content scales with16px container; all three glyph centers and menu centers are y20 in40px titlebar. Native commands and far-right alignment remain required.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "115:10391",
+      "name": "MDR Blue/Tree row",
+      "description": "本地目录树：文件夹展开/折叠图标可替换，缩进16px，文件行打开文档，长名保留完整可访问文本。",
+      "properties": [
+        {
+          "key": "Disclosure#115:24",
+          "type": "INSTANCE_SWAP",
+          "default": "109:8932"
+        },
+        {
+          "key": "Label#115:25",
+          "type": "TEXT",
+          "default": "写作笔记"
+        },
+        {
+          "key": "Type",
+          "type": "VARIANT",
+          "default": "folder",
+          "options": [
+            "folder",
+            "file"
+          ]
+        },
+        {
+          "key": "Depth",
+          "type": "VARIANT",
+          "default": "0",
+          "options": [
+            "0",
+            "1"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "hover",
+            "selected",
+            "focus"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "115:8851",
+          "name": "Type=folder, Depth=0, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:8963",
+          "name": "Type=folder, Depth=0, State=hover",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9101",
+          "name": "Type=folder, Depth=0, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9239",
+          "name": "Type=folder, Depth=0, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9403",
+          "name": "Type=folder, Depth=1, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9567",
+          "name": "Type=folder, Depth=1, State=hover",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9705",
+          "name": "Type=folder, Depth=1, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9843",
+          "name": "Type=folder, Depth=1, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:9955",
+          "name": "Type=file, Depth=0, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10016",
+          "name": "Type=file, Depth=0, State=hover",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10077",
+          "name": "Type=file, Depth=0, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10138",
+          "name": "Type=file, Depth=0, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10199",
+          "name": "Type=file, Depth=1, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10260",
+          "name": "Type=file, Depth=1, State=hover",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10321",
+          "name": "Type=file, Depth=1, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10382",
+          "name": "Type=file, Depth=1, State=focus",
+          "w": 208,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=115-10391",
+      "owners": [
+        "src/features/sidebar/folder-tree/folder-tree-node-view.js",
+        "src/features/sidebar/folder-tree/folder-tree-view.js"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "Depth/disclosure/selected/hover/focus bind actual file tree state; truncate names with title, never delete directory actions.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "115:10482",
+      "name": "MDR Blue/Outline row",
+      "description": "H1–H6真实层级，16px缩进；点击定位、分支折叠和当前章节高亮，右键仅提供现有大纲命令。",
+      "properties": [
+        {
+          "key": "Has children#115:70",
+          "type": "BOOLEAN",
+          "default": true
+        },
+        {
+          "key": "Label#115:71",
+          "type": "TEXT",
+          "default": "给想法留一点空白"
+        },
+        {
+          "key": "Level",
+          "type": "VARIANT",
+          "default": "1",
+          "options": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5",
+            "6"
+          ]
+        },
+        {
+          "key": "State",
+          "type": "VARIANT",
+          "default": "default",
+          "options": [
+            "default",
+            "selected",
+            "focus"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "115:10392",
+          "name": "Level=1, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10397",
+          "name": "Level=1, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10402",
+          "name": "Level=1, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10407",
+          "name": "Level=2, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10412",
+          "name": "Level=2, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10417",
+          "name": "Level=2, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10422",
+          "name": "Level=3, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10427",
+          "name": "Level=3, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10432",
+          "name": "Level=3, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10437",
+          "name": "Level=4, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10442",
+          "name": "Level=4, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10447",
+          "name": "Level=4, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10452",
+          "name": "Level=5, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10457",
+          "name": "Level=5, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10462",
+          "name": "Level=5, State=focus",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10467",
+          "name": "Level=6, State=default",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10472",
+          "name": "Level=6, State=selected",
+          "w": 208,
+          "h": 36
+        },
+        {
+          "id": "115:10477",
+          "name": "Level=6, State=focus",
+          "w": 208,
+          "h": 36
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=115-10482",
+      "owners": [
+        "src/features/sidebar/outline/outline-view.js",
+        "src/styles/features/sidebar-navigation.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "H1–H6 indentation and active anchor follow actual parsed document; clicking uses existing navigation.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": false,
+        "dimensionsAuthority": "variants (live Figma values)"
+      }
+    },
+    {
+      "id": "115:10493",
+      "name": "MDR Blue/Collapsed pane",
+      "description": "分栏收起后44px窄条，入口可恢复；键盘可达，保留原文、选区与滚动。",
+      "properties": [
+        {
+          "key": "Side",
+          "type": "VARIANT",
+          "default": "editor",
+          "options": [
+            "editor",
+            "preview"
+          ]
+        }
+      ],
+      "variants": [
+        {
+          "id": "115:10483",
+          "name": "Side=editor",
+          "w": 44,
+          "h": 656
+        },
+        {
+          "id": "115:10488",
+          "name": "Side=preview",
+          "w": 44,
+          "h": 656
+        }
+      ],
+      "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=115-10493",
+      "owners": [
+        "src/features/layout/state/layout-state.js",
+        "src/ui/shell/workspace-shell.js",
+        "src/styles/layout/split-pane.css"
+      ],
+      "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
+      "contract": "44px collapsed strip;16px same-source SVG arrows scale correctly. Keyboard restore preserves source,selection and scroll.",
+      "latestFullReview": {
+        "date": "2026-10-27",
+        "reference": "full-component-review.json",
+        "reviewed": true,
+        "changed": true,
+        "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    }
+  ],
+  "runtimeIntegration": {
+    "date": "2026-10-27",
+    "status": "implemented_runtime_verified_ui_baselines_synchronized",
+    "record": "docs/design/blue-integration.json",
+    "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+    "baselineMigration": "docs/design/legacy-ui-baseline-migration.md",
+    "emptySessionCorrection": "docs/design/blue-integration.json",
+    "previewSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "status": "implemented_browser_and_windows_verified",
+      "readingSelection": "217:7519",
+      "splitPreviewSelection": "218:7662"
+    },
+    "sidebarSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "collapsedScreen": "223:7810",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    },
+    "minimalHeaderCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "date": "2026-10-28",
+      "headerFamily": "98:6172",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    }
+  }
+}

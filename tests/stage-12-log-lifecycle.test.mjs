@@ -23,7 +23,7 @@ test('R12-16 preserves startup before the builder and exit before propagation of
   const main = await read('src-tauri/src/main.rs');
   await assertCurrentValidation();
   const markers = ['record_lifecycle("app.start")', 'tauri::Builder::default()',
-    '.run(tauri::generate_context!())', 'record_lifecycle("app.exit")', 'result.expect('];
+    '.build(context)', 'app.run(', 'record_lifecycle("app.exit")', 'result.expect('];
   let previous = -1;
   for (const marker of markers) {
     const at = main.indexOf(marker);

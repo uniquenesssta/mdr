@@ -5,7 +5,7 @@
  * State/side effects: Owns pending selection and modal form listeners only; no editor text.
  * Lifecycle: Explicit View with idempotent destroy(); closes modal, clears pending state and removes listeners.
  */
-import { createEventScope } from '../../../ui/dom/index.js';
+import { createEventScope, createSafeElement } from '../../../ui/dom/index.js';
 import { ModalShell } from '../../../ui/components/modal-shell.js';
 export function createLinkDialogView({
   root,
@@ -24,6 +24,10 @@ export function createLinkDialogView({
   const shell = new ModalShell(root, { panel: root.firstElementChild });
   try {
   const input = root.querySelector('#link-url-input');
+  const feedback = createSafeElement(root.ownerDocument, 'p', { className: 'c-form-status is-error', attributes: { role: 'status', 'aria-live': 'polite' } });
+  root.querySelector('.modal-body').append(feedback);
+  const submit = root.querySelector('[data-link-action="confirm"]');
+  const projectAvailability = () => { submit.disabled = !input.value.trim() || !input.checkValidity(); };
   let pending = null;
   let destroyed = false;
   const close = () => shell.close('feature-close');
@@ -31,13 +35,16 @@ export function createLinkDialogView({
     const snapshot = selection.snapshot();
     pending = Object.freeze({ selection: snapshot, label: selection.selectedText(snapshot) || fallbackLabel });
     if (input) input.value = defaultUrl;
+    feedback.textContent = '';
+    input.setAttribute('aria-invalid', 'false');
+    projectAvailability();
     shell.open(null, { labelledBy: 'link-modal-title',  initialFocus: input, onClose: () => { pending = null; focus?.focus?.({ preventScroll: true }); } });
     input?.select?.();
   };
   const confirm = () => {
     const url = String(input?.value || '').trim();
     if (!pending) { close(); return false; }
-    if (!url) { notify(emptyUrlMessage); input?.focus?.(); return false; }
+    if (!url || !input.checkValidity()) { feedback.textContent = emptyUrlMessage; input.setAttribute('aria-invalid', 'true'); submit.disabled = true; input?.focus?.(); return false; }
     insertLink(url, { selection: pending.selection, label: pending.label, fallbackLabel });
     close();
     return true;
@@ -50,6 +57,7 @@ export function createLinkDialogView({
     if (action === 'confirm') confirm();
   });
   events.listen(input, 'keydown', event => { if (event.key === 'Enter') { event.preventDefault?.(); confirm(); } });
+  events.listen(input, 'input', () => { feedback.textContent = ''; input.setAttribute('aria-invalid', 'false'); projectAvailability(); });
   return Object.freeze({ open, close, confirm, destroy() { if (destroyed) return; destroyed = true; pending = null; const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.'); } });
   } catch (error) {
     const errors = [error];

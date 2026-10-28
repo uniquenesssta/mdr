@@ -5,7 +5,7 @@
  * State/side effects: Owns navigation buttons and one scoped click listener. Lifecycle: explicit destroyable view.
  */
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
-import { HELP_PAGE_IDS, normalizeHelpPage } from '../help-state.js';
+import { normalizeHelpPage } from '../help-state.js';
 
 function findHelpButton(root, target) {
   let current = target;
@@ -46,16 +46,15 @@ export function createHelpNavigationView(root, { onNavigate } = {}) {
       assertActive();
       const nextButtons = new Map();
       const fragment = documentRef.createDocumentFragment();
-      for (const id of HELP_PAGE_IDS) {
+      for (const id of ['start', 'views', 'files', 'markdown', 'shortcuts', 'about']) {
         const page = document.pages[id];
         const button = createSafeElement(documentRef, 'button', {
-          className: 'preferences-nav-item',
-          attributes: { type: 'button', 'aria-selected': 'false' },
+          className: ['shortcuts', 'about'].includes(id) ? 'preferences-nav-item help-secondary-nav' : 'preferences-nav-item',
+          attributes: { type: 'button', 'aria-current': 'false' },
           dataset: { helpPage: id }
         });
         button.append(
-          createSafeElement(documentRef, 'span', { text: page.title }),
-          createSafeElement(documentRef, 'small', { text: page.summary })
+          createSafeElement(documentRef, 'span', { text: page.title })
         );
         nextButtons.set(id, button);
         fragment.append(button);
@@ -70,8 +69,8 @@ export function createHelpNavigationView(root, { onNavigate } = {}) {
       for (const [id, button] of buttons) {
         const active = id === activePage;
         button.classList.toggle('active', active);
-        button.setAttribute('aria-selected', active ? 'true' : 'false');
-        button.tabIndex = active ? 0 : -1;
+        button.setAttribute('aria-current', active ? 'page' : 'false');
+        button.tabIndex = 0;
       }
       return activePage;
     },

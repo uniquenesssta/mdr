@@ -147,7 +147,7 @@ test('a new editor wheel also supersedes the earlier selection alignment and pen
   let mounts = 0;
   const { controller } = createFinalSelectionController({ getPreviewVirtual: () => ({ active: true,
     containsLineRange: () => true, hasLineRangeMounted: () => false, ensureLineRangeVisible() { mounts += 1; } }) });
-  controller.editorAlignmentUntil = 1000;
+  controller.prepareEditorIntent(controller.editorSelectionReader.read());
   controller.scrollController.getState = () => ({ sourceSide: 'editor', sourceReason: 'wheel' });
   assert.equal(controller.shouldRealignEditorSelection(), false);
   assert.equal(controller.runEditor(true, 'editor-pointerup-retry', true, 1).status, 'offscreen');
@@ -178,7 +178,7 @@ function createChapterSelection() {
   };
 }
 
-test('one selection awaits chapter readiness and completes exact alignment during its own feedback settlement', async () => {
+test('one selection awaits chapter readiness and presents an already-visible exact highlight without scrolling', async () => {
   const h = createChapterSelection();
   try {
     assert.equal(h.controller.runEditor(true, 'editor-pointerup', true, 0).status, 'pending');
@@ -189,7 +189,7 @@ test('one selection awaits chapter readiness and completes exact alignment durin
     await h.mount();
     h.frames.flushAll();
     assert.equal(h.calls.filter(call => call === 'highlight').length, 1);
-    assert.equal(h.calls.filter(call => call === 'scroll').length, 1, 'no second user gesture is required');
+    assert.equal(h.calls.filter(call => call === 'scroll').length, 0, 'the mounted target is already visible; no scroll or second gesture is needed');
   } finally { h.destroy(); }
 });
 

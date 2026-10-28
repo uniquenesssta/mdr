@@ -2198,6 +2198,78 @@
       "name": "Atomic 7.3 preserves manual override before automatic character or block thresholds",
       "oldIntent": "Manual override precedes automatic size thresholds; formerly checked statement text and ordering.",
       "currentContract": "Call the actual public resolvePreviewMode for each manual mode with both tiny and oversized document signals; original exact boundary unit suite remains."
+    },
+    {
+      "path": "tests/svg-sprite.test.mjs",
+      "name": "Atomic Task 2.3 sprite has one stable definition for every preserved icon ID",
+      "reason": "Reviewed Figma copy icon joins the shared sprite; current component-owned icon references are counted exhaustively and still checked against the same external sprite.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/svg-sprite.test.mjs",
+      "name": "compatibility and dynamic callers reference the external sprite without a second geometry authority",
+      "reason": "Reviewed Figma copy icon joins the shared sprite; current component-owned icon references are counted exhaustively and still checked against the same external sprite.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/ui/modal-shell.test.mjs",
+      "name": "R16-08 editor dialogs own ModalShell directly without modal events or a second registry",
+      "reason": "Find uses a nonmodal anchored PopoverShell and Settings replaces the workspace with retained editor state; remaining dialogs preserve ModalShell ownership and cleanup.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/ui/style-layering.test.mjs",
+      "name": "Atomic Task 2.9 replaces consolidated CSS with explicit responsibility modules",
+      "reason": "The blue integration adds three cohesive feature styles after the existing writing shell; import order and per-layer totals remain exhaustive.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/help/help-feature.test.mjs",
+      "name": "Atomic 4.5 production integration removes the classic Help authority and wires one ESM Help feature before Translation Bindings",
+      "reason": "Help remains one translated registry-backed feature; its compact tabs and current top-level markup replace the retired dialog projection.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/i18n/locale-registry.test.mjs",
+      "name": "Atomic 4.2 exposes ten immutable short-text locale modules with one exact key surface",
+      "reason": "The approved writing/split/source/pure-reading labels and toolbar settings expand the exact ten-locale short-text key surface.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/i18n/locale-registry.test.mjs",
+      "name": "current locale audit reports a complete split registry with separate help content",
+      "reason": "The approved writing/split/source/pure-reading labels and toolbar settings expand the exact ten-locale short-text key surface.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/i18n/translation-bindings.test.mjs",
+      "name": "production integration preserves 113 bindings across shell, Help and the owned clipper view",
+      "reason": "Current writing controls add translated bindings; all ten locales and owned clipper/help projections remain covered.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/settings/settings-ui.test.mjs",
+      "name": "Atomic 4.10 Apply Coordinator publishes immutable effective changes only after a successful Store apply",
+      "reason": "Toolbar visibility, density and item preferences use real immutable settings commits; a dedicated preview view adds one explicit UI owner.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/settings/settings-ui.test.mjs",
+      "name": "Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Service remains bootstrap-owned",
+      "reason": "Toolbar visibility, density and item preferences use real immutable settings commits; a dedicated preview view adds one explicit UI owner.",
+      "verification": "tests/e2e/run-figma-ui.mjs and retained unit/architecture suites"
+    },
+    {
+      "path": "tests/unit/settings/classic-settings-store-port.test.mjs",
+      "name": "Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.10 adds UI/application beside the unchanged Store boundary",
+      "reason": "User-authorized backend-owned launch policy adds exactly one native Settings controller. All prior Store and compatibility-removal assertions remain; the exhaustive application-owner list now includes launch-policy-controller.js.",
+      "verification": "tests/unit/settings/launch-policy-controller.test.mjs and real Windows launch checks",
+      "currentAssertions": [
+        "assert.deepEqual(rootEntries.filter(name => name !== 'compatibility'), ['application', 'create-settings-feature.js', 'domain', 'index.js', 'infrastructure', 'sections', 'state', 'ui'])",
+        "assert.rejects(import('../../../src/features/settings/compatibility/classic-settings-store-port.js'), { code: 'ERR_MODULE_NOT_FOUND' })",
+        "assert.deepEqual(\n    (await readdir(resolve(ROOT, 'src/features/settings/state'))).sort(),\n    ['settings-store.js']\n  )",
+        "assert.deepEqual(\n    (await readdir(resolve(ROOT, 'src/features/settings/application'))).sort(),\n    ['launch-policy-controller.js', 'settings-apply-coordinator.js', 'settings-controller.js']\n  )"
+      ]
     }
   ],
   "preservedEvidence": [
@@ -2266,5 +2338,12 @@
   "synchronousReadPreservation": {
     "path": "tests/stage-10-remove-legacy-save.test.mjs",
     "currentContract": "Keep readFileSync-derived source groups synchronous; every persistence intent and forbidden implementation assertion remains."
-  }
+  },
+  "addedCases": [
+    {
+      "path": "tests/unit/settings/settings-ui.test.mjs",
+      "name": "Figma settings persist valid changes while keeping the workspace open and retain failed drafts for retry",
+      "reason": "User-approved full-workspace settings autosave requires positive and failed-draft retry coverage in addition to all historical scenarios."
+    }
+  ]
 }

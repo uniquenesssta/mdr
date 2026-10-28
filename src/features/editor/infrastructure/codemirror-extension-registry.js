@@ -10,7 +10,6 @@ import {
   EditorView,
   drawSelection,
   dropCursor,
-  highlightActiveLine,
   highlightSpecialChars,
   keymap,
   placeholder as editorPlaceholder
@@ -113,7 +112,6 @@ export function createCodeMirrorExtensionRegistry({
     highlightSpecialChars(),
     drawSelection(),
     dropCursor(),
-    highlightActiveLine(),
     EditorView.lineWrapping,
     Prec.high(createPrecisePointerSelectionExtension()),
     history({ minDepth: 100, newGroupDelay: 500 }),

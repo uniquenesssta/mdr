@@ -91,8 +91,8 @@ test('Atomic Task 2.7 keeps one ordered stylesheet entry and one semantic token 
   assert.ok(mainEntrySource.indexOf("import 'katex/dist/katex.css';") < mainEntrySource.indexOf("import './styles/index.css';"));
   assert.doesNotMatch(mainEntrySource, /styles\/main\.css/);
   assert.match(tokenSource, /^:root\s*\{/);
-  assert.match(lightSource, /^:root\s*\{/);
-  assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
+  assert.match(lightSource.replace(/^\/\*[^]*?\*\/\s*/, ''), /^:root,\s*\[data-theme="light"\]\s*\{/);
+  assert.match(darkSource.replace(/^\/\*[^]*?\*\/\s*/, ''), /^\[data-theme="dark"\]\s*\{/);
   assert.doesNotMatch(tokenSource, /\[data-theme/);
   for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
     if (path.endsWith('/foundation/tokens.css')) continue;
@@ -121,13 +121,13 @@ test('token contract separates required semantic categories without page-positio
     assert.doesNotMatch(name, /(?:left|right|top|bottom|sidebar|workspace|header|footer)/, name);
   }
 
-  assert.equal(lightDefinitions.get('--color-canvas'), '#eef1f5');
-  assert.equal(lightDefinitions.get('--color-editor-text'), '#202530');
+  assert.equal(lightDefinitions.get('--color-canvas'), '#f4f7fb');
+  assert.equal(lightDefinitions.get('--color-editor-text'), 'var(--color-text-primary)');
   assert.equal(baseDefinitions.get('--radius-md'), '7px');
   assert.equal(baseDefinitions.get('--motion-duration-moderate'), '0.20s');
-  assert.equal(lightDefinitions.get('--code-background'), '#f5f7fb');
-  assert.equal(darkDefinitions.get('--color-canvas'), '#0c1017');
-  assert.equal(darkDefinitions.get('--code-background'), '#0b0f15');
+  assert.equal(lightDefinitions.get('--code-background'), 'var(--color-code-background)');
+  assert.equal(darkDefinitions.get('--color-canvas'), '#101722');
+  assert.equal(darkDefinitions.get('--code-background'), 'var(--color-code-background)');
 });
 
 test('production callers use semantic tokens and layered CSS has no visual color literals outside themes', async () => {

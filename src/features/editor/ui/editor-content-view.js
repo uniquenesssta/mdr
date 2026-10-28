@@ -23,7 +23,7 @@ export function createEditorContentView(slots) {
       "\n"
     ]],
     [slots.overlay,[
-      ["div",{"class":"modal-overlay","id":"link-modal"},[
+      ["div",{"class":"modal-overlay link-modal","id":"link-modal"},[
         "\n    ",
         ["div",{"class":"modal c-modal c-modal--narrow","role":"dialog","aria-modal":"true","aria-labelledby":"link-modal-title"},[
           "\n      ",
@@ -99,7 +99,7 @@ export function createEditorContentView(slots) {
         ]],
         "\n  "
       ]],
-      ["div",{"class":"modal-overlay","id":"image-modal"},[
+      ["div",{"class":"modal-overlay image-modal","id":"image-modal"},[
         "\n    ",
         ["div",{"class":"modal c-modal c-modal--medium"},[
           "\n      ",
@@ -166,7 +166,7 @@ export function createEditorContentView(slots) {
         ]],
         "\n  "
       ]],
-      ["div",{"class":"modal-overlay","id":"mermaid-modal"},[
+      ["div",{"class":"modal-overlay mermaid-modal","id":"mermaid-modal"},[
         "\n    ",
         ["div",{"class":"modal c-modal c-modal--wide"},[
           "\n      ",
@@ -192,7 +192,7 @@ export function createEditorContentView(slots) {
             "\n        ",
             ["label",{"for":"mermaid-code","data-i18n":"mermaidCodeLabel"},["Mermaid 源码"]],
             "\n        ",
-            ["textarea",{"id":"mermaid-code","rows":"10","data-i18n-placeholder":"mermaidCodePlaceholder","placeholder":"mindmap\\n  root((主题))\\n    子主题 A\\n    子主题 B"},[
+            ["textarea",{"class":"mermaid-code","id":"mermaid-code","rows":"10","data-i18n-placeholder":"mermaidCodePlaceholder","placeholder":"mindmap\\n  root((主题))\\n    子主题 A\\n    子主题 B"},[
 
             ]],
             "\n        ",

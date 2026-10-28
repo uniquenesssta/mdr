@@ -21,15 +21,15 @@ import {
 const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const EXPECTED = Object.freeze({
   general: Object.freeze([
-    ['theme', 'select', 'settings-dialog'],
     ['language', 'select', 'settings-dialog'],
+    ['theme', 'select', 'settings-dialog'],
     ['layoutMode', 'select', 'settings-dialog'],
     ['sidebarVisible', 'toggle', 'settings-dialog']
   ]),
   editor: Object.freeze([
     ['editorFontSize', 'select', 'settings-dialog'],
     ['editorTextColor', 'color', 'settings-dialog'],
-    ['activeLineColor', 'color', 'settings-dialog'],
+    ['activeLineColor', 'color', 'retired'],
     ['tableVisualEditing', 'toggle', 'external'],
     ['codeVisualEditing', 'toggle', 'external']
   ]),
@@ -40,6 +40,8 @@ const EXPECTED = Object.freeze({
   ]),
   toolbar: Object.freeze([
     ['toolbarVisible', 'toggle', 'settings-dialog'],
+    ['toolbarDensity', 'select', 'settings-dialog'],
+    ['toolbarPrimaryItems', 'checklist', 'settings-dialog'],
     ['toolbarHiddenItems', 'checklist', 'settings-dialog']
   ]),
   performance: Object.freeze([
@@ -58,6 +60,8 @@ const SETTINGS_DIALOG_MARKERS = Object.freeze({
   autoSaveDelay: "'setting-autosave-delay'",
   exportDirectory: "'setting-export-directory'",
   toolbarVisible: "'setting-toolbar-visible'",
+  toolbarDensity: "'setting-toolbar-density'",
+  toolbarPrimaryItems: "'setting-toolbar-primary-items'",
   toolbarHiddenItems: "'setting-toolbar-items'",
   previewPerformanceMode: "'setting-preview-performance-mode'"
 });
@@ -116,13 +120,15 @@ test('Section field controls derive legal values from Schema validation instead 
   }
 });
 
-test('Current UI exposure remains 13 Settings Dialog fields plus two external visual-editing toggles', () => {
+test('Current UI exposes 14 fields, two external toggles and exactly one retained retired setting', () => {
   const dialogIds = SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
     .filter(field => field.surface === 'settings-dialog').map(field => field.settingId);
   const externalIds = SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
     .filter(field => field.surface === 'external').map(field => field.settingId);
-  assert.equal(dialogIds.length, 13);
+  assert.equal(dialogIds.length, 14);
   assert.deepEqual(externalIds, ['tableVisualEditing', 'codeVisualEditing']);
+  assert.deepEqual(SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
+    .filter(field => field.surface === 'retired').map(field => field.settingId), ['activeLineColor']);
 });
 
 test('Section descriptors and registry public results are deeply immutable with stable lookup semantics', () => {

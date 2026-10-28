@@ -20,6 +20,7 @@ import { verifySingleImplementationRuntime } from './lib/single-implementation.m
 
 const here = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(here, '../..');
+const builtDistRoot = resolve(process.argv.find(value => value.startsWith('--dist='))?.slice(7) || resolve(projectRoot, 'dist'));
 const argumentsSet = new Set(process.argv.slice(2));
 const runContract = argumentsSet.has('--contract') || !argumentsSet.has('--app');
 const runApp = argumentsSet.has('--app') || !argumentsSet.has('--contract');
@@ -312,22 +313,22 @@ async function runContractSuite() {
         <div id="app-root" hidden><span id="pre-shell-node">before</span></div>
       </body></html>`);
       const result = await browser.page.evaluate(`(async()=>{
-        const [{createUI},{mountStaticContent},{createMenuContentView},{createDocumentContentView}]=await Promise.all([
+        const [{createUI},{mountStaticContent},{createMenuContentView},{createDocumentContentView},{createEditorToolbarContentView}]=await Promise.all([
           import('${virtualHost.origin}/src/ui/create-ui.js'), import('${virtualHost.origin}/src/ui/dom/index.js'),
           import('${virtualHost.origin}/src/features/menu/ui/menu-content-view.js'),
-          import('${virtualHost.origin}/src/features/documents/ui/document-content-view.js')
+          import('${virtualHost.origin}/src/features/documents/ui/document-content-view.js'),import('${virtualHost.origin}/src/features/editor/ui/editor-toolbar-view.js')
         ]);
         const root=document.getElementById('app-root'),ui=createUI(root);
         let invalidMarkupError='';
         try{mountStaticContent([[ui.menu,[['span',{},['uncommitted']]]],[null,[]]]);}catch(error){invalidMarkupError=error.message;}
         const cleanAfterInvalid={shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length};
-        const menu=createMenuContentView(ui),documents=createDocumentContentView(ui);
+        const menu=createMenuContentView(ui),documents=createDocumentContentView(ui),toolbarContent=createEditorToolbarContentView(ui);
         const foreign=document.createElement('span'); foreign.id='foreign-content';ui.overlay.append(foreign);
         const mounted={rootChildren:Array.from(root.children).map(node=>node.id||node.getAttribute('data-ui-shell')||''),
           shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length,
           portHostPresent:Boolean(document.getElementById('compatibility-business-ports')),
           filePortParent:document.getElementById('filename')?.parentElement?.id||'',previousPresent:Boolean(document.getElementById('pre-shell-node'))};
-        documents.destroy();documents.destroy();menu.destroy();menu.destroy();
+        documents.destroy();documents.destroy();toolbarContent.destroy();toolbarContent.destroy();menu.destroy();menu.destroy();
         const afterContent={shellCount:root.querySelectorAll('[data-ui-shell="app"]').length,menuChildren:ui.menu.childNodes.length,
           filePortPresent:Boolean(document.getElementById('filename')),foreignPresent:foreign.isConnected};
         ui.destroy();
@@ -338,7 +339,7 @@ async function runContractSuite() {
       assert.deepEqual(result.cleanAfterInvalid,{shellCount:1,menuChildren:0});
       assert.deepEqual(result.mounted.rootChildren,['app','overlay-root']);
       assert.equal(result.mounted.shellCount,1);assert.ok(result.mounted.menuChildren>0);
-      assert.equal(result.mounted.portHostPresent,false);assert.equal(result.mounted.filePortParent,'overlay-root');
+      assert.equal(result.mounted.portHostPresent,false);assert.equal(result.mounted.filePortParent,'writing-toolbar');
       assert.equal(result.mounted.previousPresent,false);
       assert.deepEqual(result.afterContent,{shellCount:1,menuChildren:0,filePortPresent:false,foreignPresent:true});
       assert.deepEqual(result.afterUI,{hidden:true,children:['pre-shell-node'],shellCount:0});
@@ -503,7 +504,7 @@ async function runAppSuite() {
   if (!externalUrl) {
     const evidencePath = join(artifactRoot, 'r15-12-build-fingerprint.json');
     try {
-      await writeFile(evidencePath, JSON.stringify(await verifyBuiltApplication({ projectRoot }), null, 2));
+      await writeFile(evidencePath, JSON.stringify(await verifyBuiltApplication({ projectRoot, distRoot: builtDistRoot }), null, 2));
     } catch (error) {
       await writeFile(evidencePath, JSON.stringify({ accepted: false, code: error.code, reason: error.reason, message: error.message }, null, 2));
       throw error;
@@ -514,9 +515,9 @@ async function runAppSuite() {
   const openSettings = async () => {
     await browser.page.click('#file-menu-dropdown > .menu-trigger');
     await browser.page.click('[data-settings-open]');
-    await browser.page.waitFor(() => document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog open' });
+    await browser.page.waitFor(() => (document.getElementById('settings-modal')?.hidden===false), { description: 'Settings dialog open' });
   };
-  const settingsClosed = () => browser.page.waitFor(() => !document.getElementById('settings-modal')?.classList.contains('show'), { description: 'Settings dialog closed' });
+  const settingsClosed = () => browser.page.waitFor(() => !(document.getElementById('settings-modal')?.hidden===false), { description: 'Settings dialog closed' });
   const showSidebar = async () => {
     if (await browser.page.evaluate("document.querySelector('.l-sidebar')?.classList.contains('is-hidden')")) {
       await browser.page.click('#view-menu-dropdown > .menu-trigger');
@@ -527,14 +528,14 @@ async function runAppSuite() {
   let applicationHost = null;
   activePage = browser.page;
   try {
-    applicationHost = externalUrl ? null : await startBuiltApplicationHost(resolve(projectRoot, 'dist'));
+    applicationHost = externalUrl ? null : await startBuiltApplicationHost(builtDistRoot);
     const baseUrl = externalUrl || applicationHost.origin;
     if (!externalUrl) await test('R16-13 default built entry runs with retired files absent', async () => {
       const evidence = { stage: 'R16.13', platform: 'browser', commit: process.env.GITHUB_SHA || '', status: 'running' };
       let singleBrowser;
       try {
         evidence.before = await verifyRetiredInputsAbsent({ projectRoot });
-        evidence.build = await verifyBuiltApplication({ projectRoot });
+        evidence.build = await verifyBuiltApplication({ projectRoot, distRoot: builtDistRoot });
         singleBrowser = await launchChromium({ width: 1280, height: 900 });
         await singleBrowser.page.navigate(baseUrl);
         await singleBrowser.page.waitFor(() => document.documentElement.classList.contains('app-ready'), {
@@ -584,7 +585,7 @@ async function runAppSuite() {
           counts,
           appChildren:Array.from(shell?.children||[]).map(element=>element.className),
           workspaceChildren:Array.from(shell?.querySelector('.l-workspace')?.children||[]).map(element=>element.id||element.className),
-          mainChildren:Array.from(shell?.querySelector('.l-split-pane')?.children||[]).map(element=>element.id||element.className),
+          mainChildren:Array.from(shell?.querySelector('.l-split-pane')?.children||[]).map(element=>element.id||Array.from(element.classList).filter(name=>name!=='is-collapsed').join(' ')),
           overlayParent:document.getElementById('overlay-root')?.parentElement?.id||'',
           settingsParent:document.getElementById('settings-modal')?.parentElement?.id||'',
           compatibilityPortHostParent:document.getElementById('compatibility-business-ports')?.parentElement?.id||'',
@@ -601,13 +602,13 @@ async function runAppSuite() {
       assert.equal(snapshot.legacyAppHookCount, 0);
       assert.deepEqual(snapshot.legacyShellAliases, []);
       assert.deepEqual(snapshot.counts, {menu:1,toolbar:1,sidebar:1,editor:1,preview:1,status:1,overlay:1});
-      assert.deepEqual(snapshot.appChildren, ['l-menu-bar','l-toolbar-shell','l-workspace','l-status-bar']);
-      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','l-split-pane']);
+      assert.deepEqual(snapshot.appChildren, ['l-menu-bar','l-workspace','l-status-bar','settings-workspace']);
+      assert.deepEqual(snapshot.workspaceChildren, ['sidebar','sidebar-resizer','l-workspace-main']);
       assert.deepEqual(snapshot.mainChildren, ['l-pane f-editor-pane','resizer','l-pane f-preview-pane']);
       assert.equal(snapshot.overlayParent, 'app-root');
-      assert.equal(snapshot.settingsParent, 'overlay-root');
+      assert.equal(snapshot.settingsParent, '');
       assert.equal(snapshot.compatibilityPortHostParent, '');
-      assert.deepEqual(snapshot.filePortParents, ['overlay-root','overlay-root']);
+      assert.deepEqual(snapshot.filePortParents, ['writing-toolbar','overlay-root']);
       assert.deepEqual(snapshot.duplicateIds, []);
     });
 
@@ -640,10 +641,10 @@ async function runAppSuite() {
       await waitForApplication(browser.page, () => document.querySelector('#help-modal [data-help-page-panel="files"]'), { description: 'Help files page' });
       const navigated = await evaluateApplication(browser.page, `(()=>{
         const port=applicationCapabilities?.markdownEditorHelpPort;
-        return {activePage:port?.activePage,selected:document.querySelector('#help-modal [data-help-page="files"]')?.getAttribute('aria-selected')};
+        return {activePage:port?.activePage,selected:document.querySelector('#help-modal [data-help-page="files"]')?.getAttribute('aria-current')};
       })()`);
-      assert.deepEqual(navigated, {activePage:'files',selected:'true'});
-      await browser.page.click('#help-modal .modal-footer button');
+      assert.deepEqual(navigated, {activePage:'files',selected:'page'});
+      await browser.page.click('#help-modal .modal-header button');
       await waitForApplication(browser.page, () => !document.getElementById('help-modal')?.classList.contains('show'), { description: 'Help modal close' });
       const closed = await evaluateApplication(browser.page, `(()=>{
         const port=applicationCapabilities?.markdownEditorHelpPort;
@@ -652,28 +653,18 @@ async function runAppSuite() {
       assert.deepEqual(closed, {shown:'true',firstRunAgain:false,isOpen:false});
     });
 
-    await test('application Settings Store cancels draft without persisting changes', async () => {
-      const before = await evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),committed:port.get('theme'),body:document.body.getAttribute('data-theme')};})()");
+    await test('application settings workspace automatically saves and preserves edits on return or Escape', async () => {
       const read = () => evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {stored:localStorage.getItem('md_editor_theme'),hasDraft:port.hasDraft,body:document.body.getAttribute('data-theme')};})()");
-      const states = [];
-      for (const action of ['button', 'escape', 'backdrop']) {
+      for (const [theme, action] of [['dark','button'],['light','escape']]) {
         await openSettings();
         await browser.page.click('#settings-modal [data-settings-page="general"]');
-        await browser.page.selectOption('#setting-theme', 'dark');
-        if (action === 'button') await browser.page.click('#settings-modal .modal-footer button:not(.primary)');
-        else if (action === 'escape') await browser.page.pressKey('Escape');
-        else await browser.page.clickAt(3, 3);
+        await browser.page.selectOption('#setting-theme', theme);
+        assert.deepEqual(await read(), {stored:theme,hasDraft:true,body:theme});
+        if (action === 'button') await browser.page.click('#settings-modal .sidebar-footer-action');
+        else await browser.page.pressKey('Escape');
         await settingsClosed();
-        states.push(await read());
+        assert.deepEqual(await read(), {stored:theme,hasDraft:false,body:theme});
       }
-      await openSettings();
-      await browser.page.click('#settings-modal [data-settings-page="general"]');
-      const reopened = await evaluateApplication(browser.page, "document.getElementById('setting-theme').value");
-      await browser.page.click('#settings-modal .modal-footer button:not(.primary)');
-      await settingsClosed();
-      assert.deepEqual(before, {stored:null,committed:'light',body:'light'});
-      for (const state of states) assert.deepEqual(state, {stored:null,hasDraft:false,body:'light'});
-      assert.equal(reopened, 'light');
       const globals = await evaluateApplication(browser.page, "({openSettings:typeof window.openSettings,closeSettings:typeof window.closeSettings,applySettings:typeof window.applySettings,switchSettingsPage:typeof window.switchSettingsPage})");
       assert.deepEqual(globals, {openSettings:'undefined',closeSettings:'undefined',applySettings:'undefined',switchSettingsPage:'undefined'});
     });
@@ -682,17 +673,17 @@ async function runAppSuite() {
       await openSettings();
       await browser.page.click('#settings-modal [data-settings-page="save"]');
       await waitForApplication(browser.page, () => !document.querySelector('#settings-modal [data-settings-page-panel="save"]')?.hidden, { description: 'Settings save page' });
-      const selected = await evaluateApplication(browser.page, "document.querySelector('#settings-modal [data-settings-page=\"save\"]')?.getAttribute('aria-selected')");
-      assert.equal(selected, 'true');
+      const selected = await evaluateApplication(browser.page, "document.querySelector('#settings-modal [data-settings-page=\"save\"]')?.getAttribute('aria-current')");
+      assert.equal(selected, 'page');
       await browser.page.selectOption('#setting-autosave-delay', 'custom');
       await browser.page.fill('#setting-autosave-custom-seconds', '0.1');
-      await browser.page.click('#settings-modal .modal-footer .primary');
-      const invalid = await evaluateApplication(browser.page, "({open:document.getElementById('settings-modal')?.classList.contains('show'),invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),feedback:document.getElementById('settings-feedback')?.textContent||''})");
+      await browser.page.click('#settings-modal .sidebar-footer-action');
+      const invalid = await evaluateApplication(browser.page, "({open:(document.getElementById('settings-modal')?.hidden===false),invalid:document.getElementById('setting-autosave-custom-seconds')?.getAttribute('aria-invalid'),feedback:document.getElementById('settings-feedback')?.textContent||''})");
       assert.equal(invalid.open, true); assert.equal(invalid.invalid, 'true'); assert.match(invalid.feedback, /0\.5–3600/);
       await browser.page.fill('#setting-autosave-custom-seconds', '1.5');
       await browser.page.click('#settings-modal [data-settings-page="general"]');
       await browser.page.selectOption('#setting-theme', 'dark');
-      await browser.page.click('#settings-modal .modal-footer .primary');
+      await browser.page.click('#settings-modal .sidebar-footer-action');
       await settingsClosed();
       const applied = await evaluateApplication(browser.page, "(()=>{const port=applicationCapabilities.markdownEditorSettingsStorePort;return {theme:port.get('theme'),delay:port.get('autoSaveDelay'),storedTheme:localStorage.getItem('md_editor_theme'),storedDelay:localStorage.getItem('md_editor_autosave_delay'),body:document.body.getAttribute('data-theme')};})()");
       assert.deepEqual(applied, {theme:'dark',delay:1500,storedTheme:'dark',storedDelay:'1500',body:'dark'});
@@ -701,7 +692,7 @@ async function runAppSuite() {
       await browser.page.selectOption('#setting-theme', 'light');
       await browser.page.click('#settings-modal [data-settings-page="save"]');
       await browser.page.selectOption('#setting-autosave-delay', '500');
-      await browser.page.click('#settings-modal .modal-footer .primary');
+      await browser.page.click('#settings-modal .sidebar-footer-action');
       await settingsClosed();
       await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light');
     });
@@ -711,7 +702,7 @@ async function runAppSuite() {
         await openSettings();
         await browser.page.click('#settings-modal [data-settings-page="general"]');
         await browser.page.selectOption('#setting-language', value);
-        await browser.page.click('#settings-modal .modal-footer .primary');
+        await browser.page.click('#settings-modal .sidebar-footer-action');
         await settingsClosed();
       };
       await setLanguage('en');
@@ -758,8 +749,8 @@ async function runAppSuite() {
         return {light,dark,restored,theme:document.body.getAttribute('data-theme')};
       })()`);
       assert.equal(result.theme, 'light');
-      assert.equal(result.light.tokens.canvas, '#eef1f5');
-      assert.equal(result.dark.tokens.canvas, '#0c1017');
+      assert.equal(result.light.tokens.canvas, '#fcfcfa');
+      assert.equal(result.dark.tokens.canvas, '#1b211e');
       assert.equal(result.light.tokens.imageOpacity, '1');
       assert.equal(Number(result.dark.tokens.imageOpacity), 0.95);
       assert.notEqual(result.light.tokens.text, result.dark.tokens.text);
@@ -787,7 +778,7 @@ async function runAppSuite() {
         assert.deepEqual(before, {theme:'light',trigger:true,previewFirst:true});
 
         const toggle = async expected => {
-          await browser.page.click('[data-theme-toggle]');
+          await openSettings(); await browser.page.click('[data-settings-page="general"]'); await browser.page.selectOption('#setting-theme', expected); await browser.page.click('#settings-modal .sidebar-footer-action');
           await waitForApplication(browser.page, `document.body.getAttribute('data-theme') === ${JSON.stringify(expected)}`, { description: 'Theme Toggle Controller apply ' + expected });
           return evaluateApplication(browser.page, `(()=>{
             const probe=window.__themeToggleIdentity;
@@ -813,7 +804,7 @@ async function runAppSuite() {
       } finally {
         try { await writeFile(join(artifactRoot, 'themeToggle-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) { await openSettings(); await browser.page.click('[data-settings-page="general"]'); await browser.page.selectOption('#setting-theme', 'light'); await browser.page.click('#settings-modal .sidebar-footer-action'); }
           await evaluateApplication(browser.page, 'delete window.__themeToggleIdentity');
           await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Toggle Controller' });
         }
@@ -848,9 +839,9 @@ async function runAppSuite() {
           await openSettings();
           await browser.page.click('#settings-modal [data-settings-page="general"]');
           await browser.page.selectOption('#setting-theme', theme);
-          await browser.page.click('#settings-modal .modal-footer .primary');
+          await browser.page.click('#settings-modal .sidebar-footer-action');
           const encodedTheme = JSON.stringify(theme);
-          await waitForApplication(browser.page, `(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!document.getElementById('settings-modal')?.classList.contains('show'))()`, { description: 'Theme Service apply ' + theme });
+          await waitForApplication(browser.page, `(()=>document.body.getAttribute('data-theme')===${encodedTheme}&&!(document.getElementById('settings-modal')?.hidden===false))()`, { description: 'Theme Service apply ' + theme });
           return evaluateApplication(browser.page, `(()=>{
             const probe=window.__themeServiceIdentity;
             return {
@@ -870,18 +861,18 @@ async function runAppSuite() {
         report.dark=dark;
         assert.deepEqual(dark, {
           theme:'dark',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,
-          samePreview:true,samePreviewFirst:true,canvas:'#0c1017'
+          samePreview:true,samePreviewFirst:true,canvas:'#1b211e'
         });
         const light = await applyTheme('light');
         report.light=light;
         assert.deepEqual(light, {
           theme:'light',sameEditor:true,sameVirtualEditor:true,sameDocumentText:true,sameDocumentVersion:true,
-          samePreview:true,samePreviewFirst:true,canvas:'#eef1f5'
+          samePreview:true,samePreviewFirst:true,canvas:'#fcfcfa'
         });
       } finally {
         try { await writeFile(join(artifactRoot, 'themeService-identity.json'), JSON.stringify(report, null, 2)); }
         finally {
-          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) await browser.page.click('[data-theme-toggle]');
+          if (await evaluateApplication(browser.page, "document.body.getAttribute('data-theme')==='dark'")) { await openSettings(); await browser.page.click('[data-settings-page="general"]'); await browser.page.selectOption('#setting-theme', 'light'); await browser.page.click('#settings-modal .sidebar-footer-action'); }
           await evaluateApplication(browser.page, 'delete window.__themeServiceIdentity');
           await waitForApplication(browser.page, () => document.body.getAttribute('data-theme') === 'light', { description: 'restore light theme after Theme Service' });
         }
@@ -894,14 +885,14 @@ async function runAppSuite() {
         await app.revealPosition(0);
         await evaluateApplication(browser.page, 'void(window.__runnerModalOpener=document.activeElement)');
         await browser.page.pressKey(',', { modifiers: 2, code: 'Comma' });
-        await waitForApplication(browser.page, () => document.getElementById('settings-modal')?.classList.contains('show'));
+        await waitForApplication(browser.page, () => (document.getElementById('settings-modal')?.hidden===false));
       };
       await openFromKeyboard();
       await waitForApplication(browser.page, () => {
         const root=document.getElementById('settings-modal');
         const panel=root?.firstElementChild;
-        return root?.classList.contains('show')
-          && root?.getAttribute('aria-hidden')==='false'
+        return !root?.hidden
+          && document.querySelector('.l-workspace')?.inert===true
           && panel?.contains(document.activeElement);
       }, { description: 'settings modal initial focus' });
       const opened = await evaluateApplication(browser.page, `(()=>{
@@ -911,27 +902,29 @@ async function runAppSuite() {
           role:panel?.getAttribute('role')||'',
           ariaModal:panel?.getAttribute('aria-modal')||'',
           labelledBy:panel?.getAttribute('aria-labelledby')||'',
-          display:root?.style.display||''
+          display:getComputedStyle(root).display
         };
       })()`);
       assert.deepEqual(opened, {
-        role: 'dialog',
-        ariaModal: 'true',
+        role: 'region',
+        ariaModal: '',
         labelledBy: 'settings-title',
         display: 'flex'
       });
 
       await browser.page.pressKey('Escape');
       await waitForApplication(browser.page, () => (
-        document.getElementById('settings-modal')?.style.display === 'none'
+        document.getElementById('settings-modal')?.hidden === true
           && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings Escape close and focus restoration' });
 
       await openFromKeyboard();
-      await waitForApplication(browser.page, () => document.getElementById('settings-modal')?.classList.contains('show'));
+      await waitForApplication(browser.page, () => (document.getElementById('settings-modal')?.hidden===false));
       await browser.page.clickAt(3, 3);
+      assert.equal(await browser.page.evaluate("document.getElementById('settings-modal').hidden"), false, 'workspace settings have no dismissing backdrop');
+      await browser.page.click('#settings-modal .sidebar-footer-action');
       await waitForApplication(browser.page, () => (
-        document.getElementById('settings-modal')?.style.display === 'none'
+        document.getElementById('settings-modal')?.hidden === true
           && document.activeElement === window.__runnerModalOpener
       ), { description: 'settings backdrop close and focus restoration' });
 
@@ -1168,68 +1161,22 @@ async function runAppSuite() {
       assert.deepEqual(snapshot, { active: false, auto: false, cls: false });
     });
 
-    await test('application toolbar boundary wraps from measured content width without hiding tools', async () => {
-      await browser.page.setViewport({ width: 1800, height: 900 });
-      await waitForApplication(browser.page, () => window.innerWidth === 1800 && !document.documentElement.classList.contains('is-compact-shell'), { description: 'wide toolbar viewport' });
-      const before = await evaluateApplication(browser.page, `(()=>{
-        const toolbar=document.querySelector('.l-toolbar-shell');
-        const format=toolbar?.querySelector('.format-group');
-        const actions=toolbar?.querySelector('.editor-actions');
-        if(!toolbar||!format||!actions)throw new Error('Toolbar Boundary fixture unavailable');
-        const style=getComputedStyle(toolbar);
-        const padding=(parseFloat(style.paddingLeft)||0)+(parseFloat(style.paddingRight)||0);
-        const gap=parseFloat(style.columnGap||style.gap)||0;
-        const required=Math.ceil(format.scrollWidth+actions.scrollWidth+gap);
-        const hidden=Array.from(toolbar.querySelectorAll('[data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')]);
-        return {wrapped:toolbar.classList.contains('toolbar-boundary-wrap'),width:toolbar.clientWidth,padding,required,hidden};
-      })()`);
-      assert.equal(before.wrapped, false, JSON.stringify(before));
-      const targetWidth = Math.max(260, Math.min(620, Math.floor(before.required + before.padding - 24)));
-      assert.ok(targetWidth < before.required + before.padding, JSON.stringify({before,targetWidth}));
-      try {
-        await evaluateApplication(browser.page, `(()=>{
-          const target=${JSON.stringify(targetWidth)};
-          const toolbar=document.querySelector('.l-toolbar-shell');
-          toolbar.style.width=target+'px';
-          toolbar.style.maxWidth=target+'px';
-          toolbar.style.boxSizing='border-box';
-          toolbar.style.alignSelf='flex-start';
-        })()`);
-        await waitForApplication(browser.page, () => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === true, { description: 'content-width toolbar wrapping' });
-        const wrapped = await evaluateApplication(browser.page, `(()=>{
-          const toolbar=document.querySelector('.l-toolbar-shell');
-          const format=toolbar.querySelector('.format-group');
-          const actions=toolbar.querySelector('.editor-actions');
-          const formatRect=format.getBoundingClientRect();
-          const actionsRect=actions.getBoundingClientRect();
-          return {
-            width:toolbar.clientWidth,
-            wrapped:toolbar.classList.contains('toolbar-boundary-wrap'),
-            twoRows:actionsRect.top>=formatRect.bottom-1,
-            hidden:Array.from(toolbar.querySelectorAll('[data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
-          };
-        })()`);
-        assert.equal(wrapped.wrapped, true, JSON.stringify(wrapped));
-        assert.ok(wrapped.width <= targetWidth + 1, JSON.stringify({wrapped,targetWidth}));
-        assert.equal(wrapped.twoRows, true, JSON.stringify(wrapped));
-        assert.deepEqual(wrapped.hidden, before.hidden, 'responsive boundary must not hide toolbar tools');
-      } finally {
-        await evaluateApplication(browser.page, `(()=>{
-          const toolbar=document.querySelector('.l-toolbar-shell');
-          if(!toolbar)return;
-          toolbar.style.removeProperty('width');
-          toolbar.style.removeProperty('max-width');
-          toolbar.style.removeProperty('box-sizing');
-          toolbar.style.removeProperty('align-self');
-        })()`);
+    await test('application selection toolbar remains reachable and inside narrow windows without losing configured tools', async () => {
+      // Primary/More placement is user-configurable; preserve every item and
+      // its hidden state regardless of its current parent or DOM order.
+      const hidden = () => evaluateApplication(browser.page, "Array.from(document.querySelectorAll('.l-toolbar-shell [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)))");
+      const before = await hidden();
+      for (const width of [1800,900,600]) {
+        await browser.page.setViewport({ width, height: 900 });
+        await browser.page.pressKey('F10', { modifiers: 1, code: 'F10' });
+        await browser.page.waitFor(() => document.querySelector('.format-group').classList.contains('has-selection'));
+        const rect = await browser.page.elementRect('.format-group');
+        assert.ok(rect.x >= 0 && rect.x + rect.width <= width + 1, JSON.stringify({width,rect}));
+        assert.deepEqual(await hidden(), before, 'responsive layout preserves configured format actions');
       }
-      await waitForApplication(browser.page, () => document.querySelector('.l-toolbar-shell')?.classList.contains('toolbar-boundary-wrap') === false, { description: 'wide toolbar unwrap restoration' });
-      const restored = await evaluateApplication(browser.page, `(()=>({
-        hidden:Array.from(document.querySelectorAll('.l-toolbar-shell [data-toolbar-item]')).map(item=>[item.dataset.toolbarItem,item.classList.contains('toolbar-item-hidden')])
-      }))()`);
-      assert.deepEqual(restored.hidden, before.hidden);
+      await browser.page.click('.format-group [data-editor-action="toggle-more"]');
+      await browser.page.click('[data-editor-action="pin-toolbar"]');
       await browser.page.setViewport({ width: 1440, height: 1000 });
-      await waitForApplication(browser.page, () => window.innerWidth === 1440 && window.innerHeight === 1000, { description: 'restore toolbar test viewport' });
     });
 
     await test('application page fullscreen uses the Stage 6.6 controller without changing command IDs', async () => {
@@ -1779,12 +1726,12 @@ async function runAppSuite() {
     activePage = null;
     try {
       await writeFile(join(artifactRoot, 'built-app-diagnostics.json'), JSON.stringify({
-        console: browser.page.consoleMessages, exceptions: browser.page.exceptions,
+        console: browser.page.consoleMessages, exceptions: browser.page.exceptions, browserStderr: browser.stderr,
         requests: applicationHost?.requests || [], origin: applicationHost?.origin || externalUrl
       }, null, 2));
     } finally {
-      try { await releaseApplicationInspector(browser.page);
-    await browser.close(); } finally { await applicationHost?.close(); }
+      try { try { await releaseApplicationInspector(browser.page); } finally { await browser.close(); } }
+      finally { await applicationHost?.close(); }
     }
   }
 }

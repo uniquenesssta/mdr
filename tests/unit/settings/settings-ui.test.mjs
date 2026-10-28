@@ -76,7 +76,7 @@ function createView() {
   return { view, calls };
 }
 
-function createControllerFixture({ persist = () => {}, platform = null } = {}) {
+function createControllerFixture({ persist = () => {}, platform = null, autoApply = false } = {}) {
   const store = createStore(persist);
   const published = [];
   const applyCoordinator = createSettingsApplyCoordinator({
@@ -92,10 +92,34 @@ function createControllerFixture({ persist = () => {}, platform = null } = {}) {
     applyCoordinator,
     platform: platform || { capabilities: { desktop: { dialogs: false } }, dialogs: { openDirectory: async () => null } },
     openTrigger,
-    shortcutTarget
+    shortcutTarget,
+    autoApply
   });
   return { controller, store, published, view, calls, openTrigger, shortcutTarget };
 }
+
+test('Figma settings persist valid changes while keeping the workspace open and retain failed drafts for retry', () => {
+  let fail = false;
+  const writes = [];
+  const { controller, store, published, view } = createControllerFixture({ autoApply: true, persist(changes) { if (fail) throw new Error('disk full'); writes.push(changes); } });
+  controller.open();
+  controller.updateDraft('theme', 'dark');
+  assert.equal(store.snapshot.theme, 'dark');
+  assert.equal(view.isOpen(), true);
+  assert.equal(store.hasDraft, true);
+  assert.equal(writes.length, 1);
+  assert.equal(published.length, 1);
+  fail = true;
+  controller.updateDraft('language', 'en');
+  assert.equal(store.snapshot.language, 'zh-CN');
+  assert.equal(store.draft.language, 'en');
+  assert.equal(controller.apply(), false);
+  assert.equal(view.isOpen(), true);
+  fail = false;
+  assert.equal(controller.apply().language, 'en');
+  assert.equal(view.isOpen(), false);
+  controller.destroy();
+});
 
 test('Atomic 4.10 Apply Coordinator publishes immutable effective changes only after a successful Store apply', () => {
   const writes = [];
@@ -104,14 +128,14 @@ test('Atomic 4.10 Apply Coordinator publishes immutable effective changes only a
   const coordinator = createSettingsApplyCoordinator({ store, publish: event => published.push(event) });
 
   store.openDraft();
-  store.updateDraft({ theme: 'dark', editorFontSize: 18 });
+  store.updateDraft({ theme: 'dark', editorFontSize: 20 });
   const applied = coordinator.applyDraft();
   assert.equal(applied.theme, 'dark');
   assert.equal(writes.length, 1);
   assert.equal(published.length, 1);
   assert.equal(published[0].type, SETTINGS_CHANGED_EVENT);
   assert.deepEqual(published[0].changedIds, ['theme', 'editorFontSize']);
-  assert.deepEqual(published[0].changes, { theme: 'dark', editorFontSize: 18 });
+  assert.deepEqual(published[0].changes, { theme: 'dark', editorFontSize: 20 });
   assert.ok(published[0].impactEvents.includes('settings.theme.changed'));
   assert.ok(published[0].impactEvents.includes('settings.editor.changed'));
   assert.equal(Object.isFrozen(published[0]), true);
@@ -332,7 +356,9 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
   assert.doesNotMatch(markup, /id="settings-modal"|openSettings\(|closeSettings\(|switchSettingsPage\(|applySettings\(|chooseExportDirectory\(|clearExportDirectory\(|resetSettingColor\(/);
   assert.doesNotMatch(modalBridge, /id: 'settings-modal'/);
   assert.match(dialog, /id: 'settings-modal'/);
-  assert.ok(dialog.includes('return modal.open(null, options);'));
+  assert.doesNotMatch(dialog, /workspaceRoot\.hidden = true/);
+  assert.match(dialog, /workspaceRoot\.inert = true/);
+  assert.doesNotMatch(dialog, /new ModalShell/);
   assert.doesNotMatch(dialog, /\blocalStorage\b|\bsessionStorage\b|markdownEditorSettingsStorePort|markdownEditorPlatformPort|setAppTheme|setLanguage|setLayoutMode/);
   assert.match(dialog, /listSettingsSectionDefinitions/);
   assert.match(dialog, /for \(const descriptor of section\.fields\)/);
@@ -353,9 +379,10 @@ test('Atomic 4.10 Settings UI stays feature-owned while Atomic 4.11 Theme Servic
     'autosave-field-view.js',
     'color-field-view.js',
     'directory-field-view.js',
+    'launch-policy-field-view.js',
     'settings-dialog-view.js',
     'settings-field-view.js',
-    'settings-navigation-view.js'
+    'settings-navigation-view.js', 'toolbar-preview-view.js'
   ]);
   assert.match(entry, /createThemeService/);
   assert.doesNotMatch(settingsIndex + core, /createThemeService|theme-service\.js/);

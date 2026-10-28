@@ -50,3 +50,4 @@ export {
   SelectionSyncController,
   createSelectionSyncController
 } from './selection/selection-sync-controller.js';
+export { createPreviewComponentMapping } from './selection/preview-component-mapping.js';

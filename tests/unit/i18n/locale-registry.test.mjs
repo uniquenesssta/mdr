@@ -16,6 +16,8 @@ const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const FIXTURE_PATH = new URL('./fixtures/locale-split-compatibility.json', import.meta.url);
 const HISTORICAL_FIXTURE_PATH = new URL('./fixtures/locale-key-compatibility.json', import.meta.url);
 const HTML_TAG_PATTERN = /<(?:a|b|blockquote|br|code|div|em|h[1-6]|li|ol|p|pre|span|strong|table|tbody|td|th|thead|tr|ul)\b/i;
+const FIGMA_KEYS = new Set(['writingMode', 'splitMode', 'readingMode', 'focusMode']);
+const historicalShortText = record => Object.fromEntries(Object.entries(record).filter(([key]) => !FIGMA_KEYS.has(key)));
 
 function sha256(value) {
   return createHash('sha256').update(String(value), 'utf8').digest('hex');
@@ -39,18 +41,19 @@ test('Atomic 4.2 exposes ten immutable short-text locale modules with one exact 
   assert.deepEqual([...LOCALE_IDS], fixture.localeOrder);
   assert.deepEqual([...localeRegistry.localeIds], fixture.localeOrder);
   assert.equal(localeRegistry.defaultLocale, 'zh-CN');
-  assert.equal(localeRegistry.keys.length, 161);
-  assert.equal(sha256(JSON.stringify([...localeRegistry.keys].sort())), fixture.shortKeysSha256);
+  assert.equal(localeRegistry.keys.length, 165);
+  assert.equal(sha256(JSON.stringify([...localeRegistry.keys].filter(key => !FIGMA_KEYS.has(key)).sort())), fixture.shortKeysSha256);
 
   for (const locale of LOCALE_IDS) {
     const dictionary = localeRegistry.get(locale);
     assert.ok(Object.isFrozen(dictionary), `${locale} dictionary must be frozen`);
-    assert.equal(Object.keys(dictionary).length, 161, `${locale} key count`);
+    assert.equal(Object.keys(dictionary).length, 165, `${locale} key count`);
     assert.deepEqual(Object.keys(dictionary).sort(), [...localeRegistry.keys].sort(), `${locale} key set`);
     assert.equal(Object.hasOwn(dictionary, 'helpHtml'), false, `${locale} must not contain helpHtml`);
     assert.ok(Object.values(dictionary).every(value => typeof value === 'string'));
     assert.ok(Object.values(dictionary).every(value => !HTML_TAG_PATTERN.test(value)), `${locale} must contain short text only`);
-    assert.equal(stableHash(dictionary), fixture.splitShortTextSha256ByLocale[locale], `${locale} split hash`);
+    assert.equal(stableHash(historicalShortText(dictionary)), fixture.splitShortTextSha256ByLocale[locale], `${locale} split hash`);
+    for (const key of FIGMA_KEYS) assert.ok(dictionary[key].trim(), `${locale}.${key} translated`);
   }
 });
 
@@ -64,7 +67,7 @@ test('Atomic 4.2 materializes only the historical zh-CN fallback keys and preser
     const materialized = fixture.materializedFallbackKeysByLocale[locale];
     for (const key of materialized) assert.equal(dictionary[key], fallback[key], `${locale}.${key} must preserve old fallback behavior`);
 
-    const originalShape = { ...dictionary };
+    const originalShape = historicalShortText(dictionary);
     for (const key of materialized) delete originalShape[key];
     assert.equal(stableHash(originalShape), fixture.originalShortTextSha256ByLocale[locale], `${locale} original short-text hash`);
   }
@@ -139,7 +142,7 @@ test('current locale audit reports a complete split registry with separate help 
   assert.equal(audit.kind, 'stage-04-split-locale-key-audit');
   assert.equal(audit.source, 'src/i18n/locale-registry.js');
   assert.deepEqual(audit.localeOrder, fixture.localeOrder);
-  assert.equal(audit.unionKeys.length, 161);
+  assert.equal(audit.unionKeys.length, 165);
   assert.deepEqual(audit.anomalies.duplicateLocales, []);
   assert.deepEqual(audit.anomalies.duplicateKeysByLocale, {});
   assert.deepEqual(audit.anomalies.missingKeysByLocale, {});

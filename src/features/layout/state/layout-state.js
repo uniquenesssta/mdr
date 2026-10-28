@@ -9,7 +9,7 @@ const LAYOUT_MODES = new Set(['both', 'hybrid', 'edit', 'preview']);
 const COMPACT_PANES = new Set(['editor', 'preview']);
 
 const DEFAULTS = Object.freeze({
-  sidebar: Object.freeze({ visible: true, autoCollapsed: false, width: 248 }),
+  sidebar: Object.freeze({ visible: true, autoCollapsed: false, width: 240 }),
   split: Object.freeze({
     editorCollapsed: false,
     previewCollapsed: false,

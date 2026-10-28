@@ -1,0 +1,2083 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "scope": "Figma overlay density reconciliation, no application implementation",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "skills": [
+    {
+      "name": "impeccable",
+      "references": [
+        "reference/layout.md",
+        "reference/operate.md",
+        "reference/polish.md",
+        "reference/craft-floor.md"
+      ],
+      "application": "Layout assessment, task grouping, density, content extremes and render review; no code-health score used for Figma aesthetics."
+    },
+    {
+      "name": "figma-use",
+      "application": "Measured and edited real editable nodes with font/style/token preservation."
+    },
+    {
+      "name": "figma-generate-library",
+      "application": "Updated shared component variants in place and verified dependent instances."
+    }
+  ],
+  "inventory": {
+    "families": 21,
+    "totalStates": 103,
+    "activeStates": 100,
+    "retainedExcludedStates": 3,
+    "changedFamilies": 18,
+    "changedStates": 87
+  },
+  "measurements": [
+    {
+      "name": "MDR Blue/Tooltip",
+      "id": "94:1406",
+      "variants": [
+        {
+          "id": "94:1404",
+          "name": "State=visible",
+          "before": [
+            176,
+            32
+          ],
+          "after": [
+            80,
+            28
+          ],
+          "changed": true,
+          "areaReduction": 0.602
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Find panel",
+      "id": "95:2731",
+      "variants": [
+        {
+          "id": "95:2572",
+          "name": "State=results",
+          "before": [
+            480,
+            136
+          ],
+          "after": [
+            440,
+            124
+          ],
+          "changed": true,
+          "areaReduction": 0.164
+        },
+        {
+          "id": "95:2613",
+          "name": "State=empty",
+          "before": [
+            480,
+            136
+          ],
+          "after": [
+            440,
+            124
+          ],
+          "changed": true,
+          "areaReduction": 0.164
+        },
+        {
+          "id": "95:2654",
+          "name": "State=invalid",
+          "before": [
+            480,
+            136
+          ],
+          "after": [
+            440,
+            124
+          ],
+          "changed": true,
+          "areaReduction": 0.164
+        },
+        {
+          "id": "95:2696",
+          "name": "State=reading",
+          "before": [
+            480,
+            96
+          ],
+          "after": [
+            440,
+            84
+          ],
+          "changed": true,
+          "areaReduction": 0.198
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Notice",
+      "id": "95:2756",
+      "variants": [
+        {
+          "id": "95:2732",
+          "name": "Tone=info",
+          "before": [
+            440,
+            72
+          ],
+          "after": [
+            360,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.273
+        },
+        {
+          "id": "95:2738",
+          "name": "Tone=success",
+          "before": [
+            440,
+            72
+          ],
+          "after": [
+            360,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.273
+        },
+        {
+          "id": "95:2744",
+          "name": "Tone=warning",
+          "before": [
+            440,
+            72
+          ],
+          "after": [
+            360,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.273
+        },
+        {
+          "id": "95:2750",
+          "name": "Tone=error",
+          "before": [
+            440,
+            72
+          ],
+          "after": [
+            360,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.273
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Menu panel",
+      "id": "98:6043",
+      "variants": [
+        {
+          "id": "98:5458",
+          "name": "Menu=file",
+          "before": [
+            280,
+            341
+          ],
+          "after": [
+            240,
+            261
+          ],
+          "changed": true,
+          "areaReduction": 0.344
+        },
+        {
+          "id": "98:5550",
+          "name": "Menu=edit",
+          "before": [
+            280,
+            274
+          ],
+          "after": [
+            200,
+            206
+          ],
+          "changed": true,
+          "areaReduction": 0.463
+        },
+        {
+          "id": "98:5623",
+          "name": "Menu=view",
+          "before": [
+            280,
+            269
+          ],
+          "after": [
+            224,
+            205
+          ],
+          "changed": true,
+          "areaReduction": 0.39
+        },
+        {
+          "id": "98:5695",
+          "name": "Menu=insert",
+          "before": [
+            280,
+            416
+          ],
+          "after": [
+            208,
+            324
+          ],
+          "changed": true,
+          "areaReduction": 0.421
+        },
+        {
+          "id": "98:5786",
+          "name": "Menu=help",
+          "before": [
+            280,
+            48
+          ],
+          "after": [
+            144,
+            36
+          ],
+          "changed": true,
+          "areaReduction": 0.614
+        },
+        {
+          "id": "98:5797",
+          "name": "Menu=recent",
+          "before": [
+            280,
+            125
+          ],
+          "after": [
+            240,
+            93
+          ],
+          "changed": true,
+          "areaReduction": 0.362
+        },
+        {
+          "id": "98:5829",
+          "name": "Menu=legacyMore",
+          "before": [
+            280,
+            360
+          ],
+          "after": [
+            280,
+            360
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5921",
+          "name": "Menu=headings",
+          "before": [
+            280,
+            264
+          ],
+          "after": [
+            184,
+            204
+          ],
+          "changed": true,
+          "areaReduction": 0.492
+        },
+        {
+          "id": "98:5992",
+          "name": "Menu=export",
+          "before": [
+            280,
+            192
+          ],
+          "after": [
+            176,
+            148
+          ],
+          "changed": true,
+          "areaReduction": 0.515
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Confirmation",
+      "id": "99:6177",
+      "variants": [
+        {
+          "id": "99:6150",
+          "name": "Action=reset",
+          "before": [
+            440,
+            166
+          ],
+          "after": [
+            360,
+            130
+          ],
+          "changed": true,
+          "areaReduction": 0.359
+        },
+        {
+          "id": "99:6159",
+          "name": "Action=clear",
+          "before": [
+            440,
+            166
+          ],
+          "after": [
+            360,
+            130
+          ],
+          "changed": true,
+          "areaReduction": 0.359
+        },
+        {
+          "id": "99:6168",
+          "name": "Action=clearRecent",
+          "before": [
+            440,
+            166
+          ],
+          "after": [
+            360,
+            130
+          ],
+          "changed": true,
+          "areaReduction": 0.359
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Context menu",
+      "id": "101:8134",
+      "variants": [
+        {
+          "id": "101:7981",
+          "name": "Target=document",
+          "before": [
+            280,
+            264
+          ],
+          "after": [
+            176,
+            204
+          ],
+          "changed": true,
+          "areaReduction": 0.514
+        },
+        {
+          "id": "101:8052",
+          "name": "Target=sidebar",
+          "before": [
+            280,
+            156
+          ],
+          "after": [
+            216,
+            120
+          ],
+          "changed": true,
+          "areaReduction": 0.407
+        },
+        {
+          "id": "101:8093",
+          "name": "Target=outline",
+          "before": [
+            280,
+            120
+          ],
+          "after": [
+            192,
+            92
+          ],
+          "changed": true,
+          "areaReduction": 0.474
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Select menu",
+      "id": "107:8791",
+      "variants": [
+        {
+          "id": "107:8464",
+          "name": "Options=language",
+          "before": [
+            256,
+            372
+          ],
+          "after": [
+            240,
+            288
+          ],
+          "changed": true,
+          "areaReduction": 0.274
+        },
+        {
+          "id": "107:8565",
+          "name": "Options=theme",
+          "before": [
+            256,
+            84
+          ],
+          "after": [
+            240,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.286
+        },
+        {
+          "id": "107:8586",
+          "name": "Options=layout",
+          "before": [
+            256,
+            156
+          ],
+          "after": [
+            240,
+            120
+          ],
+          "changed": true,
+          "areaReduction": 0.279
+        },
+        {
+          "id": "107:8627",
+          "name": "Options=font",
+          "before": [
+            256,
+            192
+          ],
+          "after": [
+            240,
+            148
+          ],
+          "changed": true,
+          "areaReduction": 0.277
+        },
+        {
+          "id": "107:8678",
+          "name": "Options=performance",
+          "before": [
+            256,
+            156
+          ],
+          "after": [
+            240,
+            120
+          ],
+          "changed": true,
+          "areaReduction": 0.279
+        },
+        {
+          "id": "107:8719",
+          "name": "Options=density",
+          "before": [
+            256,
+            84
+          ],
+          "after": [
+            240,
+            64
+          ],
+          "changed": true,
+          "areaReduction": 0.286
+        },
+        {
+          "id": "107:8740",
+          "name": "Options=autosave",
+          "before": [
+            256,
+            192
+          ],
+          "after": [
+            240,
+            148
+          ],
+          "changed": true,
+          "areaReduction": 0.277
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Table picker",
+      "id": "95:2990",
+      "variants": [
+        {
+          "id": "95:2842",
+          "name": "State=default",
+          "before": [
+            188,
+            214
+          ],
+          "after": [
+            188,
+            214
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "95:2916",
+          "name": "State=selected",
+          "before": [
+            188,
+            214
+          ],
+          "after": [
+            188,
+            214
+          ],
+          "changed": false,
+          "areaReduction": 0
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Color palette",
+      "id": "95:3041",
+      "variants": [
+        {
+          "id": "95:2991",
+          "name": "Kind=text",
+          "before": [
+            288,
+            236
+          ],
+          "after": [
+            224,
+            206
+          ],
+          "changed": true,
+          "areaReduction": 0.321
+        },
+        {
+          "id": "95:3016",
+          "name": "Kind=highlight",
+          "before": [
+            288,
+            236
+          ],
+          "after": [
+            224,
+            206
+          ],
+          "changed": true,
+          "areaReduction": 0.321
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Export dialog",
+      "id": "98:4857",
+      "variants": [
+        {
+          "id": "98:4508",
+          "name": "Format=markdown, State=default",
+          "before": [
+            480,
+            220
+          ],
+          "after": [
+            400,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.242
+        },
+        {
+          "id": "98:4539",
+          "name": "Format=markdown, State=error",
+          "before": [
+            480,
+            252
+          ],
+          "after": [
+            400,
+            228
+          ],
+          "changed": true,
+          "areaReduction": 0.246
+        },
+        {
+          "id": "98:4571",
+          "name": "Format=html, State=default",
+          "before": [
+            480,
+            220
+          ],
+          "after": [
+            400,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.242
+        },
+        {
+          "id": "98:4602",
+          "name": "Format=html, State=error",
+          "before": [
+            480,
+            252
+          ],
+          "after": [
+            400,
+            228
+          ],
+          "changed": true,
+          "areaReduction": 0.246
+        },
+        {
+          "id": "98:4634",
+          "name": "Format=word, State=default",
+          "before": [
+            480,
+            220
+          ],
+          "after": [
+            400,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.242
+        },
+        {
+          "id": "98:4665",
+          "name": "Format=word, State=error",
+          "before": [
+            480,
+            252
+          ],
+          "after": [
+            400,
+            228
+          ],
+          "changed": true,
+          "areaReduction": 0.246
+        },
+        {
+          "id": "98:4697",
+          "name": "Format=image, State=default",
+          "before": [
+            480,
+            282
+          ],
+          "after": [
+            400,
+            250
+          ],
+          "changed": true,
+          "areaReduction": 0.261
+        },
+        {
+          "id": "98:4745",
+          "name": "Format=image, State=error",
+          "before": [
+            480,
+            314
+          ],
+          "after": [
+            400,
+            278
+          ],
+          "changed": true,
+          "areaReduction": 0.262
+        },
+        {
+          "id": "98:4794",
+          "name": "Format=pdf, State=default",
+          "before": [
+            480,
+            220
+          ],
+          "after": [
+            400,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.242
+        },
+        {
+          "id": "98:4825",
+          "name": "Format=pdf, State=error",
+          "before": [
+            480,
+            252
+          ],
+          "after": [
+            400,
+            228
+          ],
+          "changed": true,
+          "areaReduction": 0.246
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Help panel",
+      "id": "98:5130",
+      "variants": [
+        {
+          "id": "98:4858",
+          "name": "Page=start, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.259
+        },
+        {
+          "id": "98:4930",
+          "name": "Page=markdown, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            280
+          ],
+          "changed": true,
+          "areaReduction": 0.326
+        },
+        {
+          "id": "98:4998",
+          "name": "Page=shortcuts, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.259
+        },
+        {
+          "id": "98:5070",
+          "name": "Page=about, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            224
+          ],
+          "changed": true,
+          "areaReduction": 0.461
+        },
+        {
+          "id": "100:6696",
+          "name": "Page=views, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.259
+        },
+        {
+          "id": "100:6765",
+          "name": "Page=files, Width=desktop",
+          "before": [
+            600,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.259
+        },
+        {
+          "id": "105:13986",
+          "name": "Page=start, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.217
+        },
+        {
+          "id": "105:14071",
+          "name": "Page=markdown, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            280
+          ],
+          "changed": true,
+          "areaReduction": 0.288
+        },
+        {
+          "id": "105:14152",
+          "name": "Page=shortcuts, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.217
+        },
+        {
+          "id": "105:14237",
+          "name": "Page=about, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            224
+          ],
+          "changed": true,
+          "areaReduction": 0.43
+        },
+        {
+          "id": "105:14310",
+          "name": "Page=views, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.217
+        },
+        {
+          "id": "105:14395",
+          "name": "Page=files, Width=narrow",
+          "before": [
+            568,
+            360
+          ],
+          "after": [
+            520,
+            308
+          ],
+          "changed": true,
+          "areaReduction": 0.217
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Insert form",
+      "id": "98:5457",
+      "variants": [
+        {
+          "id": "98:5131",
+          "name": "Kind=link, State=default",
+          "before": [
+            480,
+            182
+          ],
+          "after": [
+            360,
+            164
+          ],
+          "changed": true,
+          "areaReduction": 0.324
+        },
+        {
+          "id": "98:5153",
+          "name": "Kind=link, State=error",
+          "before": [
+            480,
+            214
+          ],
+          "after": [
+            360,
+            192
+          ],
+          "changed": true,
+          "areaReduction": 0.327
+        },
+        {
+          "id": "98:5176",
+          "name": "Kind=imageUrl, State=default",
+          "before": [
+            400,
+            296
+          ],
+          "after": [
+            400,
+            296
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5208",
+          "name": "Kind=imageUrl, State=error",
+          "before": [
+            400,
+            324
+          ],
+          "after": [
+            400,
+            324
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5241",
+          "name": "Kind=imageFile, State=default",
+          "before": [
+            400,
+            288
+          ],
+          "after": [
+            400,
+            288
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5273",
+          "name": "Kind=imageFile, State=error",
+          "before": [
+            400,
+            316
+          ],
+          "after": [
+            400,
+            316
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5306",
+          "name": "Kind=mermaid, State=default",
+          "before": [
+            480,
+            346
+          ],
+          "after": [
+            440,
+            306
+          ],
+          "changed": true,
+          "areaReduction": 0.189
+        },
+        {
+          "id": "98:5336",
+          "name": "Kind=mermaid, State=error",
+          "before": [
+            480,
+            378
+          ],
+          "after": [
+            440,
+            334
+          ],
+          "changed": true,
+          "areaReduction": 0.19
+        },
+        {
+          "id": "98:5367",
+          "name": "Kind=import, State=default",
+          "before": [
+            480,
+            182
+          ],
+          "after": [
+            480,
+            182
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5389",
+          "name": "Kind=import, State=error",
+          "before": [
+            480,
+            214
+          ],
+          "after": [
+            480,
+            214
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "98:5412",
+          "name": "Kind=rename, State=default",
+          "before": [
+            480,
+            182
+          ],
+          "after": [
+            360,
+            164
+          ],
+          "changed": true,
+          "areaReduction": 0.324
+        },
+        {
+          "id": "98:5434",
+          "name": "Kind=rename, State=error",
+          "before": [
+            480,
+            214
+          ],
+          "after": [
+            360,
+            192
+          ],
+          "changed": true,
+          "areaReduction": 0.327
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Web clipper",
+      "id": "100:7286",
+      "variants": [
+        {
+          "id": "100:7176",
+          "name": "State=ready",
+          "before": [
+            520,
+            224
+          ],
+          "after": [
+            440,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.245
+        },
+        {
+          "id": "100:7203",
+          "name": "State=fetching",
+          "before": [
+            520,
+            224
+          ],
+          "after": [
+            440,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.245
+        },
+        {
+          "id": "100:7230",
+          "name": "State=success",
+          "before": [
+            520,
+            224
+          ],
+          "after": [
+            440,
+            200
+          ],
+          "changed": true,
+          "areaReduction": 0.245
+        },
+        {
+          "id": "100:7257",
+          "name": "State=manual",
+          "before": [
+            520,
+            354
+          ],
+          "after": [
+            440,
+            318
+          ],
+          "changed": true,
+          "areaReduction": 0.24
+        },
+        {
+          "id": "107:8973",
+          "name": "State=proxy",
+          "before": [
+            520,
+            316
+          ],
+          "after": [
+            440,
+            280
+          ],
+          "changed": true,
+          "areaReduction": 0.25
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Selection toolbar",
+      "id": "95:2571",
+      "variants": [
+        {
+          "id": "95:2501",
+          "name": "Density=compact, Pinned=false",
+          "before": [
+            444,
+            36
+          ],
+          "after": [
+            392,
+            36
+          ],
+          "changed": true,
+          "areaReduction": 0.117
+        },
+        {
+          "id": "95:2516",
+          "name": "Density=compact, Pinned=true",
+          "before": [
+            444,
+            36
+          ],
+          "after": [
+            424,
+            36
+          ],
+          "changed": true,
+          "areaReduction": 0.045
+        },
+        {
+          "id": "95:2536",
+          "name": "Density=standard, Pinned=false",
+          "before": [
+            444,
+            40
+          ],
+          "after": [
+            392,
+            40
+          ],
+          "changed": true,
+          "areaReduction": 0.117
+        },
+        {
+          "id": "95:2551",
+          "name": "Density=standard, Pinned=true",
+          "before": [
+            444,
+            40
+          ],
+          "after": [
+            424,
+            40
+          ],
+          "changed": true,
+          "areaReduction": 0.045
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Progress",
+      "id": "95:2841",
+      "variants": [
+        {
+          "id": "95:2799",
+          "name": "Stage=preparing",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        },
+        {
+          "id": "95:2806",
+          "name": "Stage=rendering",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        },
+        {
+          "id": "95:2813",
+          "name": "Stage=writing",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        },
+        {
+          "id": "95:2820",
+          "name": "Stage=complete",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        },
+        {
+          "id": "95:2827",
+          "name": "Stage=failed",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        },
+        {
+          "id": "95:2834",
+          "name": "Stage=cancelled",
+          "before": [
+            440,
+            186
+          ],
+          "after": [
+            360,
+            142
+          ],
+          "changed": true,
+          "areaReduction": 0.375
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Image export advanced",
+      "id": "100:7382",
+      "variants": [
+        {
+          "id": "100:7287",
+          "name": "State=empty",
+          "before": [
+            560,
+            464
+          ],
+          "after": [
+            480,
+            256
+          ],
+          "changed": true,
+          "areaReduction": 0.527
+        },
+        {
+          "id": "100:7318",
+          "name": "State=ready",
+          "before": [
+            560,
+            464
+          ],
+          "after": [
+            480,
+            378
+          ],
+          "changed": true,
+          "areaReduction": 0.302
+        },
+        {
+          "id": "100:7351",
+          "name": "State=failed",
+          "before": [
+            560,
+            464
+          ],
+          "after": [
+            480,
+            256
+          ],
+          "changed": true,
+          "areaReduction": 0.527
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Link preview",
+      "id": "100:7416",
+      "variants": [
+        {
+          "id": "100:7383",
+          "name": "State=loading, Width=desktop",
+          "before": [
+            720,
+            480
+          ],
+          "after": [
+            400,
+            138
+          ],
+          "changed": true,
+          "areaReduction": 0.84
+        },
+        {
+          "id": "100:7394",
+          "name": "State=ready, Width=desktop",
+          "before": [
+            720,
+            480
+          ],
+          "after": [
+            720,
+            460
+          ],
+          "changed": true,
+          "areaReduction": 0.042
+        },
+        {
+          "id": "100:7405",
+          "name": "State=blocked, Width=desktop",
+          "before": [
+            720,
+            480
+          ],
+          "after": [
+            400,
+            138
+          ],
+          "changed": true,
+          "areaReduction": 0.84
+        },
+        {
+          "id": "109:11812",
+          "name": "State=loading, Width=narrow",
+          "before": [
+            568,
+            464
+          ],
+          "after": [
+            400,
+            138
+          ],
+          "changed": true,
+          "areaReduction": 0.791
+        },
+        {
+          "id": "109:11823",
+          "name": "State=ready, Width=narrow",
+          "before": [
+            568,
+            464
+          ],
+          "after": [
+            568,
+            380
+          ],
+          "changed": true,
+          "areaReduction": 0.181
+        },
+        {
+          "id": "109:11834",
+          "name": "State=blocked, Width=narrow",
+          "before": [
+            568,
+            464
+          ],
+          "after": [
+            400,
+            138
+          ],
+          "changed": true,
+          "areaReduction": 0.791
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Drag overlay",
+      "id": "100:7426",
+      "variants": [
+        {
+          "id": "100:7417",
+          "name": "State=active",
+          "before": [
+            560,
+            240
+          ],
+          "after": [
+            360,
+            122
+          ],
+          "changed": true,
+          "areaReduction": 0.673
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Preview recovery",
+      "id": "100:7433",
+      "variants": [
+        {
+          "id": "100:7427",
+          "name": "State=recovering",
+          "before": [
+            280,
+            24
+          ],
+          "after": [
+            96,
+            24
+          ],
+          "changed": true,
+          "areaReduction": 0.657
+        },
+        {
+          "id": "100:7430",
+          "name": "State=failed",
+          "before": [
+            280,
+            24
+          ],
+          "after": [
+            144,
+            24
+          ],
+          "changed": true,
+          "areaReduction": 0.486
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Widget toolbar",
+      "id": "100:7462",
+      "variants": [
+        {
+          "id": "100:7434",
+          "name": "Kind=code",
+          "before": [
+            640,
+            36
+          ],
+          "after": [
+            640,
+            36
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "100:7441",
+          "name": "Kind=html",
+          "before": [
+            640,
+            36
+          ],
+          "after": [
+            640,
+            36
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "100:7448",
+          "name": "Kind=table",
+          "before": [
+            640,
+            36
+          ],
+          "after": [
+            640,
+            36
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "100:7455",
+          "name": "Kind=image",
+          "before": [
+            640,
+            36
+          ],
+          "after": [
+            640,
+            36
+          ],
+          "changed": false,
+          "areaReduction": 0
+        }
+      ]
+    },
+    {
+      "name": "MDR Blue/Duration field",
+      "id": "107:8433",
+      "variants": [
+        {
+          "id": "107:8403",
+          "name": "State=preset",
+          "before": [
+            240,
+            36
+          ],
+          "after": [
+            240,
+            36
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "107:8410",
+          "name": "State=custom",
+          "before": [
+            240,
+            80
+          ],
+          "after": [
+            240,
+            80
+          ],
+          "changed": false,
+          "areaReduction": 0
+        },
+        {
+          "id": "107:8421",
+          "name": "State=error",
+          "before": [
+            240,
+            108
+          ],
+          "after": [
+            240,
+            108
+          ],
+          "changed": false,
+          "areaReduction": 0
+        }
+      ]
+    }
+  ],
+  "boundary": {
+    "checked": 100,
+    "issues": [],
+    "intentional": [
+      {
+        "family": "MDR Blue/Image export advanced",
+        "variant": "100:7318",
+        "node": "100:7340",
+        "parent": "100:7339",
+        "rectangle": [
+          8,
+          8,
+          432,
+          300
+        ],
+        "parentSize": [
+          448,
+          160
+        ]
+      }
+    ],
+    "noStyle": [],
+    "zeroText": [],
+    "raster": 0
+  },
+  "sceneUpdates": {
+    "desktop": [
+      {
+        "root": "104:3044",
+        "id": "I104:3127;99:5668",
+        "family": "Selection toolbar",
+        "w": 392,
+        "h": 36,
+        "x": 24,
+        "y": 252,
+        "visible": true
+      },
+      {
+        "root": "104:3784",
+        "id": "104:3924",
+        "family": "Find panel",
+        "w": 440,
+        "h": 124,
+        "x": 776,
+        "y": 124,
+        "visible": true
+      },
+      {
+        "root": "104:3973",
+        "id": "104:4114",
+        "family": "Export dialog",
+        "w": 400,
+        "h": 250,
+        "x": 440,
+        "y": 305,
+        "visible": true
+      },
+      {
+        "root": "104:4180",
+        "id": "104:4321",
+        "family": "Help panel",
+        "w": 520,
+        "h": 308,
+        "x": 380,
+        "y": 276,
+        "visible": true
+      },
+      {
+        "root": "104:4452",
+        "id": "104:4592",
+        "family": "Selection toolbar",
+        "w": 392,
+        "h": 36,
+        "x": 420,
+        "y": 360,
+        "visible": true
+      },
+      {
+        "root": "104:4785",
+        "id": "104:4929",
+        "family": "Notice",
+        "w": 360,
+        "h": 64,
+        "x": 580,
+        "y": 732,
+        "visible": true
+      },
+      {
+        "root": "104:4936",
+        "id": "I104:5086;144:9119",
+        "family": "Preview recovery",
+        "w": 96,
+        "h": 24,
+        "x": 24,
+        "y": 8,
+        "visible": true
+      },
+      {
+        "root": "104:4936",
+        "id": "104:5101",
+        "family": "Preview recovery",
+        "w": 96,
+        "h": 24,
+        "x": 764,
+        "y": 220,
+        "visible": false
+      },
+      {
+        "root": "104:5104",
+        "id": "104:5245",
+        "family": "Web clipper",
+        "w": 440,
+        "h": 318,
+        "x": 420,
+        "y": 271,
+        "visible": true
+      },
+      {
+        "root": "104:5281",
+        "id": "104:5422",
+        "family": "Image export advanced",
+        "w": 480,
+        "h": 378,
+        "x": 400,
+        "y": 241,
+        "visible": true
+      },
+      {
+        "root": "104:5466",
+        "id": "104:5606",
+        "family": "Context menu",
+        "w": 176,
+        "h": 204,
+        "x": 180,
+        "y": 292,
+        "visible": true
+      },
+      {
+        "root": "111:5884",
+        "id": "111:6031",
+        "family": "Menu panel",
+        "w": 240,
+        "h": 261,
+        "x": 40,
+        "y": 44,
+        "visible": true
+      },
+      {
+        "root": "111:6204",
+        "id": "111:6351",
+        "family": "Menu panel",
+        "w": 240,
+        "h": 93,
+        "x": 20,
+        "y": 560,
+        "visible": true
+      },
+      {
+        "root": "111:6415",
+        "id": "111:6563",
+        "family": "Link preview",
+        "w": 400,
+        "h": 138,
+        "x": 440,
+        "y": 361,
+        "visible": true
+      },
+      {
+        "root": "111:6576",
+        "id": "111:6724",
+        "family": "Progress",
+        "w": 360,
+        "h": 142,
+        "x": 460,
+        "y": 359,
+        "visible": true
+      },
+      {
+        "root": "111:6732",
+        "id": "111:6879",
+        "family": "Selection toolbar",
+        "w": 392,
+        "h": 36,
+        "x": 420,
+        "y": 360,
+        "visible": true
+      },
+      {
+        "root": "111:6732",
+        "id": "111:6894",
+        "family": "Color palette",
+        "w": 224,
+        "h": 206,
+        "x": 620,
+        "y": 408,
+        "visible": true
+      },
+      {
+        "root": "111:6939",
+        "id": "111:7086",
+        "family": "Table picker",
+        "w": 188,
+        "h": 214,
+        "x": 820,
+        "y": 160,
+        "visible": true
+      },
+      {
+        "root": "111:7160",
+        "id": "111:7308",
+        "family": "Insert form",
+        "w": 360,
+        "h": 164,
+        "x": 460,
+        "y": 348,
+        "visible": true
+      },
+      {
+        "root": "111:7334",
+        "id": "111:7482",
+        "family": "Insert form",
+        "w": 400,
+        "h": 288,
+        "x": 440,
+        "y": 286,
+        "visible": true
+      },
+      {
+        "root": "111:7521",
+        "id": "111:7669",
+        "family": "Insert form",
+        "w": 440,
+        "h": 334,
+        "x": 420,
+        "y": 263,
+        "visible": true
+      },
+      {
+        "root": "111:7708",
+        "id": "111:7843",
+        "family": "Notice",
+        "w": 360,
+        "h": 64,
+        "x": 580,
+        "y": 732,
+        "visible": true
+      }
+    ],
+    "responsive": [
+      {
+        "root": "105:8794",
+        "id": "I105:8877;101:7754",
+        "family": "Selection toolbar",
+        "w": 280,
+        "h": 36,
+        "x": 16,
+        "y": 332,
+        "visible": true
+      },
+      {
+        "root": "105:9433",
+        "id": "105:9518",
+        "family": "Find panel",
+        "w": 440,
+        "h": 124,
+        "x": 104,
+        "y": 152,
+        "visible": true
+      },
+      {
+        "root": "105:9550",
+        "id": "105:9636",
+        "family": "Export dialog",
+        "w": 400,
+        "h": 250,
+        "x": 100,
+        "y": 115,
+        "visible": true
+      },
+      {
+        "root": "105:9681",
+        "id": "105:9767",
+        "family": "Help panel",
+        "w": 520,
+        "h": 308,
+        "x": 40,
+        "y": 276,
+        "visible": true
+      },
+      {
+        "root": "105:9852",
+        "id": "105:9937",
+        "family": "Selection toolbar",
+        "w": 392,
+        "h": 36,
+        "x": 78,
+        "y": 340,
+        "visible": true
+      },
+      {
+        "root": "105:10037",
+        "id": "105:10122",
+        "family": "Notice",
+        "w": 360,
+        "h": 64,
+        "x": 120,
+        "y": 740,
+        "visible": true
+      },
+      {
+        "root": "111:16324",
+        "id": "111:16410",
+        "family": "Link preview",
+        "w": 400,
+        "h": 138,
+        "x": 100,
+        "y": 171,
+        "visible": true
+      },
+      {
+        "root": "111:16421",
+        "id": "111:16507",
+        "family": "Web clipper",
+        "w": 440,
+        "h": 318,
+        "x": 80,
+        "y": 81,
+        "visible": true
+      },
+      {
+        "root": "111:16533",
+        "id": "111:16619",
+        "family": "Insert form",
+        "w": 400,
+        "h": 316,
+        "x": 100,
+        "y": 82,
+        "visible": true
+      },
+      {
+        "root": "111:16649",
+        "id": "111:16735",
+        "family": "Image export advanced",
+        "w": 480,
+        "h": 378,
+        "x": 60,
+        "y": 51,
+        "visible": true
+      },
+      {
+        "root": "111:16768",
+        "id": "111:16852",
+        "family": "Find panel",
+        "w": 440,
+        "h": 84,
+        "x": 104,
+        "y": 152,
+        "visible": true
+      }
+    ]
+  },
+  "reviewBoards": [
+    {
+      "id": "164:8461",
+      "name": "MDR Blue/浮层紧凑审阅/01 · 右键与短菜单",
+      "w": 1500,
+      "h": 529
+    },
+    {
+      "id": "164:8577",
+      "name": "MDR Blue/浮层紧凑审阅/02 · 主菜单与快捷键",
+      "w": 1500,
+      "h": 817
+    },
+    {
+      "id": "164:8834",
+      "name": "MDR Blue/浮层紧凑审阅/03 · 选项、提示与查找",
+      "w": 1500,
+      "h": 662
+    },
+    {
+      "id": "164:8970",
+      "name": "MDR Blue/浮层紧凑审阅/04 · 表单、调色与插入",
+      "w": 1500,
+      "h": 854
+    },
+    {
+      "id": "164:9190",
+      "name": "MDR Blue/浮层紧凑审阅/05 · 导入与导出状态",
+      "w": 1500,
+      "h": 830
+    },
+    {
+      "id": "164:9355",
+      "name": "MDR Blue/浮层紧凑审阅/06 · 帮助与网页预览",
+      "w": 1500,
+      "h": 1000
+    },
+    {
+      "id": "164:9488",
+      "name": "MDR Blue/浮层紧凑审阅/07 · 图片预览与拖放",
+      "w": 1500,
+      "h": 694
+    },
+    {
+      "id": "164:9619",
+      "name": "MDR Blue/浮层紧凑审阅/08 · 内联组件边界",
+      "w": 1500,
+      "h": 610
+    },
+    {
+      "id": "165:9553",
+      "name": "MDR Blue/浮层紧凑审阅/09 · 深色状态",
+      "w": 1500,
+      "h": 854
+    }
+  ],
+  "screenshots": [
+    "compact-review-0.png",
+    "compact-review-1.png",
+    "compact-review-2.png",
+    "compact-review-3.png",
+    "compact-review-4.png",
+    "compact-review-5.png",
+    "compact-review-6.png",
+    "compact-review-7.png",
+    "compact-review-dark.png",
+    "compact-context-screen.png",
+    "compact-short-export.png",
+    "compact-short-import.png",
+    "compact-short-link.png",
+    "compact-narrow-help.png",
+    "compact-desktop-help.png"
+  ],
+  "review": {
+    "independent": "Read-only second assessment from the same103-state snapshot, followed by primary agent rendered review; recommendations were targets, not acceptance evidence.",
+    "visual": "9 normal-scale boards reviewed including dark sample; desktop context/help and600x480 export/import/link plus600x860 help reviewed.",
+    "mechanical": "Figma Plugin API boundary scan on100active states:0unintended overflows,0missing text styles,0nonempty zero-sized text,0image-filled UI;1intentional vertical PNG preview scroll area.",
+    "cliDetector": "Not executed for this Figma design. Installed skill guidance was read; no local engine found at sibling/home/version cache paths. Code-level detector results would not certify the unimplemented Figma design.",
+    "prototype": "Configuration retained; actual playback not verified."
+  },
+  "retained": [
+    {
+      "family": "Table picker",
+      "reason": "Already188x214 with8x8 grid; shrinking cells further harms precise selection."
+    },
+    {
+      "family": "Widget toolbar",
+      "reason": "Full-width content-block toolbar, not a floating panel."
+    },
+    {
+      "family": "Duration field",
+      "reason": "Inline settings field and validation, not a floating panel."
+    },
+    {
+      "family": "Link preview ready",
+      "reason": "Actual webpage reading viewport retained; loading and blocked states compacted."
+    },
+    {
+      "family": "Select menu",
+      "reason": "240px matches existing native select trigger; OS controls popup behavior. Do not replace native keyboard semantics for a narrow mockup."
+    },
+    {
+      "family": "Image export advanced ready",
+      "reason": "Preview area160high with explicit vertical scroll to retain complete long PNG preview."
+    }
+  ],
+  "implementationContract": {
+    "sizing": "Use intrinsic content height and task-specific width, preserve14px operation text and32px form controls. Context/menu rows28px, panel padding4px, group separators semantic1px; no routine extra row gaps.",
+    "menus": "Choose widths from labels, shortcuts and disclosure. Reposition within8px viewport margins; long dynamic filenames may truncate with accessible full title.",
+    "modal": "Center actual panel after content/state changes, viewport maximum height calc(100dvh -64px), scroll content without hiding title/actions.",
+    "help": "Top category strip; long translations scroll horizontally, long real registry content scrolls vertically. Do not replace the registry with the design sample rows.",
+    "data": "All actual commands, preferences, validation, native fetch, export formats, cancellation protection, stable preview and persistence remain owned by their existing modules."
+  },
+  "limitations": [
+    "Figma-only revision; no new-blue build, functional browser automation or Windows runtime validation.",
+    "Physical DPI, keyboard/screen-reader behavior and all localized runtime strings remain implementation acceptance work.",
+    "System file and print dialogs are OS-owned, not redrawn as application Figma modals."
+  ]
+}

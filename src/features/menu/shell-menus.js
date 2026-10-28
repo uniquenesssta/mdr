@@ -6,6 +6,7 @@
  * Lifecycle: Explicit construction, rollback on failure and idempotent destroy.
  */
 import { createApplicationLifetime } from '../../bootstrap/application-lifetime.js';
+import { createSafeElement } from '../../ui/dom/index.js';
 
 export function createShellMenus({ document, window, toast, coreSubmenuPositionerPort, coreEditorUiCommandPort }) {
   const lifetime = createApplicationLifetime();
@@ -90,9 +91,19 @@ export function createShellMenus({ document, window, toast, coreSubmenuPositione
     let toastTimer = 0;
     function showToast(msg) {
       if (!lifetime.alive) return;
-      toast.textContent = msg; toast.classList.add('show');
+      const failed = /^保存失败/.test(String(msg));
+      toast.classList.toggle('is-error-notice', failed);
+      toast.replaceChildren();
+      if (failed) {
+        const copy = createSafeElement(document, 'div', { className: 'notice-copy' });
+        copy.append(createSafeElement(document, 'strong', { text: '保存失败' }), createSafeElement(document, 'span', { text: String(msg).replace(/^保存失败[：:]?\s*/, '') || '检查文件是否被占用，稍后重试。' }));
+        const retry = createSafeElement(document, 'button', { text: '重试', attributes: { type: 'button' } });
+        retry.addEventListener('click', () => { void coreEditorUiCommandPort.invoke('saveCurrentFile'); }, { once: true });
+        toast.append(copy, retry);
+      } else toast.textContent = msg;
+      toast.classList.add('show');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 2000);
+      toastTimer = failed ? 0 : setTimeout(() => toast.classList.remove('show'), 2000);
     }
     lifetime.own(() => { toast.classList.remove('show'); closeContextMenus(); closeAppMenus(); });
     lifetime.own(coreEditorUiCommandPort.register({ notify: showToast, closeAppMenus, showContextMenu, closeContextMenus }));

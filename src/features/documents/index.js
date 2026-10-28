@@ -23,3 +23,6 @@ export { createDocumentContextMenuView } from './ui/document-context-menu-view.j
 export { createDocumentTitleView } from './ui/document-title-view.js';
 
 export { createDocumentContentView } from './ui/document-content-view.js';
+export { createDocumentEmptyView } from './ui/document-empty-view.js';
+export { createWindowSessionStorage } from './infrastructure/window-session-storage.js';
+export { createLaunchOpenController } from './application/launch-open-controller.js';

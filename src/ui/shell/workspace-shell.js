@@ -14,7 +14,7 @@ function createSeparator(documentRef, { className, id, label, title = label }) {
   return separator;
 }
 
-export function createWorkspaceShell(documentRef, sidebar) {
+export function createWorkspaceShell(documentRef, sidebar, toolbar = null) {
   requireElementRef(sidebar, 'workspace sidebar shell');
   if (sidebar.id !== 'sidebar') throw new TypeError('createWorkspaceShell requires the sidebar shell.');
 
@@ -55,6 +55,9 @@ export function createWorkspaceShell(documentRef, sidebar) {
   });
 
   main.append(editor, paneResizer, preview);
-  workspace.append(sidebar, sidebarResizer, main);
+  const workArea = createSafeElement(documentRef, 'div', { className: 'l-workspace-main' });
+  if (toolbar) workArea.append(toolbar);
+  workArea.append(main);
+  workspace.append(sidebar, sidebarResizer, workArea);
   return Object.freeze({ element: workspace, editor, preview });
 }

@@ -12,7 +12,7 @@ html.tauri-shell body {
 
 html.tauri-shell .l-app-shell {
   height: 100vh;
-  border: 0;
+  border: 1px solid var(--color-border-subtle);
   border-radius: 0;
   overflow: hidden;
   background: var(--color-canvas);
@@ -33,6 +33,7 @@ html.tauri-shell.window-maximized .l-app-shell {
   align-items: center;
   gap: var(--space-xs);
   flex: 0 0 auto;
+  margin-left: auto;
 }
 
 .window-controls[hidden] {
@@ -67,10 +68,6 @@ html.tauri-shell.window-maximized .l-app-shell {
 }
 
 @media (max-width: 900px) {
-  .window-controls {
-margin-left: var(--space-sm);
-  }
-
   .window-control-btn {
 width: 28px;
 height: 28px;

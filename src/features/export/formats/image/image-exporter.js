@@ -103,7 +103,7 @@ export function createImageExporter({ documentModel, documents, builder, enhance
     const request = normalize(input), cached = preview;
     if (!cached) return Object.freeze({ status: 'no-preview', name: request.name });
     if (!sourceCurrent(cached.source)) { clearPreview(); throw new ExportCancelledError('document-changed'); }
-    if (request.imageOptions.ratio !== cached.request.imageOptions.ratio || request.imageOptions.cropFit !== cached.request.imageOptions.cropFit) {
+    if (request.imageOptions.ratio !== cached.request.imageOptions.ratio || request.imageOptions.cropFit !== cached.request.imageOptions.cropFit || request.imageOptions.background !== cached.request.imageOptions.background) {
       throw new ExportCancelledError('image-options-changed');
     }
     const bytes = cached.bytes.slice();

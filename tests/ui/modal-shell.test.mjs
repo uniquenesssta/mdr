@@ -356,8 +356,8 @@ test('R16-08 editor dialogs own ModalShell directly without modal events or a se
   assert.match(clipperSource, /new ModalShell\(root, \{ panel \}\)/);
   assert.doesNotMatch(clipperSource, /markdown-editor:modal-shell-/);
 
-  for (const source of featureSources) {
-    assert.match(source, /new ModalShell\((?:root|element),|createModalShell\(root,/);
+  for (const [index, source] of featureSources.entries()) {
+    assert.match(source, index === 1 ? /new PopoverShell\(root,/ : /new ModalShell\((?:root|element),|createModalShell\(root,/);
     assert.match(source, /shell\.open\(null,/);
     assert.match(source, /shell\.destroy\(\)/);
     assert.doesNotMatch(source, /markdown-editor:modal-shell-|markdownEditorModalShells/);
@@ -371,7 +371,8 @@ test('R16-08 editor dialogs own ModalShell directly without modal events or a se
   assert.match(helpDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'help-modal'/);
   assert.match(helpDialogSource, /new ModalShell\((?:root|element),|createModalShell\(root,/);
   assert.match(settingsDialogSource, /createSafeElement\(documentRef, 'div', \{ id: 'settings-modal'/);
-  assert.match(settingsDialogSource, /new ModalShell\((?:root|element),|createModalShell\(root,/);
+  assert.doesNotMatch(settingsDialogSource, /new ModalShell/);
+  assert.match(settingsDialogSource, /workspaceRoot\.inert = true/);
   assert.doesNotMatch(
     joined,
     /(?:settings|help|link|url|find|export-progress|export-image|image|mermaid)-modal[^\n]*(?:classList\.(?:add|remove)|style\.display)/

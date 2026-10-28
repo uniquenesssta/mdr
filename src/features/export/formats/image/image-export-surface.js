@@ -34,6 +34,10 @@ export function createImageExportSurface({ documentRef, container, stage, previe
       try {
         root.replaceChildren(body);
         styleLease = styles.apply(root, 'image');
+        if (options.background) {
+          root.dataset.theme = options.background;
+          root.style.setProperty('--export-paper', options.background === 'dark' ? 'var(--color-canvas)' : 'var(--color-surface-raised)');
+        }
         container.appendChild(root);
         layoutLease = layout.mount({ root, stage, options });
       } catch (error) {

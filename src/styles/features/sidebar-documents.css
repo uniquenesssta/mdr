@@ -113,3 +113,16 @@
   color: var(--color-danger);
   background: color-mix(in srgb, var(--color-danger) 11%, transparent);
 }
+
+
+.document-list { display:flex;flex-direction:column;gap:12px; }
+.document-item { display:flex;align-items:center;gap:8px;height:40px;min-height:40px;padding:8px;border:0;border-radius:8px;box-shadow:none;background:transparent; }
+.document-item.active { background:var(--color-accent-soft);border:0;box-shadow:none; }
+.document-item.active::before,.document-item.active::after { display:none; }
+.document-item .document-file-icon { width:16px;height:16px;flex:0 0 16px;color:var(--color-text-secondary); }
+.document-summary { display:flex;flex:1;min-width:0;padding:0;border:0;background:transparent;text-align:left;color:var(--color-text-primary); }
+.document-item.active .document-summary { color:var(--color-accent); }
+.document-title { font-size:14px;line-height:22px;font-weight:400; }
+.document-meta { display:none; }
+.document-close { width:20px;height:20px;padding:2px;border:0;background:transparent;opacity:0; }
+.document-item:hover .document-close,.document-item:focus-within .document-close { opacity:1; }

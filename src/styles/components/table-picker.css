@@ -1,37 +1,6 @@
-/* Responsibility: Table-size picker component. */
-
-/* 表格选择器 */
-.table-selector-menu {
-      padding: var(--space-xl);
-      min-width: auto;
-}
-
-.table-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 22px);
-      grid-template-rows: repeat(8, 22px);
-      gap: 3px;
-}
-
-.table-grid-cell {
-      width: 22px;
-      height: 22px;
-      border: 1px solid var(--color-border-subtle);
-      border-radius: 4px;
-      cursor: pointer;
-      background: var(--color-surface-raised);
-      transition: background var(--motion-duration-instant-feedback) ease, border-color var(--motion-duration-instant-feedback) ease;
-}
-
-.table-grid-cell:hover,
-.table-grid-cell.active {
-      background: var(--color-accent);
-      border-color: var(--color-accent);
-}
-
-.table-size-label {
-      text-align: center;
-      margin-top: var(--space-md);
-      font-size: var(--font-size-sm);
-      color: var(--color-text-muted);
-}
+/* Responsibility: The compact 8 by 8 table-size picker. */
+.table-selector-menu { width: 212px; min-width: 212px; padding: 12px; }
+.table-grid { display: grid; grid-template-columns: repeat(8,20px); grid-template-rows: repeat(8,20px); gap: 4px; }
+.table-grid-cell { width: 20px; height: 20px; padding: 0; border: 1px solid var(--color-border-strong); border-radius: 4px; background: var(--color-surface-raised); cursor: pointer; }
+.table-grid-cell:hover, .table-grid-cell.active { background: var(--color-accent-soft); border-color: var(--color-accent); }
+.table-size-label { margin: 8px 0 0; height: 20px; color: var(--color-text-secondary); font-size: 12px; line-height: 20px; text-align: center; }

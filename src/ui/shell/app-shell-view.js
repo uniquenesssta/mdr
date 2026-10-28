@@ -14,11 +14,11 @@ export function createAppShellView(documentRef) {
   const menu = createMenuBarShell(documentRef);
   const toolbar = createToolbarShell(documentRef);
   const sidebar = createSidebarShell(documentRef);
-  const workspace = createWorkspaceShell(documentRef, sidebar);
+  const workspace = createWorkspaceShell(documentRef, sidebar, toolbar);
   const status = createStatusBarShell(documentRef);
   const overlay = createOverlayRoot(documentRef);
 
-  app.append(menu, toolbar, workspace.element, status);
+  app.append(menu, workspace.element, status);
   return Object.freeze({
     app,
     overlay,
@@ -29,7 +29,8 @@ export function createAppShellView(documentRef) {
       editor: workspace.editor,
       preview: workspace.preview,
       status,
-      overlay
+      overlay,
+      workspace: workspace.element
     })
   });
 }

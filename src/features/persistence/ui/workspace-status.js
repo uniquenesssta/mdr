@@ -7,7 +7,7 @@
  */
 import { createApplicationLifetime } from '../../../bootstrap/application-lifetime.js';
 
-export function createWorkspaceStatus({ document, editor, coreI18nPort, corePreviewCommandPort, coreSettingsStorePort, coreSaveStatusStorePort, coreDocumentSessionPort, coreLayoutStatePort, coreEditorUiCommandPort }) {
+export function createWorkspaceStatus({ document, editor, coreI18nPort, corePreviewCommandPort, coreSettingsStorePort, coreSaveStatusStorePort, coreDocumentSessionPort, coreLayoutStatePort, coreEditorUiCommandPort, corePreviewStatePort = null }) {
   const lifetime = createApplicationLifetime();
   const setTimeout = lifetime.setTimeout, clearTimeout = lifetime.clearTimeout;
   try {
@@ -90,12 +90,16 @@ const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
       clearTimeout(saveStatusResetTimer);
       saveStatusResetTimer = 0;
       hint.dataset.state = state;
-      hint.textContent = resolveSaveStatusMessage(snapshot, state);
-      hint.classList.toggle('show', state !== 'saved');
-      if (state === 'saved') {
-        hint.classList.add('show');
-        saveStatusResetTimer = setTimeout(() => hint.classList.remove('show'), 1500);
-      }
+      const preview = corePreviewStatePort?.snapshot;
+      const previewFailed = ['error', 'degraded'].includes(preview?.status);
+      const previewRecovering = preview?.status === 'rendering' && Boolean(preview?.error);
+      const previewVisible = !['error', 'saving', 'queued', 'loading'].includes(state) && (previewFailed || previewRecovering);
+      hint.textContent = previewVisible ? (previewFailed ? '预览恢复失败' : '预览恢复中…') : resolveSaveStatusMessage(snapshot, state).replace(/^✓\s*/, '');
+      if (state === 'saved' && !previewVisible && hint.textContent === '已保存') hint.textContent = '已保存到本地';
+      if(state==='saved'&&!previewVisible&&!coreSettingsStorePort.get('autoSaveEnabled'))hint.textContent='自动保存关闭';
+      hint.classList.add('show');
+      const retry = document.getElementById('statusbar-preview-retry');
+      if (retry) retry.hidden = !previewVisible || !previewFailed;
     }
 
     function updateStatusBar() {
@@ -105,17 +109,6 @@ const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
       if (statusLeft) statusLeft.textContent = autoSaveEnabled
         ? `自动保存已启用 · ${Math.round(autoSaveDelay) / 1000} 秒`
         : '自动保存已关闭';
-      if (!autoSaveEnabled) {
-        clearTimeout(saveStatusResetTimer);
-        saveStatusResetTimer = 0;
-        const hint = document.getElementById('save-hint');
-        if (hint) {
-          hint.dataset.state = 'disabled';
-          hint.textContent = '自动保存关闭';
-          hint.classList.remove('show');
-        }
-        return;
-      }
       renderSaveHint(getSaveStatusSnapshot());
     }
 
@@ -136,12 +129,17 @@ const corePreviewBehaviorThresholds = corePreviewCommandPort.thresholds;
         } else if (snapshot.state === 'idle') {
           updateStatusBar();
         }
+        const hint = document.getElementById('save-hint');
+        if (hint && ['loading', 'error'].includes(snapshot.state)) { hint.textContent = statusLeft.textContent; hint.classList.add('show'); }
         return;
       }
       renderSaveHint(snapshot);
     }
     lifetime.own(coreI18nPort.subscribe(() => refreshClassicLocalizedState()));
     lifetime.own(coreSaveStatusStorePort.subscribe(event => renderPersistenceStatus(event.current)));
+    if (corePreviewStatePort?.subscribe) lifetime.own(corePreviewStatePort.subscribe(() => renderSaveHint()));
+    const previewRetry = document.getElementById('statusbar-preview-retry');
+    if (previewRetry) lifetime.listen(previewRetry, 'click', () => { void corePreviewCommandPort.update().catch(error => { const hint = document.getElementById('save-hint'); if (hint) hint.textContent = error?.message || '预览恢复失败'; }); });
     renderPersistenceStatus(getSaveStatusSnapshot());
     return Object.freeze({ updateStatusBar, updateLargeDocumentMode, refreshClassicLocalizedState, updatePreviewStrategyBadge, destroy: lifetime.destroy });
   } catch (error) { lifetime.destroy(); throw error; }

@@ -1,0 +1,4796 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "status": "figma_export_with_verified_runtime_integration_record",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "collections": [
+    {
+      "id": "VariableCollectionId:3:6",
+      "name": "MDR / Dimensions",
+      "modes": [
+        {
+          "name": "Base",
+          "modeId": "3:3"
+        }
+      ]
+    },
+    {
+      "id": "VariableCollectionId:78:1006",
+      "name": "MDR / Blue reference",
+      "modes": [
+        {
+          "name": "Light",
+          "modeId": "78:0"
+        },
+        {
+          "name": "Dark",
+          "modeId": "93:1"
+        }
+      ]
+    },
+    {
+      "id": "VariableCollectionId:93:1202",
+      "name": "MDR Blue / Primitives",
+      "modes": [
+        {
+          "name": "Base",
+          "modeId": "93:0"
+        }
+      ]
+    }
+  ],
+  "variables": [
+    {
+      "id": "VariableID:3:43",
+      "name": "space/4",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 4
+      },
+      "syntax": {
+        "WEB": "var(--space-xs)"
+      },
+      "cssMapping": {
+        "name": "--space-xs",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:44",
+      "name": "space/8",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 8
+      },
+      "syntax": {
+        "WEB": "var(--space-md)"
+      },
+      "cssMapping": {
+        "name": "--space-md",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:45",
+      "name": "space/12",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 12
+      },
+      "syntax": {
+        "WEB": "var(--space-xl)"
+      },
+      "cssMapping": {
+        "name": "--space-xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:46",
+      "name": "space/16",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 16
+      },
+      "syntax": {
+        "WEB": "var(--space-2xl)"
+      },
+      "cssMapping": {
+        "name": "--space-2xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:47",
+      "name": "space/24",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 24
+      },
+      "syntax": {
+        "WEB": "var(--space-4xl)"
+      },
+      "cssMapping": {
+        "name": "--space-4xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:48",
+      "name": "space/32",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 32
+      },
+      "syntax": {
+        "WEB": "var(--space-5xl)"
+      },
+      "cssMapping": {
+        "name": "--space-5xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:49",
+      "name": "space/48",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 48
+      },
+      "syntax": {
+        "WEB": "var(--space-7xl)"
+      },
+      "cssMapping": {
+        "name": "--space-7xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:50",
+      "name": "space/64",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 64
+      },
+      "syntax": {
+        "WEB": "var(--space-8xl)"
+      },
+      "cssMapping": {
+        "name": "--space-8xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:51",
+      "name": "radius/4",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "CORNER_RADIUS"
+      ],
+      "values": {
+        "3:3": 4
+      },
+      "syntax": {
+        "WEB": "var(--mdr-radius-4)"
+      },
+      "cssMapping": {
+        "name": "--mdr-radius-4",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:3:52",
+      "name": "radius/8",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "CORNER_RADIUS"
+      ],
+      "values": {
+        "3:3": 8
+      },
+      "syntax": {
+        "WEB": "var(--radius-lg)"
+      },
+      "cssMapping": {
+        "name": "--radius-lg",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:53",
+      "name": "radius/12",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "CORNER_RADIUS"
+      ],
+      "values": {
+        "3:3": 12
+      },
+      "syntax": {
+        "WEB": "var(--radius-2xl)"
+      },
+      "cssMapping": {
+        "name": "--radius-2xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:54",
+      "name": "font/ui",
+      "collection": "VariableCollectionId:3:6",
+      "type": "STRING",
+      "scopes": [
+        "FONT_FAMILY"
+      ],
+      "values": {
+        "3:3": "Noto Sans SC"
+      },
+      "syntax": {
+        "WEB": "var(--font-family-ui)"
+      },
+      "cssMapping": {
+        "name": "--font-family-ui",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:3:55",
+      "name": "font/mono",
+      "collection": "VariableCollectionId:3:6",
+      "type": "STRING",
+      "scopes": [
+        "FONT_FAMILY"
+      ],
+      "values": {
+        "3:3": "JetBrains Mono"
+      },
+      "syntax": {
+        "WEB": "var(--font-family-mono)"
+      },
+      "cssMapping": {
+        "name": "--font-family-mono",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:34:755",
+      "name": "control/height",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 36
+      },
+      "syntax": {
+        "WEB": "var(--control-height)"
+      },
+      "cssMapping": {
+        "name": "--control-height",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:34:756",
+      "name": "control/compact",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 32
+      },
+      "syntax": {
+        "WEB": "var(--control-compact)"
+      },
+      "cssMapping": {
+        "name": "--control-compact",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:34:757",
+      "name": "settings/row",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 72
+      },
+      "syntax": {
+        "WEB": "var(--settings-row-height)"
+      },
+      "cssMapping": {
+        "name": "--settings-row-height",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:34:758",
+      "name": "sidebar/width",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 240
+      },
+      "syntax": {
+        "WEB": "var(--sidebar-width)"
+      },
+      "cssMapping": {
+        "name": "--sidebar-width",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:56:1167",
+      "name": "layout/status-height",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 40
+      },
+      "syntax": {
+        "WEB": "var(--status-bar-height)"
+      },
+      "cssMapping": {
+        "name": "--status-bar-height",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:66:1215",
+      "name": "control/selection-compact",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 28
+      },
+      "syntax": {
+        "WEB": "var(--selection-control-height)"
+      },
+      "cssMapping": {
+        "name": "--selection-control-height",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:78:1007",
+      "name": "primary",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1203"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1204"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-accent)"
+      },
+      "cssMapping": {
+        "name": "--color-accent",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.14509804546833038,
+        "g": 0.22745098173618317,
+        "b": 0.4431372582912445,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.6627451181411743,
+        "g": 0.7647058963775635,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1008",
+      "name": "primaryHover",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1205"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1206"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-accent-hover)"
+      },
+      "cssMapping": {
+        "name": "--color-accent-hover",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.10980392247438431,
+        "g": 0.18431372940540314,
+        "b": 0.3764705955982208,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.772549033164978,
+        "g": 0.8392156958580017,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1009",
+      "name": "primaryPressed",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1207"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1208"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-accent-emphasis)"
+      },
+      "cssMapping": {
+        "name": "--color-accent-emphasis",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.0784313753247261,
+        "g": 0.1411764770746231,
+        "b": 0.2823529541492462,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.5568627715110779,
+        "g": 0.6745098233222961,
+        "b": 0.9137254953384399,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1010",
+      "name": "navy",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1209"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1210"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-text-heading)"
+      },
+      "cssMapping": {
+        "name": "--color-text-heading",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.05098039284348488,
+        "g": 0.15294118225574493,
+        "b": 0.2705882489681244,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8352941274642944,
+        "g": 0.8901960849761963,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1011",
+      "name": "blue",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1211"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1212"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-link)"
+      },
+      "cssMapping": {
+        "name": "--color-link",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.125490203499794,
+        "g": 0.3803921639919281,
+        "b": 0.6705882549285889,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.6117647290229797,
+        "g": 0.7686274647712708,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1012",
+      "name": "teal",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1213"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1214"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-teal)"
+      },
+      "cssMapping": {
+        "name": "--color-teal",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.15294118225574493,
+        "g": 0.5647059082984924,
+        "b": 0.6470588445663452,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.4745098054409027,
+        "g": 0.7882353067398071,
+        "b": 0.8470588326454163,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1013",
+      "name": "canvas",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1215"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1216"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-canvas)"
+      },
+      "cssMapping": {
+        "name": "--color-canvas",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.95686274766922,
+        "g": 0.9686274528503418,
+        "b": 0.9843137264251709,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.062745101749897,
+        "g": 0.09019608050584793,
+        "b": 0.13333334028720856,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1014",
+      "name": "surface",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1217"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1218"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-surface-raised)"
+      },
+      "cssMapping": {
+        "name": "--color-surface-raised",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.09803921729326248,
+        "g": 0.13725490868091583,
+        "b": 0.1921568661928177,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1015",
+      "name": "text",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1219"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1220"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-text-primary)"
+      },
+      "cssMapping": {
+        "name": "--color-text-primary",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.125490203499794,
+        "g": 0.1725490242242813,
+        "b": 0.24313725531101227,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8941176533699036,
+        "g": 0.9176470637321472,
+        "b": 0.95686274766922,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1016",
+      "name": "muted",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1221"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1222"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-text-secondary)"
+      },
+      "cssMapping": {
+        "name": "--color-text-secondary",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.3843137254901961,
+        "g": 0.4470588235294118,
+        "b": 0.5372549019607843,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.6431372761726379,
+        "g": 0.7019608020782471,
+        "b": 0.7843137383460999,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1017",
+      "name": "border",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1223"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1224"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-border-subtle)"
+      },
+      "cssMapping": {
+        "name": "--color-border-subtle",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8627451062202454,
+        "g": 0.8901960849761963,
+        "b": 0.929411768913269,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.20392157137393951,
+        "g": 0.26274511218070984,
+        "b": 0.33725491166114807,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1018",
+      "name": "selected",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1225"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1226"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-accent-soft)"
+      },
+      "cssMapping": {
+        "name": "--color-accent-soft",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.9176470637321472,
+        "g": 0.9411764740943909,
+        "b": 0.9803921580314636,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.1568627506494522,
+        "g": 0.23137255012989044,
+        "b": 0.35686275362968445,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1019",
+      "name": "navHover",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1215"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1227"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-surface-hover)"
+      },
+      "cssMapping": {
+        "name": "--color-surface-hover",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.95686274766922,
+        "g": 0.9686274528503418,
+        "b": 0.9843137264251709,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.13333334028720856,
+        "g": 0.1921568661928177,
+        "b": 0.27843138575553894,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1020",
+      "name": "navSelected",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1203"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1204"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-nav-selected)"
+      },
+      "cssMapping": {
+        "name": "--color-nav-selected",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.14509804546833038,
+        "g": 0.22745098173618317,
+        "b": 0.4431372582912445,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.6627451181411743,
+        "g": 0.7647058963775635,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1021",
+      "name": "navText",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1217"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1228"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-on-accent)"
+      },
+      "cssMapping": {
+        "name": "--color-on-accent",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.062745101749897,
+        "g": 0.125490203499794,
+        "b": 0.22745098173618317,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1022",
+      "name": "navMuted",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1221"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1222"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-text-muted)"
+      },
+      "cssMapping": {
+        "name": "--color-text-muted",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.3843137254901961,
+        "g": 0.4470588235294118,
+        "b": 0.5372549019607843,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.6431372761726379,
+        "g": 0.7019608020782471,
+        "b": 0.7843137383460999,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1023",
+      "name": "disabled",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1229"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1230"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-control-disabled)"
+      },
+      "cssMapping": {
+        "name": "--color-control-disabled",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.9137254953384399,
+        "g": 0.929411768913269,
+        "b": 0.9529411792755127,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.15294118225574493,
+        "g": 0.1921568661928177,
+        "b": 0.25882354378700256,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1024",
+      "name": "disabledText",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1231"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1232"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-text-disabled)"
+      },
+      "cssMapping": {
+        "name": "--color-text-disabled",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.3960784375667572,
+        "g": 0.45490196347236633,
+        "b": 0.5411764979362488,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.5764706134796143,
+        "g": 0.6313725709915161,
+        "b": 0.7098039388656616,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1025",
+      "name": "error",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1233"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1234"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-danger)"
+      },
+      "cssMapping": {
+        "name": "--color-danger",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.7058823704719543,
+        "g": 0.13725490868091583,
+        "b": 0.21176470816135406,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 1,
+        "g": 0.6549019813537598,
+        "b": 0.6941176652908325,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:78:1026",
+      "name": "success",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1235"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1236"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-success-strong)"
+      },
+      "cssMapping": {
+        "name": "--color-success-strong",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.08627451211214066,
+        "g": 0.45490196347236633,
+        "b": 0.3960784375667572,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.4901960790157318,
+        "g": 0.8509804010391235,
+        "b": 0.7215686440467834,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1203",
+      "name": "color/253A71",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.14509804546833038,
+          "g": 0.22745098173618317,
+          "b": 0.4431372582912445,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-253a71)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-253a71",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1204",
+      "name": "color/A9C3FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.6627451181411743,
+          "g": 0.7647058963775635,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-a9c3ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-a9c3ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1205",
+      "name": "color/1C2F60",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.10980392247438431,
+          "g": 0.18431372940540314,
+          "b": 0.3764705955982208,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-1c2f60)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-1c2f60",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1206",
+      "name": "color/C5D6FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.772549033164978,
+          "g": 0.8392156958580017,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-c5d6ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-c5d6ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1207",
+      "name": "color/142448",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.0784313753247261,
+          "g": 0.1411764770746231,
+          "b": 0.2823529541492462,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-142448)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-142448",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1208",
+      "name": "color/8EACE9",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.5568627715110779,
+          "g": 0.6745098233222961,
+          "b": 0.9137254953384399,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-8eace9)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-8eace9",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1209",
+      "name": "color/0D2745",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.05098039284348488,
+          "g": 0.15294118225574493,
+          "b": 0.2705882489681244,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-0d2745)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-0d2745",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1210",
+      "name": "color/D5E3FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8352941274642944,
+          "g": 0.8901960849761963,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-d5e3ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-d5e3ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1211",
+      "name": "color/2061AB",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.125490203499794,
+          "g": 0.3803921639919281,
+          "b": 0.6705882549285889,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-2061ab)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-2061ab",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1212",
+      "name": "color/9CC4FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.6117647290229797,
+          "g": 0.7686274647712708,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-9cc4ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-9cc4ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1213",
+      "name": "color/2790A5",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.15294118225574493,
+          "g": 0.5647059082984924,
+          "b": 0.6470588445663452,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-2790a5)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-2790a5",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1214",
+      "name": "color/79C9D8",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.4745098054409027,
+          "g": 0.7882353067398071,
+          "b": 0.8470588326454163,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-79c9d8)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-79c9d8",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1215",
+      "name": "color/F4F7FB",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.95686274766922,
+          "g": 0.9686274528503418,
+          "b": 0.9843137264251709,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-f4f7fb)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-f4f7fb",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1216",
+      "name": "color/101722",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.062745101749897,
+          "g": 0.09019608050584793,
+          "b": 0.13333334028720856,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-101722)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-101722",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1217",
+      "name": "color/FFFFFF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 1,
+          "g": 1,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-ffffff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-ffffff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1218",
+      "name": "color/192331",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.09803921729326248,
+          "g": 0.13725490868091583,
+          "b": 0.1921568661928177,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-192331)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-192331",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1219",
+      "name": "color/202C3E",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.125490203499794,
+          "g": 0.1725490242242813,
+          "b": 0.24313725531101227,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-202c3e)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-202c3e",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1220",
+      "name": "color/E4EAF4",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8941176533699036,
+          "g": 0.9176470637321472,
+          "b": 0.95686274766922,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-e4eaf4)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-e4eaf4",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1221",
+      "name": "color/627289",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.3843137254901961,
+          "g": 0.4470588235294118,
+          "b": 0.5372549019607843,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-627289)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-627289",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1222",
+      "name": "color/A4B3C8",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.6431372761726379,
+          "g": 0.7019608020782471,
+          "b": 0.7843137383460999,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-a4b3c8)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-a4b3c8",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1223",
+      "name": "color/DCE3ED",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8627451062202454,
+          "g": 0.8901960849761963,
+          "b": 0.929411768913269,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-dce3ed)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-dce3ed",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1224",
+      "name": "color/344356",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.20392157137393951,
+          "g": 0.26274511218070984,
+          "b": 0.33725491166114807,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-344356)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-344356",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1225",
+      "name": "color/EAF0FA",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9176470637321472,
+          "g": 0.9411764740943909,
+          "b": 0.9803921580314636,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-eaf0fa)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-eaf0fa",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1226",
+      "name": "color/283B5B",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.1568627506494522,
+          "g": 0.23137255012989044,
+          "b": 0.35686275362968445,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-283b5b)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-283b5b",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1227",
+      "name": "color/223147",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.13333334028720856,
+          "g": 0.1921568661928177,
+          "b": 0.27843138575553894,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-223147)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-223147",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1228",
+      "name": "color/10203A",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.062745101749897,
+          "g": 0.125490203499794,
+          "b": 0.22745098173618317,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-10203a)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-10203a",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1229",
+      "name": "color/E9EDF3",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9137254953384399,
+          "g": 0.929411768913269,
+          "b": 0.9529411792755127,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-e9edf3)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-e9edf3",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1230",
+      "name": "color/273142",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.15294118225574493,
+          "g": 0.1921568661928177,
+          "b": 0.25882354378700256,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-273142)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-273142",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1231",
+      "name": "color/65748A",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.3960784375667572,
+          "g": 0.45490196347236633,
+          "b": 0.5411764979362488,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-65748a)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-65748a",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1232",
+      "name": "color/93A1B5",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.5764706134796143,
+          "g": 0.6313725709915161,
+          "b": 0.7098039388656616,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-93a1b5)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-93a1b5",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1233",
+      "name": "color/B42336",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.7058823704719543,
+          "g": 0.13725490868091583,
+          "b": 0.21176470816135406,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-b42336)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-b42336",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1234",
+      "name": "color/FFA7B1",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 1,
+          "g": 0.6549019813537598,
+          "b": 0.6941176652908325,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-ffa7b1)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-ffa7b1",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1235",
+      "name": "color/167465",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.08627451211214066,
+          "g": 0.45490196347236633,
+          "b": 0.3960784375667572,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-167465)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-167465",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1236",
+      "name": "color/7DD9B8",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.4901960790157318,
+          "g": 0.8509804010391235,
+          "b": 0.7215686440467834,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-7dd9b8)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-7dd9b8",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1237",
+      "name": "focus",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1211"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1238"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-focus-ring)"
+      },
+      "cssMapping": {
+        "name": "--color-focus-ring",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.125490203499794,
+        "g": 0.3803921639919281,
+        "b": 0.6705882549285889,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.7176470756530762,
+        "g": 0.8235294222831726,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1238",
+      "name": "color/B7D2FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.7176470756530762,
+          "g": 0.8235294222831726,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-b7d2ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-b7d2ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1239",
+      "name": "strongBorder",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1240"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1241"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-border-strong)"
+      },
+      "cssMapping": {
+        "name": "--color-border-strong",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.6392157077789307,
+        "g": 0.6980392336845398,
+        "b": 0.7803921699523926,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.4431372582912445,
+        "g": 0.5137255191802979,
+        "b": 0.6235294342041016,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1240",
+      "name": "color/A3B2C7",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.6392157077789307,
+          "g": 0.6980392336845398,
+          "b": 0.7803921699523926,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-a3b2c7)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-a3b2c7",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1241",
+      "name": "color/71839F",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.4431372582912445,
+          "g": 0.5137255191802979,
+          "b": 0.6235294342041016,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-71839f)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-71839f",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1242",
+      "name": "errorSurface",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1243"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1244"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-danger-soft)"
+      },
+      "cssMapping": {
+        "name": "--color-danger-soft",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 0.9450980424880981,
+        "b": 0.9529411792755127,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.23137255012989044,
+        "g": 0.1411764770746231,
+        "b": 0.1764705926179886,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1243",
+      "name": "color/FFF1F3",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 1,
+          "g": 0.9450980424880981,
+          "b": 0.9529411792755127,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fff1f3)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fff1f3",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1244",
+      "name": "color/3B242D",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.23137255012989044,
+          "g": 0.1411764770746231,
+          "b": 0.1764705926179886,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-3b242d)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-3b242d",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1245",
+      "name": "successSurface",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1246"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1247"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-success-soft)"
+      },
+      "cssMapping": {
+        "name": "--color-success-soft",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.929411768913269,
+        "g": 0.9686274528503418,
+        "b": 0.9529411792755127,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.0941176488995552,
+        "g": 0.22745098173618317,
+        "b": 0.1921568661928177,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1246",
+      "name": "color/EDF7F3",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.929411768913269,
+          "g": 0.9686274528503418,
+          "b": 0.9529411792755127,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-edf7f3)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-edf7f3",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1247",
+      "name": "color/183A31",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.0941176488995552,
+          "g": 0.22745098173618317,
+          "b": 0.1921568661928177,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-183a31)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-183a31",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1248",
+      "name": "warning",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1249"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1250"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-warning)"
+      },
+      "cssMapping": {
+        "name": "--color-warning",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.5372549295425415,
+        "g": 0.33725491166114807,
+        "b": 0,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.9607843160629272,
+        "g": 0.7803921699523926,
+        "b": 0.4470588266849518,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1249",
+      "name": "color/895600",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.5372549295425415,
+          "g": 0.33725491166114807,
+          "b": 0,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-895600)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-895600",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1250",
+      "name": "color/F5C772",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9607843160629272,
+          "g": 0.7803921699523926,
+          "b": 0.4470588266849518,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-f5c772)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-f5c772",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1251",
+      "name": "warningSurface",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1252"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1253"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-warning-soft)"
+      },
+      "cssMapping": {
+        "name": "--color-warning-soft",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 0.9647058844566345,
+        "b": 0.8901960849761963,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.2235294133424759,
+        "g": 0.1921568661928177,
+        "b": 0.11372549086809158,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1252",
+      "name": "color/FFF6E3",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 1,
+          "g": 0.9647058844566345,
+          "b": 0.8901960849761963,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fff6e3)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fff6e3",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1253",
+      "name": "color/39311D",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.2235294133424759,
+          "g": 0.1921568661928177,
+          "b": 0.11372549086809158,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-39311d)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-39311d",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1254",
+      "name": "tooltip",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1255"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1256"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-tooltip)"
+      },
+      "cssMapping": {
+        "name": "--color-tooltip",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.062745101749897,
+        "g": 0.16470588743686676,
+        "b": 0.27450981736183167,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8745098114013672,
+        "g": 0.9137254953384399,
+        "b": 0.9803921580314636,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1255",
+      "name": "color/102A46",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.062745101749897,
+          "g": 0.16470588743686676,
+          "b": 0.27450981736183167,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-102a46)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-102a46",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1256",
+      "name": "color/DFE9FA",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8745098114013672,
+          "g": 0.9137254953384399,
+          "b": 0.9803921580314636,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-dfe9fa)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-dfe9fa",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1257",
+      "name": "tooltipText",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1217"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1228"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-tooltip-text)"
+      },
+      "cssMapping": {
+        "name": "--color-tooltip-text",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 1,
+        "b": 1,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.062745101749897,
+        "g": 0.125490203499794,
+        "b": 0.22745098173618317,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1258",
+      "name": "scrim",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1259"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1260"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-overlay-scrim)"
+      },
+      "cssMapping": {
+        "name": "--color-overlay-scrim",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.05098039284348488,
+        "g": 0.15294118225574493,
+        "b": 0.2705882489681244,
+        "a": 0.27843138575553894
+      },
+      "resolvedDark": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0.5490196347236633
+      }
+    },
+    {
+      "id": "VariableID:93:1259",
+      "name": "color/0D274547",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.05098039284348488,
+          "g": 0.15294118225574493,
+          "b": 0.2705882489681244,
+          "a": 0.27843138575553894
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-0d274547)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-0d274547",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1260",
+      "name": "color/0000008C",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 0.5490196347236633
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-0000008c)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-0000008c",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1261",
+      "name": "shadow",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1262"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1263"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-shadow-subtle)"
+      },
+      "cssMapping": {
+        "name": "--color-shadow-subtle",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.05098039284348488,
+        "g": 0.15294118225574493,
+        "b": 0.2705882489681244,
+        "a": 0.10196078568696976
+      },
+      "resolvedDark": {
+        "r": 0,
+        "g": 0,
+        "b": 0,
+        "a": 0.250980406999588
+      }
+    },
+    {
+      "id": "VariableID:93:1262",
+      "name": "color/0D27451A",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.05098039284348488,
+          "g": 0.15294118225574493,
+          "b": 0.2705882489681244,
+          "a": 0.10196078568696976
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-0d27451a)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-0d27451a",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1263",
+      "name": "color/00000040",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0,
+          "g": 0,
+          "b": 0,
+          "a": 0.250980406999588
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-00000040)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-00000040",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1264",
+      "name": "selection",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1265"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1266"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-accent-selection)"
+      },
+      "cssMapping": {
+        "name": "--color-accent-selection",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8627451062202454,
+        "g": 0.9098039269447327,
+        "b": 1,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.20392157137393951,
+        "g": 0.3294117748737335,
+        "b": 0.5254902243614197,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1265",
+      "name": "color/DCE8FF",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8627451062202454,
+          "g": 0.9098039269447327,
+          "b": 1,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-dce8ff)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-dce8ff",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1266",
+      "name": "color/345486",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.20392157137393951,
+          "g": 0.3294117748737335,
+          "b": 0.5254902243614197,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-345486)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-345486",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1267",
+      "name": "caret",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1203"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1206"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-editor-caret)"
+      },
+      "cssMapping": {
+        "name": "--color-editor-caret",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.14509804546833038,
+        "g": 0.22745098173618317,
+        "b": 0.4431372582912445,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.772549033164978,
+        "g": 0.8392156958580017,
+        "b": 1,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1268",
+      "name": "scrollbar",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1269"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1270"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-scrollbar-thumb)"
+      },
+      "cssMapping": {
+        "name": "--color-scrollbar-thumb",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.7019608020782471,
+        "g": 0.7529411911964417,
+        "b": 0.8235294222831726,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.3803921639919281,
+        "g": 0.4431372582912445,
+        "b": 0.545098066329956,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1269",
+      "name": "color/B3C0D2",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.7019608020782471,
+          "g": 0.7529411911964417,
+          "b": 0.8235294222831726,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-b3c0d2)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-b3c0d2",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1270",
+      "name": "color/61718B",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.3803921639919281,
+          "g": 0.4431372582912445,
+          "b": 0.545098066329956,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-61718b)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-61718b",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1271",
+      "name": "codeBackground",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1215"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1272"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-code-background)"
+      },
+      "cssMapping": {
+        "name": "--color-code-background",
+        "status": "planned_name_not_yet_implemented"
+      },
+      "resolvedLight": {
+        "r": 0.95686274766922,
+        "g": 0.9686274528503418,
+        "b": 0.9843137264251709,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.07450980693101883,
+        "g": 0.11372549086809158,
+        "b": 0.16862745583057404,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1272",
+      "name": "color/131D2B",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.07450980693101883,
+          "g": 0.11372549086809158,
+          "b": 0.16862745583057404,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-131d2b)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-131d2b",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1273",
+      "name": "highlight",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "FRAME_FILL",
+        "SHAPE_FILL",
+        "TEXT_FILL",
+        "STROKE_COLOR"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1274"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1275"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-highlight)"
+      },
+      "cssMapping": {
+        "name": "--color-highlight",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 0.9529411792755127,
+        "b": 0.6392157077789307,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.4000000059604645,
+        "g": 0.33725491166114807,
+        "b": 0.16862745583057404,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:93:1274",
+      "name": "color/FFF3A3",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 1,
+          "g": 0.9529411792755127,
+          "b": 0.6392157077789307,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fff3a3)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fff3a3",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1275",
+      "name": "color/66562B",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.4000000059604645,
+          "g": 0.33725491166114807,
+          "b": 0.16862745583057404,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-66562b)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-66562b",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1276",
+      "name": "space/0",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 0
+      },
+      "syntax": {
+        "WEB": "var(--space-zero)"
+      },
+      "cssMapping": {
+        "name": "--space-zero",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1277",
+      "name": "space/2",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 2
+      },
+      "syntax": {
+        "WEB": "var(--space-2xs)"
+      },
+      "cssMapping": {
+        "name": "--space-2xs",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:93:1278",
+      "name": "space/40",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "GAP"
+      ],
+      "values": {
+        "3:3": 40
+      },
+      "syntax": {
+        "WEB": "var(--space-6xl)"
+      },
+      "cssMapping": {
+        "name": "--space-6xl",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:93:1279",
+      "name": "control/toolbar-standard",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 32
+      },
+      "syntax": {
+        "WEB": "var(--selection-control-standard-height)"
+      },
+      "cssMapping": {
+        "name": "--selection-control-standard-height",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1280",
+      "name": "layout/header",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 76
+      },
+      "syntax": {
+        "WEB": "var(--writing-header-height)"
+      },
+      "cssMapping": {
+        "name": "--writing-header-height",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1281",
+      "name": "layout/titlebar",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 40
+      },
+      "syntax": {
+        "WEB": "var(--title-bar-height)"
+      },
+      "cssMapping": {
+        "name": "--title-bar-height",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:93:1282",
+      "name": "document/measure",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 720
+      },
+      "syntax": {
+        "WEB": "var(--document-measure)"
+      },
+      "cssMapping": {
+        "name": "--document-measure",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:93:1283",
+      "name": "settings/measure",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [
+        "WIDTH_HEIGHT"
+      ],
+      "values": {
+        "3:3": 760
+      },
+      "syntax": {
+        "WEB": "var(--settings-measure)"
+      },
+      "cssMapping": {
+        "name": "--settings-measure",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      }
+    },
+    {
+      "id": "VariableID:93:1284",
+      "name": "motion/fast",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [],
+      "values": {
+        "3:3": 140
+      },
+      "syntax": {
+        "WEB": "var(--motion-duration-fast)"
+      },
+      "cssMapping": {
+        "name": "--motion-duration-fast",
+        "status": "existing_name_values_must_be_reconciled_during_integration",
+        "figmaUnit": "ms",
+        "cssUnit": "s",
+        "conversion": "CSS value = Figma value / 1000"
+      }
+    },
+    {
+      "id": "VariableID:93:1285",
+      "name": "motion/normal",
+      "collection": "VariableCollectionId:3:6",
+      "type": "FLOAT",
+      "scopes": [],
+      "values": {
+        "3:3": 160
+      },
+      "syntax": {
+        "WEB": "var(--motion-duration-normal)"
+      },
+      "cssMapping": {
+        "name": "--motion-duration-normal",
+        "status": "existing_name_values_must_be_reconciled_during_integration",
+        "figmaUnit": "ms",
+        "cssUnit": "s",
+        "conversion": "CSS value = Figma value / 1000"
+      }
+    },
+    {
+      "id": "VariableID:107:8225",
+      "name": "color/1A1D23",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.10196078568696976,
+          "g": 0.11372549086809158,
+          "b": 0.13725490868091583,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-1a1d23)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-1a1d23",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8226",
+      "name": "preset/text/ink",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8225"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8225"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-ink)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-ink",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.10196078568696976,
+        "g": 0.11372549086809158,
+        "b": 0.13725490868091583,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.10196078568696976,
+        "g": 0.11372549086809158,
+        "b": 0.13725490868091583,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8227",
+      "name": "color/6B7280",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.41960784792900085,
+          "g": 0.4470588266849518,
+          "b": 0.501960813999176,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-6b7280)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-6b7280",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8228",
+      "name": "preset/text/gray",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8227"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8227"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-gray)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-gray",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.41960784792900085,
+        "g": 0.4470588266849518,
+        "b": 0.501960813999176,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.41960784792900085,
+        "g": 0.4470588266849518,
+        "b": 0.501960813999176,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8229",
+      "name": "color/DC2626",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8627451062202454,
+          "g": 0.14901961386203766,
+          "b": 0.14901961386203766,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-dc2626)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-dc2626",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8230",
+      "name": "preset/text/red",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8229"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8229"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-red)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-red",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8627451062202454,
+        "g": 0.14901961386203766,
+        "b": 0.14901961386203766,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8627451062202454,
+        "g": 0.14901961386203766,
+        "b": 0.14901961386203766,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8231",
+      "name": "color/EA580C",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9176470637321472,
+          "g": 0.3450980484485626,
+          "b": 0.0470588244497776,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-ea580c)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-ea580c",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8232",
+      "name": "preset/text/orange",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8231"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8231"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-orange)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-orange",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.9176470637321472,
+        "g": 0.3450980484485626,
+        "b": 0.0470588244497776,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.9176470637321472,
+        "g": 0.3450980484485626,
+        "b": 0.0470588244497776,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8233",
+      "name": "color/CA8A04",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.7921568751335144,
+          "g": 0.5411764979362488,
+          "b": 0.01568627543747425,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-ca8a04)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-ca8a04",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8234",
+      "name": "preset/text/yellow",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8233"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8233"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-yellow)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-yellow",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.7921568751335144,
+        "g": 0.5411764979362488,
+        "b": 0.01568627543747425,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.7921568751335144,
+        "g": 0.5411764979362488,
+        "b": 0.01568627543747425,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8235",
+      "name": "color/16A34A",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.08627451211214066,
+          "g": 0.6392157077789307,
+          "b": 0.29019609093666077,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-16a34a)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-16a34a",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8236",
+      "name": "preset/text/green",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8235"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8235"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-green)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-green",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.08627451211214066,
+        "g": 0.6392157077789307,
+        "b": 0.29019609093666077,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.08627451211214066,
+        "g": 0.6392157077789307,
+        "b": 0.29019609093666077,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8237",
+      "name": "color/0891B2",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.0313725508749485,
+          "g": 0.5686274766921997,
+          "b": 0.6980392336845398,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-0891b2)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-0891b2",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8238",
+      "name": "preset/text/cyan",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8237"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8237"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-cyan)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-cyan",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.0313725508749485,
+        "g": 0.5686274766921997,
+        "b": 0.6980392336845398,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.0313725508749485,
+        "g": 0.5686274766921997,
+        "b": 0.6980392336845398,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8239",
+      "name": "color/2563EB",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.14509804546833038,
+          "g": 0.38823530077934265,
+          "b": 0.9215686321258545,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-2563eb)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-2563eb",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8240",
+      "name": "preset/text/blue",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8239"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8239"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-blue)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-blue",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.14509804546833038,
+        "g": 0.38823530077934265,
+        "b": 0.9215686321258545,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.14509804546833038,
+        "g": 0.38823530077934265,
+        "b": 0.9215686321258545,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8241",
+      "name": "color/7C3AED",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.48627451062202454,
+          "g": 0.22745098173618317,
+          "b": 0.929411768913269,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-7c3aed)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-7c3aed",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8242",
+      "name": "preset/text/purple",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8241"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8241"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-purple)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-purple",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.48627451062202454,
+        "g": 0.22745098173618317,
+        "b": 0.929411768913269,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.48627451062202454,
+        "g": 0.22745098173618317,
+        "b": 0.929411768913269,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8243",
+      "name": "color/DB2777",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8588235378265381,
+          "g": 0.15294118225574493,
+          "b": 0.46666666865348816,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-db2777)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-db2777",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8244",
+      "name": "preset/text/pink",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8243"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8243"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-text-pink)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-text-pink",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8588235378265381,
+        "g": 0.15294118225574493,
+        "b": 0.46666666865348816,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8588235378265381,
+        "g": 0.15294118225574493,
+        "b": 0.46666666865348816,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8245",
+      "name": "preset/highlight/yellow",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1274"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:93:1274"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-yellow)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-yellow",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 1,
+        "g": 0.9529411792755127,
+        "b": 0.6392157077789307,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 1,
+        "g": 0.9529411792755127,
+        "b": 0.6392157077789307,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8246",
+      "name": "color/FED7AA",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9960784316062927,
+          "g": 0.843137264251709,
+          "b": 0.6666666865348816,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fed7aa)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fed7aa",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8247",
+      "name": "preset/highlight/orange",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8246"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8246"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-orange)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-orange",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.9960784316062927,
+        "g": 0.843137264251709,
+        "b": 0.6666666865348816,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.9960784316062927,
+        "g": 0.843137264251709,
+        "b": 0.6666666865348816,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8248",
+      "name": "color/FECACA",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9960784316062927,
+          "g": 0.7921568751335144,
+          "b": 0.7921568751335144,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fecaca)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fecaca",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8249",
+      "name": "preset/highlight/red",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8248"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8248"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-red)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-red",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.9960784316062927,
+        "g": 0.7921568751335144,
+        "b": 0.7921568751335144,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.9960784316062927,
+        "g": 0.7921568751335144,
+        "b": 0.7921568751335144,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8250",
+      "name": "color/BBF7D0",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.7333333492279053,
+          "g": 0.9686274528503418,
+          "b": 0.8156862854957581,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-bbf7d0)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-bbf7d0",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8251",
+      "name": "preset/highlight/green",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8250"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8250"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-green)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-green",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.7333333492279053,
+        "g": 0.9686274528503418,
+        "b": 0.8156862854957581,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.7333333492279053,
+        "g": 0.9686274528503418,
+        "b": 0.8156862854957581,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8252",
+      "name": "color/BAE6FD",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.729411780834198,
+          "g": 0.9019607901573181,
+          "b": 0.9921568632125854,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-bae6fd)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-bae6fd",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8253",
+      "name": "preset/highlight/blue",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8252"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8252"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-blue)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-blue",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.729411780834198,
+        "g": 0.9019607901573181,
+        "b": 0.9921568632125854,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.729411780834198,
+        "g": 0.9019607901573181,
+        "b": 0.9921568632125854,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8254",
+      "name": "color/DDD6FE",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8666666746139526,
+          "g": 0.8392156958580017,
+          "b": 0.9960784316062927,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-ddd6fe)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-ddd6fe",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8255",
+      "name": "preset/highlight/purple",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8254"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8254"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-purple)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-purple",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8666666746139526,
+        "g": 0.8392156958580017,
+        "b": 0.9960784316062927,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8666666746139526,
+        "g": 0.8392156958580017,
+        "b": 0.9960784316062927,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8256",
+      "name": "color/FBCFE8",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.9843137264251709,
+          "g": 0.8117647171020508,
+          "b": 0.9098039269447327,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-fbcfe8)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-fbcfe8",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8257",
+      "name": "preset/highlight/pink",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8256"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8256"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-pink)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-pink",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.9843137264251709,
+        "g": 0.8117647171020508,
+        "b": 0.9098039269447327,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.9843137264251709,
+        "g": 0.8117647171020508,
+        "b": 0.9098039269447327,
+        "a": 1
+      }
+    },
+    {
+      "id": "VariableID:107:8258",
+      "name": "color/E5E7EB",
+      "collection": "VariableCollectionId:93:1202",
+      "type": "COLOR",
+      "scopes": [],
+      "values": {
+        "93:0": {
+          "r": 0.8980392217636108,
+          "g": 0.9058823585510254,
+          "b": 0.9215686321258545,
+          "a": 1
+        }
+      },
+      "syntax": {
+        "WEB": "var(--mdr-palette-e5e7eb)"
+      },
+      "cssMapping": {
+        "name": "--mdr-palette-e5e7eb",
+        "status": "planned_name_not_yet_implemented"
+      }
+    },
+    {
+      "id": "VariableID:107:8259",
+      "name": "preset/highlight/gray",
+      "collection": "VariableCollectionId:78:1006",
+      "type": "COLOR",
+      "scopes": [
+        "SHAPE_FILL"
+      ],
+      "values": {
+        "78:0": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8258"
+        },
+        "93:1": {
+          "type": "VARIABLE_ALIAS",
+          "id": "VariableID:107:8258"
+        }
+      },
+      "syntax": {
+        "WEB": "var(--color-preset-highlight-gray)"
+      },
+      "cssMapping": {
+        "name": "--color-preset-highlight-gray",
+        "status": "existing_name_values_must_be_reconciled_during_integration"
+      },
+      "resolvedLight": {
+        "r": 0.8980392217636108,
+        "g": 0.9058823585510254,
+        "b": 0.9215686321258545,
+        "a": 1
+      },
+      "resolvedDark": {
+        "r": 0.8980392217636108,
+        "g": 0.9058823585510254,
+        "b": 0.9215686321258545,
+        "a": 1
+      }
+    }
+  ],
+  "textStyles": [
+    {
+      "id": "S:6bd9ba3ce9c91caa5e92d63e798ca6876c6c5020,",
+      "name": "MDR Blue/Caption",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "size": 12,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 20
+      }
+    },
+    {
+      "id": "S:92d4169791e1bd28b259e321ede75e202837a3c4,",
+      "name": "MDR Blue/UI",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "size": 14,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 22
+      }
+    },
+    {
+      "id": "S:69e2cc08eceaee189930878b01b449b043781733,",
+      "name": "MDR Blue/Label",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "size": 14,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 22
+      }
+    },
+    {
+      "id": "S:238c4a551f7090d954bf7d10b479aeb9c26e8f5b,",
+      "name": "MDR Blue/SmallHeading",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "variationSettings": {
+          "wght": 700
+        }
+      },
+      "size": 18,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 28
+      }
+    },
+    {
+      "id": "S:b0c45d311095bf0635f84400d80f964974d82cc3,",
+      "name": "MDR Blue/Heading",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "variationSettings": {
+          "wght": 700
+        }
+      },
+      "size": 24,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 36
+      }
+    },
+    {
+      "id": "S:5239e9a4fb04986d25c22099d4b87ab46a8f6234,",
+      "name": "MDR Blue/Title",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Bold",
+        "variationSettings": {
+          "wght": 700
+        }
+      },
+      "size": 32,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 48
+      }
+    },
+    {
+      "id": "S:88a6ab643e1222a2070d9ae1be8c7f669a3d88ac,",
+      "name": "MDR Blue/Body",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "size": 17,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 32
+      }
+    },
+    {
+      "id": "S:c6f56d8d1b3a35eeeffc5f0b47333f6a5323cefb,",
+      "name": "MDR Blue/Code",
+      "font": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "size": 13,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 24
+      }
+    },
+    {
+      "id": "S:66937fc61a0a4dd5f479c9ede1a1b67a3ecd8f73,",
+      "name": "MDR Blue/Source",
+      "font": {
+        "family": "JetBrains Mono",
+        "style": "Regular",
+        "variationSettings": {
+          "wght": 400
+        }
+      },
+      "size": 18,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 32
+      }
+    },
+    {
+      "id": "S:1e837ddebe03c358d4f869ca64f846a196a898ae,",
+      "name": "MDR Blue/Dialog title",
+      "font": {
+        "family": "Noto Sans SC",
+        "style": "Medium",
+        "variationSettings": {
+          "wght": 500
+        }
+      },
+      "size": 16,
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 24
+      }
+    }
+  ],
+  "effects": [
+    {
+      "id": "S:c1ed3cd98531c4b3f469b4a0a63f327b20f582c7,",
+      "name": "MDR Blue/Elevation/Control",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 2,
+          "boundVariables": {},
+          "color": {
+            "r": 0.05098039284348488,
+            "g": 0.15294118225574493,
+            "b": 0.2705882489681244,
+            "a": 0.05999999865889549
+          },
+          "offset": {
+            "x": 0,
+            "y": 1
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    },
+    {
+      "id": "S:d19449ae01c691a7c9dbbd74b1558073fdbbea09,",
+      "name": "MDR Blue/Elevation/Popover",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 12,
+          "boundVariables": {},
+          "color": {
+            "r": 0.05098039284348488,
+            "g": 0.15294118225574493,
+            "b": 0.2705882489681244,
+            "a": 0.11999999731779099
+          },
+          "offset": {
+            "x": 0,
+            "y": 4
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    },
+    {
+      "id": "S:5133cf24c85cb83cc31d9e9980893d65058462d1,",
+      "name": "MDR Blue/Elevation/Dialog",
+      "effects": [
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 24,
+          "boundVariables": {},
+          "color": {
+            "r": 0.05098039284348488,
+            "g": 0.15294118225574493,
+            "b": 0.2705882489681244,
+            "a": 0.1599999964237213
+          },
+          "offset": {
+            "x": 0,
+            "y": 8
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Primitive color scopes are explicitly empty to keep the semantic picker clean; semantic variables carry relevant scopes.",
+    "Figma aliases are authoritative; existing CSS name does not mean current software already has the new color.",
+    "27 numeric dimensions and2 font-family variables; motion unit conversion is explicit.",
+    "Source18/32 is a persisted editorFontSize example, not a replacement for all rendered-code styles.",
+    "Disabled/decorative borders are not included in the normal text contrast claim; user-chosen document colors are not certified by this role-pair check.",
+    "2026-10-27: Preview native selections and synchronized character marks use strong semantic selection. Editor active-line background/stripe and the legacy color override are retired; actual text selections remain.",
+    "2026-10-28 minimal header: layout/header remains76px for desktop and narrow views; mode group is208x40, derived from3existing buttons and4px spacing. Prior104px narrow two-row override retired."
+  ],
+  "normalTextContrast": [
+    {
+      "theme": "Light",
+      "fg": "text",
+      "bg": "surface",
+      "ratio": 14.082,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "text",
+      "bg": "canvas",
+      "ratio": 13.106,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "muted",
+      "bg": "surface",
+      "ratio": 4.898,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "muted",
+      "bg": "canvas",
+      "ratio": 4.558,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "primary",
+      "bg": "surface",
+      "ratio": 10.924,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "primary",
+      "bg": "selected",
+      "ratio": 9.542,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "navText",
+      "bg": "primary",
+      "ratio": 10.924,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "error",
+      "bg": "errorSurface",
+      "ratio": 5.914,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "success",
+      "bg": "successSurface",
+      "ratio": 5.161,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "warning",
+      "bg": "warningSurface",
+      "ratio": 5.757,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Light",
+      "fg": "tooltipText",
+      "bg": "tooltip",
+      "ratio": 14.567,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "text",
+      "bg": "surface",
+      "ratio": 13.102,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "text",
+      "bg": "canvas",
+      "ratio": 14.879,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "muted",
+      "bg": "surface",
+      "ratio": 7.436,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "muted",
+      "bg": "canvas",
+      "ratio": 8.445,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "primary",
+      "bg": "surface",
+      "ratio": 9.002,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "primary",
+      "bg": "selected",
+      "ratio": 6.394,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "navText",
+      "bg": "primary",
+      "ratio": 9.255,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "error",
+      "bg": "errorSurface",
+      "ratio": 7.732,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "success",
+      "bg": "successSurface",
+      "ratio": 7.397,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "warning",
+      "bg": "warningSurface",
+      "ratio": 8.151,
+      "normalTextPass": true
+    },
+    {
+      "theme": "Dark",
+      "fg": "tooltipText",
+      "bg": "tooltip",
+      "ratio": 13.316,
+      "normalTextPass": true
+    }
+  ],
+  "runtimeIntegration": {
+    "date": "2026-10-27",
+    "status": "implemented_runtime_verified_ui_baselines_synchronized",
+    "record": "docs/design/blue-integration.json",
+    "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+    "baselineMigration": "docs/design/legacy-ui-baseline-migration.md",
+    "emptySessionCorrection": "docs/design/blue-integration.json",
+    "previewSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "status": "implemented_browser_and_windows_verified",
+      "readingSelection": "217:7519",
+      "splitPreviewSelection": "218:7662"
+    },
+    "sidebarSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "collapsedScreen": "223:7810",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    },
+    "minimalHeaderCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "date": "2026-10-28",
+      "headerFamily": "98:6172",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    }
+  },
+  "exportPreparationStatus": "figma_final_export_not_applied_to_runtime"
+}

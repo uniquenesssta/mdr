@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-28",
+  "branch": "codex/figma-ui",
+  "scope": "User-authorized single-instance preference (default on) and content-driven quote height. R17 remains unaccepted.",
+  "figma": {
+    "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+    "settingsDesktop": "99:5528",
+    "settingsNarrow": "101:7547",
+    "quote": "98:6078",
+    "quoteSingleLineHeight": 80,
+    "quotePadding": 24
+  },
+  "implementation": {
+    "nativePolicy": "Backend-owned app_config_dir/single-instance.json, atomic replace; no localStorage duplicate.",
+    "launch": "One Windows coordinator, named mutex and durable bounded launch inbox; enabled reuses the surviving/focused window, disabled creates independent webview windows.",
+    "session": "Window-scoped document metadata; global preferences and recent files retain their original authority.",
+    "reenable": "If more than one window exists, retain disabled and explain how to close others; never close unsaved sessions automatically.",
+    "quotes": "Removed fixed112px minimum; line count determines height.",
+    "dependency": "Existing locked windows-sys0.61.2 is now a direct Windows-only dependency; MIT OR Apache-2.0. No JavaScript production dependency or Tauri upgrade."
+  },
+  "verification": {
+    "status": "implemented_runtime_verified_with_one_rust_environment_block",
+    "evidence": "O:/Project/Markdown Rust/Temp/launch-20261028",
+    "static": [
+      "verify-architecture passed",
+      "verify-no-legacy-runtime passed",
+      "verify-generated-files passed",
+      "verify-readme-record passed",
+      "git diff --check passed"
+    ],
+    "frontendBuild": {
+      "accepted": true,
+      "sourceSha256": "79a01637bef688d940972624579ac96da560a2b3a4bb1b135d86cddde06aa652",
+      "sourceFiles": 496,
+      "outputFiles": 140
+    },
+    "repository": {
+      "groups": 16,
+      "tests": 2919,
+      "passed": 2919,
+      "report": "O:/Project/Markdown Rust/Temp/launch-20261028/repository-verified/repository-audit/suite-results.json"
+    },
+    "additionalUntrackedNode": {
+      "passed": 5,
+      "report": "O:/Project/Markdown Rust/Temp/launch-20261028/new-node-tests.log"
+    },
+    "browser": {
+      "passed": 79,
+      "report": "O:/Project/Markdown Rust/Temp/launch-20261028/browser-verified/figma-ui-results.json"
+    },
+    "windows": {
+      "launchChecks": 10,
+      "report": "O:/Project/Markdown Rust/Temp/launch-20261028/native-owned/launch-results.json",
+      "frame": "O:/Project/Markdown Rust/Temp/launch-20261028/native-frame/native-frame.json",
+      "minimalHeader": "O:/Project/Markdown Rust/Temp/launch-20261028/native-frame/native-minimal-header.json",
+      "previewSelection": "O:/Project/Markdown Rust/Temp/launch-20261028/native-frame/native-preview-selection.json"
+    },
+    "rust": {
+      "passed": 305,
+      "failed": 1,
+      "newLaunchTestsPassed": 5,
+      "fullRun": "O:/Project/Markdown Rust/Temp/launch-20261028/rust-tests.log",
+      "remainingIntegration": "O:/Project/Markdown Rust/Temp/launch-20261028/rust-integration.log",
+      "block": "Existing windows_case_sensitive_directory_preserves_distinct_spelling_bodies setup: fsutil file setCaseSensitiveInfo enable returned Access is denied on the configured NTFS project Temp. Test was neither skipped nor weakened; full Rust pass and stage acceptance are not claimed."
+    }
+  },
+  "outstanding": [
+    "Full Rust suite remains blocked on Windows case-sensitive test-directory permission; R17 acceptance unchanged."
+  ]
+}

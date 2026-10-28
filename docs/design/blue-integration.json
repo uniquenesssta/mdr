@@ -1,0 +1,894 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-27",
+  "updatedAt": "2026-10-27T16:12:32.509Z",
+  "branch": "codex/figma-ui",
+  "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "status": "implemented_runtime_verified_ui_baselines_synchronized",
+  "design": {
+    "components": 61,
+    "activeVariants": 361,
+    "excludedLegacyVariants": [
+      "98:5367",
+      "98:5389",
+      "98:5829"
+    ],
+    "screen": "104:1006",
+    "latestReview": "docs/design/full-component-review.json",
+    "authority": "Latest reviewed variants and user corrections; old preparation status is historical."
+  },
+  "implementation": {
+    "themes": "53 semantic color variables mapped for both modes; existing code syntax presets and user preferences preserved.",
+    "fonts": "Bundled Noto Sans SC variable font and JetBrains Mono with OFL licenses.",
+    "shell": "40px title/status bars, centered desktop modes, 104px two-row narrow header, 24px/16px canvas insets, uniform boundaries.",
+    "components": "Current menu groups, sidebars, settings route, configurable selection tools, equal find rows, filled palettes, compact forms/help/export, safe webpage preview, real empty-session creation and bottom-left recovery.",
+    "dataFlows": "Existing document, editor, settings, import/export, native window and persistence authorities retained.",
+    "lifecycleRepair": "Transferred live word-count DOM now releases before static roots are destroyed.",
+    "nativeDialogs": "Platform dialogs and native input/select behavior remain platform owned."
+  },
+  "verification": {
+    "browser": {
+      "status": "passed",
+      "checks": 73,
+      "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built-ui-final/figma-ui-results.json",
+      "admission": {
+        "accepted": true,
+        "sourceSha256": "4b45ae1d810b8ea3265c25b68f653f7523db9939c2e5e5b3648f6b15f30b9f17",
+        "sourceFiles": 490,
+        "outputFiles": 140
+      },
+      "previousEvidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/built-ui/figma-ui-results.json"
+    },
+    "native": {
+      "status": "passed",
+      "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-frame.json",
+      "nonclient": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "viewports": [
+        {
+          "width": 600,
+          "height": 860
+        },
+        {
+          "width": 600,
+          "height": 480
+        }
+      ],
+      "dpi": 96,
+      "emptySessionEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-empty-modes.json",
+      "previousEvidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/native-final/native-frame.json",
+      "selectionEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-preview-selection.json",
+      "selectionRevealEvidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/native-final/native-selection-reveal.json",
+      "minimalHeaderEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-minimal-header.json"
+    },
+    "independentMarkup": {
+      "status": "passed",
+      "test": "tests/e2e/blue-ui-ownership.test.mjs",
+      "baseline": "tests/fixtures/blue-ui/markup-baseline.json",
+      "historicalBaselineUnchanged": "4eb83c94c2175a651127b413084c56ecbee3f564afa2359c1ffe6d9d249984a2"
+    },
+    "contractBrowser": {
+      "status": "passed",
+      "checks": 12
+    },
+    "fullRepository": {
+      "status": "passed",
+      "tests": 2919,
+      "groups": 16,
+      "failures": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/repository-final.log",
+      "suiteResults": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/repository-final/repository-audit/suite-results.json",
+      "previousEvidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/repository.log"
+    },
+    "static": {
+      "syntax": "passed for changed JavaScript",
+      "architecture": "passed",
+      "legacyRuntime": "passed",
+      "generatedFiles": "passed",
+      "readmeRecord": "passed",
+      "diffCheck": "passed"
+    },
+    "node": {
+      "status": "passed",
+      "tests": 1878,
+      "failures": 0,
+      "evidence": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/npm-delivery.log"
+    },
+    "independentClipper": {
+      "status": "passed",
+      "test": "tests/e2e/blue-web-clipper.test.mjs",
+      "evidence": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/blue-clipper-final.log"
+    }
+  },
+  "limitations": [
+    "No R17 acceptance, GitHub CI acceptance, commit or push is claimed.",
+    "Physical 125%/150% Windows DPI and real IME/system-dialog interaction were not reaccepted in this UI turn."
+  ],
+  "mappedSourceChanges": [
+    {
+      "path": "src/styles/components/form.css",
+      "before": "fa83c80279408fe8391b2390c7cea3eae62847390b92c73df337324312114b1d",
+      "after": "aaed14b61dd24ea234fd97f0aa7b006082c05c4ed5376887ca36cdf83520426f"
+    },
+    {
+      "path": "src/features/sidebar/ui/sidebar-content-view.js",
+      "before": "a14c8799ae90ebb0618e5b504b0f03e0f570fc7bd0e9c04d80d6b5ccb86c0329",
+      "after": "24119e056aa6793c7a0a5dab76adbd974e547290237b478a3f7b40cfc90aa301"
+    },
+    {
+      "path": "src/styles/features/sidebar-navigation.css",
+      "before": "5a63c1519e8cc8d22ed5c83ef30c71aeefd38cd43e92471805c4d698b8e42bf4",
+      "after": "e18ed4b9a909c87c5b7b9e9a3bf9c68acbfa08012fa2cc3d0df0f40aa7d16813"
+    },
+    {
+      "path": "src/features/settings/ui/settings-field-view.js",
+      "before": "e6791d6f251432576ffbd9030a221c8e754428678daff56c5b27f97ce3ec43ff",
+      "after": "7f4f8c131c0ea2258d42fb3e92b6c63e6babeeaa2aafdef9d78fbc5e0ce4d785"
+    },
+    {
+      "path": "src/features/editor/ui/editor-toolbar-view.js",
+      "before": "f50ff095a1aa616ffed45465d847cf32a529f35e1aebb8060b96e0d75cb7cb8e",
+      "after": "7555ac6a46e52081a05eb3204f11603414447dac0817d317e11b5aaa00d858b4"
+    },
+    {
+      "path": "src/features/settings/ui/settings-dialog-view.js",
+      "before": "8ce5bd562f22cd5203ed4b48a869f6677d7ca0c27097486faa1b43119bdced55",
+      "after": "00eb1382a96eed353a8531c6b4f2d31366028ca92daeb1628ceab1c61c17dd1c"
+    },
+    {
+      "path": "src/features/menu/ui/menu-content-view.js",
+      "before": "bd67b530376358cb79d04ed5d8a622736aeaba6fff9770c5d32580d0253d4bb6",
+      "after": "ca21adfa090e5b3b210a4a2458262a9ba764155f6b7710fd4178c3c7693fc01d"
+    },
+    {
+      "path": "src/styles/components/menu.css",
+      "before": "970069a2aaf45d2d35493c9f80a3f0e39fc6b3ec8747db76ca157c97e0bfda81",
+      "after": "c8a4a00948d5e0b89abc2f68c27767e08c9c2ce0be616564b1c52795bc37453b"
+    },
+    {
+      "path": "src/features/editor/ui/selection-toolbar-view.js",
+      "before": "5a826afef9abce65105f8a75c3c8af0b433320625df4df97df17f0b0a8d5737b",
+      "after": "11f4b3644496ce04024d3679935b645449ffc0abefbc3dd6fa522cf393551750"
+    },
+    {
+      "path": "src/features/editor/ui/find-replace-dialog-view.js",
+      "before": "7ea51b93090803eb4e2068b627cc7d512ed2a50099770ccec7ffc63e9b503ace",
+      "after": "9de47117d43c4166c544b16fe9be91457df9d887b2ead22dc0e602dd9a139752"
+    },
+    {
+      "path": "src/features/editor/commands/find-replace-command.js",
+      "before": "c79b3e1c06eb1dc17b56af4d8cad7265bc6b477e904206e3a935cda5a18bad0e",
+      "after": "f66e21792edec38a82e95ba18a404bf7b19a08c3540b3b3846dd993fbc5f6bf8"
+    },
+    {
+      "path": "src/features/editor/ui/inline-color-menu-view.js",
+      "before": "2c986d83a3fc1ae41c0543c475a5115aaff4c2aa342ed0f3c3c18fb45c7a3b27",
+      "after": "5b970a8eca542a3de28bf1a85242814515ebbbf4f08648d0b948dd0df788f5ad"
+    },
+    {
+      "path": "src/features/settings/ui/color-field-view.js",
+      "before": "90069a870c2a35b18b1473768035438bfc1a26018861362fc7e372ea9f191fd8",
+      "after": "3dde2a91f3ce618c4c2e42891465b2c2f0ed921cb5cbf839feae0ebbcd5d2bed"
+    },
+    {
+      "path": "src/styles/foundation/tokens.css",
+      "before": "d912dc9d334880960392716ce13b440912cc47b4b277b93b6b80037fa903c9cd",
+      "after": "d636e08fd4dc93a99853ef957acbf6fdd59092d0262ab5ba46ad179d5962afb5"
+    },
+    {
+      "path": "src/styles/shell/status-bar.css",
+      "before": "b35f2be8bf08d498552fb3dbe69fb99fc7dc6862b77c0ee76ea943c61bfd39d2",
+      "after": "3bbf35679f30b51fec171e2dd737ed3bb6062e336412655c9ac5a3f3f9e3a47c"
+    },
+    {
+      "path": "src/features/persistence/ui/status-content-view.js",
+      "before": "137ff370f1385e87192bcad2284bea400069742151221bd928bb210733d593d4",
+      "after": "d5e34c7fba09313fb434c446147918217429d0f3f2e8394f62ee50a97886af00"
+    },
+    {
+      "path": "src/features/settings/ui/settings-navigation-view.js",
+      "before": "ea657ede5d0c94d1586817d9ab491054b66ad46fa24886df0589aa52cba5d320",
+      "after": "6eabf93c509f82c281172f65d94e153f06d9b4fc33b2c91beb7204b033ad7ee9"
+    },
+    {
+      "path": "src/features/export/ui/export-progress-dialog-view.js",
+      "before": "bc9cb25173ebf6284e72a1e61e25677b59db4efe003399216c27feaca1606688",
+      "after": "77577d42a3d73a487bcfeb4feb698f3243c9ad4983ae31835abbea5133f84ee1"
+    },
+    {
+      "path": "src/features/export/ui/export-dialog-view.js",
+      "before": "e698ffdb60da36465019c82e3e245a2003519650cd89ae589ec6434c9f019732",
+      "after": "5ac2aca0ef8ce84488cc81860a2a32976a2ce3fb4b462e6d373f136d7dc27007"
+    },
+    {
+      "path": "src/features/help/ui/help-dialog-view.js",
+      "before": "a372cd298034cbe74f48c22d1abbaf0578660893a8b018c03d224adbdf01e2b5",
+      "after": "93ad8724cf95f599e7fbdaeb3b08cdd737c5718e406d8b942b1c11cb976737de"
+    },
+    {
+      "path": "src/features/editor/ui/link-dialog-view.js",
+      "before": "f2b8eedb5ce829f25971cf6ae58943a309f84d5087f8332b57928d7e391ff060",
+      "after": "7d0f02b456fccc56194321ff174a22fab387933f4b8bddefc96331505e3cbfaa"
+    },
+    {
+      "path": "src/features/editor/ui/image-dialog-view.js",
+      "before": "ae59b22fea2e4951ddf8e170e562cb726a844a8be55102d2fd323840419e7085",
+      "after": "80a2ebfd8868c58ebe2255551678207beddbddcc2dfe8946349100e13b49915a"
+    },
+    {
+      "path": "src/features/menu/shell-menus.js",
+      "before": "1c9044f0b3cd1dd2f4e56c9e743b8b202ee1908d39a0e7af53c3af5a73a13dcd",
+      "after": "c4a8f809c4bbf66c7aa59daa66dba4c0ce1d535326974a74613bb8441e3c9573"
+    },
+    {
+      "path": "src/features/documents/ui/document-content-view.js",
+      "before": "a0e6b64dac6b22e35e4bc42f81e509ba986fbcc33eda4ffc66d0768712e04496",
+      "after": "01a40b7ff78d4fe6fb3837e8cb57f18b3fb563ac6ce10c95f754bdf4aba8eb72"
+    },
+    {
+      "path": "src/styles/shell/writing-workspace.css",
+      "before": "f8fe73fdb649d669017b2320a301f2e63c4c058df490a74dde02bce81f4c98e4",
+      "after": "6eba9c3ca66900ddfd43d224dc83f0f5dfd31084b28d8d0f6fe77b1a18cbc1cd"
+    },
+    {
+      "path": "src/features/documents/ui/document-list-item-view.js",
+      "before": "a6dd08dbf1387ab46183c1960d09fb9da7b1b27e878c842251dae7dda9d0d1b3",
+      "after": "437a16de90d718b7bebcd450b73272c6d605e5ec10e56cd981a5f1d8ec67eaa3"
+    },
+    {
+      "path": "src/features/import/web-clipper/web-clipper-view.js",
+      "before": "06d261adbcb90d62a104a02f27b66fc0c2c7a915d6130be2bcc513d2509c16a6",
+      "after": "5c7888e8b2bb2a8510e4c732a310328bd2c2a93c8487082a230330a2e8c31cb2"
+    },
+    {
+      "path": "src/features/export/ui/export-image-dialog-view.js",
+      "before": "94caeeed6331e71c5c6285c743ca2804b347bdfb9bbbe6fc2395657d2badb89c",
+      "after": "5e8024df04b0bba010209cdb1710fcd9d302fd89ff2775b71cf963d7f2f5abf5"
+    },
+    {
+      "path": "src/features/link-preview/link-preview-controller.js",
+      "before": "8cce1c16436888b160a291b56e370330a681168bbcf7541417e55e57b15cc6ad",
+      "after": "5e757dee19300969f64e00dadba9f46496d07e7cd28d852fd44023b02900e298"
+    },
+    {
+      "path": "src/styles/components/link-preview.css",
+      "before": "e157cc9f0e65dd533f1542e2c9d54c7e364c4cd78c64f5c397ab97740348bdc2",
+      "after": "ac49a75d9aba621aa2484d4788b9e2a6c713ca8084044aa19c94893504b13e22"
+    }
+  ],
+  "followup": "docs/design/legacy-ui-baseline-migration.md",
+  "evidence": {
+    "figmaContexts": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/figma-context-evidence.json",
+    "sourceBaseline": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/blue-integration-source-baseline.json",
+    "writingPreview": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/runtime-writing-1280.png",
+    "fonts": [
+      "public/assets/fonts/NotoSansSC-VF.ttf",
+      "public/assets/fonts/JetBrainsMono-Regular.woff2"
+    ],
+    "historicalStage16FixturePreserved": true
+  },
+  "baselineMigration": {
+    "date": "2026-10-27",
+    "authorization": "User: 那就按你的建议来吧",
+    "status": "passed",
+    "record": "docs/design/legacy-ui-baseline-migration.md",
+    "scope": [
+      "Complete current UI markup and Find nonmodal semantics",
+      "Web clipper title icons and disabled/enabled keyboard focus",
+      "General Settings language/theme field order"
+    ],
+    "historicalFixtureSha256": "4eb83c94c2175a651127b413084c56ecbee3f564afa2359c1ffe6d9d249984a2",
+    "targetedChecks": 12,
+    "validationInfrastructureChecks": 17,
+    "auditChainChecks": 50,
+    "productSourceChanged": false,
+    "windowsNativeReexecuted": false,
+    "targetedEvidence": "O:/Project/Markdown Rust/Temp/ui-baseline-migration-20261027/targeted-final.log",
+    "auditEvidence": "O:/Project/Markdown Rust/Temp/ui-baseline-migration-20261027/audit-chain.log",
+    "retainedFailedRuns": [
+      "O:/Project/Markdown Rust/Temp/ui-baseline-migration-20261027/targeted.log",
+      "O:/Project/Markdown Rust/Temp/ui-baseline-migration-20261027/repository.log",
+      "O:/Project/Markdown Rust/Temp/ui-baseline-migration-20261027/repository-final.log"
+    ],
+    "auditReview": "Five tracked test input hashes changed; protected models, candidate decisions and historical acceptance were preserved. The current risk-review fingerprint was synchronized."
+  },
+  "emptySessionCorrection": {
+    "date": "2026-10-27",
+    "authorization": "User: no document means writing stays selected and all mode switches are locked; creating a document enables mode switching.",
+    "status": "implemented_and_verified",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "pageId": "93:1291",
+      "nodeId": "104:1838",
+      "paperNodeId": "210:7542",
+      "paperSize": [
+        992,
+        656
+      ],
+      "paperRadius": 12,
+      "modeReactions": 0,
+      "newDocumentDestination": "104:1006"
+    },
+    "implementation": {
+      "availabilityAuthority": "DocumentSessionStore.activeId",
+      "owner": "src/features/layout/session-layout-controller.js",
+      "emptyPaperOwner": "src/features/documents/ui/document-empty-view.js",
+      "rules": [
+        "Empty session selects hybrid and disables all four native mode buttons.",
+        "The central layout command clamps menus, shortcuts and programmatic mode requests too.",
+        "Empty editor and filename are readonly; first create/open enables editing in writing mode.",
+        "Closing the last active document restores writing and locks modes.",
+        "Switching documents or mounting with an already active document preserves the selected mode.",
+        "Automatic empty-state transitions preserve the saved layout preference.",
+        "Empty paper hides underlying panes and the splitter; center New Document button receives the actual pointer hit."
+      ]
+    },
+    "verification": {
+      "newTests": 3,
+      "newTestEvidence": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/built-empty-final.log",
+      "settingsRegression": 5,
+      "settingsEvidence": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/session-settings.log",
+      "trackedRepositoryTests": 2917,
+      "repositoryEvidence": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/repository-final.log",
+      "builtUiChecks": 71,
+      "nativePassed": true,
+      "nativeEvidence": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/native-final/native-empty-modes.json",
+      "viewports": [
+        [
+          1280,
+          860
+        ],
+        [
+          600,
+          480
+        ]
+      ],
+      "windowsDpi": 96,
+      "staticAndBuild": "Production build and four project gates passed; final documentation checks run separately."
+    },
+    "evidence": {
+      "desktop": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/built-final/empty-1280-860.png",
+      "narrow": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/built-final/empty-600-480.png",
+      "windows": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/native-final/native-empty-after-close.png"
+    },
+    "retainedFailedRun": "O:/Project/Markdown Rust/Temp/empty-document-modes-20261027/repository.log",
+    "fixtureUpdate": "Existing Settings regression now supplies a real active DocumentSessionStore; original assertions preserved.",
+    "scopeLimits": [
+      "No R17 acceptance or Git commit/push.",
+      "Physical 125%/150% DPI and IME were not reaccepted.",
+      "Figma reactions were inspected; no interactive prototype replay is claimed."
+    ]
+  },
+  "previewSelectionCorrection": {
+    "date": "2026-10-27",
+    "status": "implemented_build_browser_windows_verified_regressions_rechecked",
+    "authorization": "Latest user correction: pure reading and split rendered preview must never show a formatting toolbar; their native selected text must remain visibly highlighted. Remove the editor active-line strip.",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "pageId": "93:1291",
+      "readingSelection": "217:7519",
+      "splitPreviewSelection": "218:7662",
+      "toolbarFamily": "95:2571",
+      "settingsFamily": "99:5851",
+      "editorSettingsScreen": "104:2662",
+      "selectionVariable": "VariableID:93:1264",
+      "editingToolbarVariants": 4,
+      "previewToolbarVariants": 0
+    },
+    "implementation": {
+      "editor": "Remove highlightActiveLine extension and hybrid active-source background/stripe; preserve normal cursor, actual selections, source activation and input behavior.",
+      "previews": "Native preview ::selection and synchronized character highlights use the strong semantic selection color. Hide formatting controls for pure reading and split preview intent/native selection, including pinned state and Alt+F10.",
+      "settings": "14 visible fields, 2 external menu toggles, exactly one retired activeLineColor descriptor. Keep legacy stored values readable, stop applying their CSS override, remove the obsolete control. Preserve strict field/schema completeness checks.",
+      "files": [
+        "src/features/editor/infrastructure/codemirror-extension-registry.js",
+        "src/features/editor/ui/selection-toolbar-view.js",
+        "src/features/layout/workspace-preferences.js",
+        "src/features/settings/sections/settings-section.js",
+        "src/features/settings/sections/editor-settings.js",
+        "src/features/settings/ui/settings-dialog-view.js",
+        "src/styles/features/editor.css",
+        "src/styles/features/hybrid.css",
+        "src/styles/features/preview.css"
+      ]
+    },
+    "logs": {
+      "path": "logs/performance-2026-10-27_12-45-28-336_pid-39364.jsonl",
+      "entries": 386,
+      "pointerCorrectionWarnings": 3,
+      "followingPointerLineChecks": "completed; lineMismatch=false, geometryMismatch=false",
+      "runtimeLongTasks": 24,
+      "maximumLongTaskMs": 234,
+      "crashOrSaveFailureFound": false,
+      "scope": "Existing pointer correction diagnostics remain intact; no pointer implementation changes or claim that warnings disappeared."
+    },
+    "verification": {
+      "sourceBrowser": {
+        "status": "passed",
+        "checks": 20,
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/dev/preview-selection-results.json"
+      },
+      "builtBrowser": {
+        "status": "passed",
+        "checks": 20,
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/built/preview-selection-results.json"
+      },
+      "uiRegression": {
+        "status": "passed",
+        "checks": 71,
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/built-ui/figma-ui-results.json",
+        "admission": {
+          "accepted": true,
+          "sourceSha256": "0f6d9652b4397bdd6c1d9838efbab797d961dc44272eca2c35f3b264fb064779",
+          "sourceFiles": 490,
+          "outputFiles": 140
+        }
+      },
+      "build": {
+        "status": "passed",
+        "frontend": "Vite production",
+        "native": "Windows debug binary, isolated com.markdowneditor.ui-frame-check identifier, no bundle; built frontend bytes embedded",
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/native-build.log"
+      },
+      "windows": {
+        "status": "passed",
+        "selectionChecks": 20,
+        "selectionEvidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/native-final/native-preview-selection.json",
+        "frameEvidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/native-final/native-frame.json",
+        "emptySessionEvidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/native-final/native-empty-modes.json",
+        "dpi": 96
+      },
+      "repository": {
+        "status": "passed_after_targeted_runtime_failure_recheck",
+        "tests": 2918,
+        "groups": 16,
+        "fullRun": {
+          "passed": 2917,
+          "failures": 1,
+          "skipped": 0,
+          "cancelled": 0,
+          "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/repository-complete.log",
+          "suiteResults": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/repository-complete/repository-audit/suite-results.json"
+        },
+        "failedCase": "all architecture package scripts execute successfully before any build step",
+        "observedRuntimeFailure": "verify:architecture printed passed; child Node then aborted with UV_HANDLE_CLOSING (exit 3221226505). No source/test change made in response.",
+        "unchangedRerun": {
+          "status": "passed",
+          "tests": 4,
+          "failures": 0,
+          "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/package-scripts-recheck.log"
+        },
+        "interpretation": "Every unique tracked case has passing evidence on the final source; retain the nonzero full-run process result and separate successful recheck. This is not a single all-green full run or R17 acceptance."
+      },
+      "static": {
+        "status": "passed",
+        "checks": [
+          "architecture",
+          "no-legacy-runtime",
+          "generated-files",
+          "readme-record",
+          "git diff --check"
+        ],
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/package-scripts-recheck.log",
+        "separateGateEvidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/static-gates.json"
+      }
+    },
+    "retainedFailedRun": {
+      "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/targeted.log",
+      "reason": "Retiring the old current-line control exposed the still-strict 15-field startup guard. Corrected to exactly 14 fields; no check skipped, no timeout increased."
+    },
+    "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027",
+    "scopeLimits": "UI correction only; existing staged R17 fixes and historical acceptance retained. Physical high DPI, real IME/system dialogs and final R17 CI were not reaccepted.",
+    "retainedRepositoryFailures": [
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/repository-final.log",
+        "cause": "Owned Chrome exited before taskkill; localized status 128 quotes the missing root without PID text. UI assertions did not fail."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/repository-verified.log",
+        "cause": "Taskkill target lines also named the surviving Node parent. Probe first target on every failure line plus owned root; parent context is excluded."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/repository-complete.log",
+        "cause": "verify:architecture printed passed; child Node then aborted with UV_HANDLE_CLOSING (exit 3221226505). No source/test change made in response.",
+        "recheck": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/package-scripts-recheck.log"
+      }
+    ],
+    "cleanupRepair": {
+      "files": [
+        "tests/e2e/lib/cdp-browser.mjs",
+        "tests/stage-13-browser-cleanup.test.mjs"
+      ],
+      "scope": "Only recognize demonstrated taskkill termination races after actual PID liveness checks; surviving failed targets, unknown errors and access failures still reject. Product code, UI snapshot and historical fixture unchanged.",
+      "regression": {
+        "status": "passed",
+        "tests": 6,
+        "evidence": "O:/Project/Markdown Rust/Temp/preview-selection-20261027/cleanup-regression-final.log"
+      }
+    }
+  },
+  "sidebarSelectionCorrection": {
+    "date": "2026-10-27",
+    "authorization": "侧栏这个开始修复，其他的根据你的建议来",
+    "status": "implemented_built_browser_windows_and_repository_verified",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "sessionId": "bfded1ba-0ddd-4790-8e4f-e4e35c191ee4",
+      "collapsedSelectionScreen": "223:7810",
+      "sidebarFamily": "99:6098",
+      "selectionFamily": "95:2571",
+      "designContextRead": true
+    },
+    "implementation": {
+      "sidebar": "Collapsed sidebar uses display:none and zero padding/border; its resizer stays hidden. Existing Ctrl+Shift+B restores original width. No content or focus remains in the collapsed strip.",
+      "selection": "Editor-to-preview selection highlights in place when visible; offscreen ranges reveal at the nearest edge with an 8px inset, using immediate scrolling. Oversized visible ranges do not chase their far edge. Complete initial virtual-chapter reveal only after measured target geometry is visibly stable; later mounts/geometry restore highlights without re-aligning. Fresh user gestures, selection/document changes and scrolling still cancel stale intent.",
+      "diagnostics": "Keep exact mapping and source viewport diagnostics; target ratio now reflects measured target geometry rather than copying source ratio.",
+      "scope": "Preview-to-editor behavior, frozen model/mapper and scroll public interfaces, persistence formats and existing staged R17 fixes retained. No new production module/dependency.",
+      "files": [
+        "src/styles/shell/writing-workspace.css",
+        "src/features/sync/selection/selection-sync-controller.js"
+      ]
+    },
+    "verification": {
+      "selectionUnit": {
+        "status": "passed",
+        "checks": 47,
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/selection-unit.log"
+      },
+      "builtSelection": {
+        "status": "passed",
+        "checks": 6,
+        "firstChapterSelections": 3,
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/built-final/selection-reveal-results.json",
+        "admission": {
+          "accepted": true,
+          "sourceSha256": "995570bbbc4d6fc1a9d2952b2908206ac466588fa2fc797452a3e2d0b85b869b",
+          "sourceFiles": 490,
+          "outputFiles": 140
+        },
+        "wheelRegression": {
+          "status": "passed",
+          "characters": 1383561,
+          "sampledFrames": 30,
+          "scope": "Fresh editor wheel takes over within six frames; old selection never remounts the beginning; reverse wheel synchronization and actual document content preserved."
+        }
+      },
+      "previewReadOnly": {
+        "status": "passed",
+        "checks": 20,
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/built/preview-selection-results.json"
+      },
+      "ui": {
+        "status": "passed",
+        "checks": 71,
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/built-ui/figma-ui-results.json",
+        "admission": {
+          "accepted": true,
+          "sourceSha256": "995570bbbc4d6fc1a9d2952b2908206ac466588fa2fc797452a3e2d0b85b869b",
+          "sourceFiles": 490,
+          "outputFiles": 140
+        }
+      },
+      "native": {
+        "status": "passed",
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/native-final/native-selection-reveal.json",
+        "frameEvidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/native-final/native-frame.json",
+        "originalDocumentCharacters": 5453875,
+        "measurements": [
+          {
+            "line": 29904,
+            "visibleMs": 276,
+            "maxVisibilityErrorPx": 0,
+            "driftPx": 0
+          },
+          {
+            "line": 71771,
+            "visibleMs": 311,
+            "maxVisibilityErrorPx": 0,
+            "driftPx": 0
+          },
+          {
+            "line": 107660,
+            "visibleMs": 361,
+            "maxVisibilityErrorPx": 0,
+            "driftPx": 0
+          }
+        ],
+        "originalFileSha256": "C042B1AB556D9156F22A4B81E761A6BB11861324EB762D6E2083FB98850F1032",
+        "originalFileUnchanged": true,
+        "dpi": 96
+      },
+      "repository": {
+        "status": "passed",
+        "tests": 2918,
+        "groups": 16,
+        "failures": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/repository.log",
+        "suiteResults": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/repository/repository-audit/suite-results.json"
+      },
+      "static": {
+        "status": "passed",
+        "architecture": true,
+        "noLegacyRuntime": true,
+        "generatedFiles": true,
+        "readmeRecord": true,
+        "diffCheck": true
+      }
+    },
+    "expectationMigration": "Replace forced same-height viewport assertions with exact text selection/highlight coverage, first-gesture cross-chapter readiness, visibility within 1px and stable scrollTop within 1px across 8+12 frames. No second user gesture and no dropped selection cases.",
+    "firstFailedBrowserRun": {
+      "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027/dev/failure.json",
+      "reason": "A reveal was prematurely marked complete before virtual block measurements; target remained 504.7px below viewport. Fix waits for stable measured visibility, with bounded cancellable checks; the same fixture now passes."
+    },
+    "evidence": "O:/Project/Markdown Rust/Temp/sidebar-selection-reveal-20261027",
+    "limitations": [
+      "No R17 or GitHub CI acceptance claimed.",
+      "Physical high DPI and real IME/system-dialog interaction were not reaccepted."
+    ]
+  },
+  "minimalHeaderCorrection": {
+    "date": "2026-10-28",
+    "startedDate": "2026-10-27",
+    "authorization": "去掉红色的这两块，将写作分栏纯阅读居中，去掉源码",
+    "status": "implemented_built_browser_windows_and_repository_verified",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "sessionId": "46e65904-6463-4b34-8a40-9d8b504f22c9",
+      "headerFamily": "98:6172",
+      "desktopHeader": "98:6128",
+      "narrowHeader": "98:6150",
+      "modeFamily": "95:1963",
+      "desktopScreenHeadersUpdated": 31,
+      "responsiveScreenHeadersUpdated": 16,
+      "designContextRead": true
+    },
+    "implementation": {
+      "header": "Remove visible title and entire right action group; render only writing/split/reading. Three-button group208x40 centered horizontally and vertically in a76px header at every width. Top Source entry removed; existing advanced/source capabilities preserved.",
+      "documents": "The nonvisual filename input remains a live Session-owned compatibility projection for existing document commands; it has no visible width, tab stop or header label. Sidebar rename/save and native title remain connected.",
+      "export": "File/Export owner opens the existing five-format options dialog. Child command clicks retain direct export and do not bubble into another dialog; close restores focus to the visible File menu. Dialog name is read from actual active Session record.",
+      "layout": "Boundary Controller singleGroup mode measures the real208px mode group without demanding an absent action row or forcing a narrow second row. Legacy default behavior remains verified.",
+      "dependencies": "No new production dependencies or modules."
+    },
+    "verification": {
+      "header": {
+        "status": "passed",
+        "checks": 9,
+        "views": [
+          {
+            "viewportWidth": 1280,
+            "headerHeight": 76,
+            "groupWidth": 208,
+            "centerX": 0,
+            "centerY": 0
+          },
+          {
+            "viewportWidth": 980,
+            "headerHeight": 76,
+            "groupWidth": 208,
+            "centerX": 0,
+            "centerY": 0
+          },
+          {
+            "viewportWidth": 600,
+            "headerHeight": 76,
+            "groupWidth": 208,
+            "centerX": 0,
+            "centerY": 0
+          }
+        ],
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built-verified/minimal-header-results.json",
+        "admission": {
+          "accepted": true,
+          "sourceSha256": "4b45ae1d810b8ea3265c25b68f653f7523db9939c2e5e5b3648f6b15f30b9f17",
+          "sourceFiles": 490,
+          "outputFiles": 140
+        }
+      },
+      "ui": {
+        "status": "passed",
+        "checks": 73,
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built-ui-final/figma-ui-results.json",
+        "admission": {
+          "accepted": true,
+          "sourceSha256": "4b45ae1d810b8ea3265c25b68f653f7523db9939c2e5e5b3648f6b15f30b9f17",
+          "sourceFiles": 490,
+          "outputFiles": 140
+        }
+      },
+      "compatibility": {
+        "status": "passed",
+        "checks": 3,
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/markup-checks.log",
+        "historicalStage16Sha256": "4eb83c94c2175a651127b413084c56ecbee3f564afa2359c1ffe6d9d249984a2",
+        "changes": "Only the approved title/action/source removal and File export trigger were changed in the current blue snapshot."
+      },
+      "previewAndEmptyModes": {
+        "status": "passed",
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built-checks.log",
+        "note": "Other8tests in the initial combined run passed; the header test was subsequently rechecked after waiting for actual modal keyboard focus."
+      },
+      "telemetryAndLayout": {
+        "status": "passed",
+        "checks": 30,
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/telemetry-review.log"
+      },
+      "windows": {
+        "status": "passed",
+        "checks": 9,
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-minimal-header.json",
+        "frameEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-frame.json",
+        "emptySessionEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-empty-modes.json",
+        "previewSelectionEvidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/native-final/native-preview-selection.json",
+        "viewports": [
+          {
+            "width": 1280,
+            "height": 860
+          },
+          {
+            "width": 600,
+            "height": 860
+          },
+          {
+            "width": 600,
+            "height": 480
+          }
+        ],
+        "dpi": 96
+      },
+      "repository": {
+        "status": "passed",
+        "tests": 2919,
+        "groups": 16,
+        "failures": 0,
+        "skipped": 0,
+        "cancelled": 0,
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/repository-final.log",
+        "suiteResults": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/repository-final/repository-audit/suite-results.json"
+      },
+      "static": {
+        "status": "passed",
+        "architecture": true,
+        "noLegacyRuntime": true,
+        "generatedFiles": true,
+        "readmeRecord": true,
+        "diffCheck": true
+      }
+    },
+    "retainedFailures": [
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/dev/failure.json",
+        "reason": "Startup still required the removed action row; replace it with real single-group measurement."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built/failure.json",
+        "reason": "The test pressed Escape before the modal initial-focus frame. Wait for actual focus and fully closed state before checking restoration/screenshots; no timeout raised."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/built-ui.log",
+        "reason": "One remaining removed-header selector in the reading regression now uses the real Find shortcut."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027/repository.log",
+        "reason": "Old class-only producer assertion conflicts with the authorized single-group behavior. Register exactly this reviewed producer; keep43 frozen producer baselines and unchanged event schema."
+      }
+    ],
+    "evidence": "O:/Project/Markdown Rust/Temp/minimal-header-20261027",
+    "limitations": [
+      "No R17 acceptance, commit, push or GitHub CI acceptance claimed.",
+      "Physical high DPI and real IME/system-dialog interactions were not reaccepted."
+    ]
+  },
+  "selectionMappingRepair": {
+    "date": "2026-10-28",
+    "status": "local-runtime-verified-with-existing-clippy-findings",
+    "figma": {
+      "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+      "nodes": [
+        "95:2571",
+        "99:6149",
+        "98:6117"
+      ]
+    },
+    "cause": [
+      "Successful Mermaid replaces its pre node, so the former connected-root completion guard skipped cache invalidation.",
+      "SVG labels are a component representation, not a character-equivalent rendering of Mermaid syntax."
+    ],
+    "contract": "Rendered diagrams correspond to the whole source fence in both directions. Component correspondence is explicitly non-character-exact. Native preview selection and no-formatting policy remain. Ordinary text retains the frozen kernel and96% coverage threshold.",
+    "source": {
+      "originalChars": 5955,
+      "sha256": "632782f78feeb3e69bffb3df4fda6981e69eb043eb13bbcd672819a4d43ceb9d",
+      "readOnly": true
+    },
+    "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028",
+    "architecture": "Frozen text mapping remains directly injected; a separate optional component mapping handles rendered Mermaid source identity. No frozen models or 96% text coverage gate changed.",
+    "additionalRepairs": [
+      "Application/context menus temporarily suppress formatting tools and nested popups without clearing the editor selection.",
+      "Unchanged toolbar preferences no longer remount pressed controls, preserving pointer clicks across animation frames."
+    ],
+    "validation": {
+      "staticGates": [
+        "verify-architecture",
+        "verify-no-legacy-runtime",
+        "verify-generated-files",
+        "verify-readme-record",
+        "git diff --check"
+      ],
+      "productionBuild": {
+        "accepted": true,
+        "sourceSha256": "c36100a48ae4ce85bb90f6f620ddd0ebccfde3d9376e94ed1a177c3bed247c22",
+        "sourceFiles": 497,
+        "outputFiles": 140
+      },
+      "rustRedaction": {
+        "passed": 17,
+        "failed": 0,
+        "ignored": 0,
+        "includesActualFrontendToRustJsonl": true
+      },
+      "browserUi": {
+        "passed": 82,
+        "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028/ui-stable/figma-ui-results.json",
+        "heldPointerAcrossFrames": true
+      },
+      "windows": {
+        "passed": true,
+        "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028/native-stable",
+        "diagramChecks": 5,
+        "previewSelectionChecks": 20,
+        "largeDocumentCharacters": 5453875,
+        "largeDocumentMaxDriftPx": 0,
+        "originalDocumentsUnchanged": true,
+        "testProcessClosed": true
+      },
+      "newNodeTests": {
+        "passed": 8,
+        "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028/new-unit-final.log"
+      },
+      "fullNode": {
+        "passed": 2921,
+        "failed": 0,
+        "skipped": 0,
+        "groups": 16,
+        "evidence": "O:/Project/Markdown Rust/Temp/selection-repair-20261028/repository-stable.log"
+      },
+      "limits": [
+        "Full Rust suite not rerun for this focused repair; earlier NTFS case-sensitive-directory setup permission failure remains outside this scope.",
+        "Full all-target Clippy was executed and failed on three existing findings in frozen document storage and compatibility tests; no lint suppressions or gate changes were made.",
+        "No R17 phase acceptance, remote push or deletion authorization. Local checkpoints were subsequently requested; see versionControlPreparation."
+      ],
+      "scopeComplete": true
+    }
+  },
+  "versionControlPreparation": {
+    "date": "2026-10-28",
+    "baselineCheckpoint": "d9d3767f00cad6107187bc0a5cb37cece43e18d5",
+    "policy": "After each completed local change, create a scoped local commit and report the commit and validation limits. Remote push requires authorization.",
+    "productionBuild": {
+      "accepted": true,
+      "sourceSha256": "1cad526cee35b077d0e67806b2c10e2f2a1141cea6162b35d3f3a6a9a915d7ef",
+      "sourceFiles": 497,
+      "outputFiles": 140
+    },
+    "runtimeJsCssUnchanged": true,
+    "record": "docs/audit/r12-24-closeout.json#currentSourceReview.localGitCheckpoints",
+    "validation": {
+      "tests": 2944,
+      "pass": 2944,
+      "fail": 0,
+      "skipped": 0,
+      "groups": 17,
+      "trackedTestFiles": 389,
+      "evidence": "O:/Project/Markdown Rust/Temp/git-checkpoint-20261028/repository.log",
+      "afterWhitespaceAuditTests": 60
+    },
+    "status": "ready-for-local-integration-commit"
+  }
+}

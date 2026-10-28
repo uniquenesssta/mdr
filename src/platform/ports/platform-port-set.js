@@ -10,6 +10,7 @@ import { defineLogsPort } from './logs-port.js';
 import { defineClipboardPort } from './clipboard-port.js';
 import { defineFullscreenPort } from './fullscreen-port.js';
 import { definePrintPort } from './print-port.js';
+import { defineLaunchPort } from './launch-port.js';
 
 const PORT_DEFINITIONS = Object.freeze([
   Object.freeze(['storage', defineStoragePort]),
@@ -23,7 +24,8 @@ const PORT_DEFINITIONS = Object.freeze([
   Object.freeze(['logs', defineLogsPort]),
   Object.freeze(['clipboard', defineClipboardPort]),
   Object.freeze(['fullscreen', defineFullscreenPort]),
-  Object.freeze(['print', definePrintPort])
+  Object.freeze(['print', definePrintPort]),
+  Object.freeze(['launch', defineLaunchPort])
 ]);
 
 export const PLATFORM_PORT_NAMES = Object.freeze(PORT_DEFINITIONS.map(([name]) => name));

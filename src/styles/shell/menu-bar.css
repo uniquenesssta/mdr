@@ -158,7 +158,4 @@
   background: var(--color-border-subtle);
 }
 
-.menu-bar-spacer,
-.statusbar-spacer {
-  flex: 1 1 auto;
-}
+.menu-bar-spacer { flex: 1; }

@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "09071c022e0f47964b2be68cfb50c94fb101bd55",
+  "baselineCommit": "d9d3767f00cad6107187bc0a5cb37cece43e18d5",
   "schemaVersion": 1,
   "stage": "R16.12",
-  "productionFiles": 532,
-  "inputSha256": "e8d701023b9d8848cff843b608d48556764ccbffb609f1fe35ab5b3e518010a0",
+  "productionFiles": 559,
+  "inputSha256": "89ae517c8266e5d1b8ff71610ee60818455a825e6080057d4f44ece5e11dbab8",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -90,6 +90,11 @@
     },
     {
       "id": "cargo:url",
+      "kind": "cargo-declaration",
+      "feature": null
+    },
+    {
+      "id": "cargo:windows-sys",
       "kind": "cargo-declaration",
       "feature": null
     },
@@ -224,6 +229,16 @@
       "feature": null
     },
     {
+      "id": "public/assets/fonts/JetBrainsMono-Regular.woff2",
+      "kind": "asset",
+      "feature": null
+    },
+    {
+      "id": "public/assets/fonts/NotoSansSC-VF.ttf",
+      "kind": "asset",
+      "feature": null
+    },
+    {
       "id": "rust:std",
       "kind": "rust-standard-library",
       "feature": null
@@ -246,6 +261,41 @@
     {
       "id": "src-tauri/Cargo.toml",
       "kind": "configuration",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/inbox.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/instance_guard.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/launch_commands.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/mod.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/policy.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/routing.rs",
+      "kind": "rs",
+      "feature": null
+    },
+    {
+      "id": "src-tauri/src/app_launch/tests.rs",
+      "kind": "rs",
       "feature": null
     },
     {
@@ -779,6 +829,11 @@
       "feature": "documents"
     },
     {
+      "id": "src/features/documents/application/launch-open-controller.js",
+      "kind": "js",
+      "feature": "documents"
+    },
+    {
       "id": "src/features/documents/application/recent-files-read-source.js",
       "kind": "js",
       "feature": "documents"
@@ -829,6 +884,11 @@
       "feature": "documents"
     },
     {
+      "id": "src/features/documents/infrastructure/window-session-storage.js",
+      "kind": "js",
+      "feature": "documents"
+    },
+    {
       "id": "src/features/documents/state/document-session-store.js",
       "kind": "js",
       "feature": "documents"
@@ -840,6 +900,11 @@
     },
     {
       "id": "src/features/documents/ui/document-context-menu-view.js",
+      "kind": "js",
+      "feature": "documents"
+    },
+    {
+      "id": "src/features/documents/ui/document-empty-view.js",
       "kind": "js",
       "feature": "documents"
     },
@@ -964,6 +1029,11 @@
       "feature": "editor"
     },
     {
+      "id": "src/features/editor/domain/reading-policy.js",
+      "kind": "js",
+      "feature": "editor"
+    },
+    {
       "id": "src/features/editor/index.js",
       "kind": "js",
       "feature": "editor"
@@ -1055,6 +1125,11 @@
     },
     {
       "id": "src/features/editor/ui/mermaid-dialog-view.js",
+      "kind": "js",
+      "feature": "editor"
+    },
+    {
+      "id": "src/features/editor/ui/selection-toolbar-view.js",
       "kind": "js",
       "feature": "editor"
     },
@@ -1190,6 +1265,11 @@
     },
     {
       "id": "src/features/export/task/export-task-controller.js",
+      "kind": "js",
+      "feature": "export"
+    },
+    {
+      "id": "src/features/export/ui/export-dialog-view.js",
       "kind": "js",
       "feature": "export"
     },
@@ -1629,6 +1709,11 @@
       "feature": "layout"
     },
     {
+      "id": "src/features/layout/session-layout-controller.js",
+      "kind": "js",
+      "feature": "layout"
+    },
+    {
       "id": "src/features/layout/shell/compact-shell-controller.js",
       "kind": "js",
       "feature": "layout"
@@ -1735,6 +1820,16 @@
     },
     {
       "id": "src/features/menu/ui/menu-content-view.js",
+      "kind": "js",
+      "feature": "menu"
+    },
+    {
+      "id": "src/features/menu/ui/menu-presentation.js",
+      "kind": "js",
+      "feature": "menu"
+    },
+    {
+      "id": "src/features/menu/ui/workspace-actions-view.js",
       "kind": "js",
       "feature": "menu"
     },
@@ -1989,6 +2084,11 @@
       "feature": "preview"
     },
     {
+      "id": "src/features/settings/application/launch-policy-controller.js",
+      "kind": "js",
+      "feature": "settings"
+    },
+    {
       "id": "src/features/settings/application/settings-apply-coordinator.js",
       "kind": "js",
       "feature": "settings"
@@ -2089,6 +2189,11 @@
       "feature": "settings"
     },
     {
+      "id": "src/features/settings/ui/launch-policy-field-view.js",
+      "kind": "js",
+      "feature": "settings"
+    },
+    {
       "id": "src/features/settings/ui/settings-dialog-view.js",
       "kind": "js",
       "feature": "settings"
@@ -2100,6 +2205,11 @@
     },
     {
       "id": "src/features/settings/ui/settings-navigation-view.js",
+      "kind": "js",
+      "feature": "settings"
+    },
+    {
+      "id": "src/features/settings/ui/toolbar-preview-view.js",
       "kind": "js",
       "feature": "settings"
     },
@@ -2210,6 +2320,11 @@
     },
     {
       "id": "src/features/sync/selection/editor-selection-reader.js",
+      "kind": "js",
+      "feature": "sync"
+    },
+    {
+      "id": "src/features/sync/selection/preview-component-mapping.js",
       "kind": "js",
       "feature": "sync"
     },
@@ -2474,6 +2589,11 @@
       "feature": null
     },
     {
+      "id": "src/platform/desktop/launch-client.js",
+      "kind": "js",
+      "feature": null
+    },
+    {
       "id": "src/platform/desktop/link-client.js",
       "kind": "js",
       "feature": null
@@ -2540,6 +2660,11 @@
     },
     {
       "id": "src/platform/ports/index.js",
+      "kind": "js",
+      "feature": null
+    },
+    {
+      "id": "src/platform/ports/launch-port.js",
       "kind": "js",
       "feature": null
     },
@@ -2684,6 +2809,11 @@
       "feature": null
     },
     {
+      "id": "src/styles/features/document-surface.css",
+      "kind": "css",
+      "feature": null
+    },
+    {
       "id": "src/styles/features/editor.css",
       "kind": "css",
       "feature": null
@@ -2695,6 +2825,11 @@
     },
     {
       "id": "src/styles/features/file-tree.css",
+      "kind": "css",
+      "feature": null
+    },
+    {
+      "id": "src/styles/features/find-replace.css",
       "kind": "css",
       "feature": null
     },
@@ -2750,6 +2885,11 @@
     },
     {
       "id": "src/styles/features/preview.css",
+      "kind": "css",
+      "feature": null
+    },
+    {
+      "id": "src/styles/features/selection-toolbar.css",
       "kind": "css",
       "feature": null
     },
@@ -2864,6 +3004,11 @@
       "feature": null
     },
     {
+      "id": "src/styles/shell/writing-workspace.css",
+      "kind": "css",
+      "feature": null
+    },
+    {
       "id": "src/styles/themes/dark.css",
       "kind": "css",
       "feature": null
@@ -2900,6 +3045,11 @@
     },
     {
       "id": "src/ui/components/modal-shell.js",
+      "kind": "js",
+      "feature": null
+    },
+    {
+      "id": "src/ui/components/popover-shell.js",
       "kind": "js",
       "feature": null
     },
@@ -3260,6 +3410,227 @@
       "section": "dependencies",
       "specifier": "url",
       "domain": null
+    },
+    {
+      "from": "src-tauri/Cargo.toml",
+      "to": "cargo:windows-sys",
+      "kind": "cargo-declaration",
+      "section": "target.'cfg(windows)'.dependencies",
+      "specifier": "windows-sys",
+      "domain": null
+    },
+    {
+      "from": "src-tauri/src/app_launch/inbox.rs",
+      "to": "cargo:serde",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "serde::{Deserialize,Serialize}",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/inbox.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::{fs,io::Write,path::{Path,PathBuf},time::{SystemTime,UNIX_EPOCH},}",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/instance_guard.rs",
+      "to": "cargo:windows-sys",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "windows_sys::Win32::{Foundation::{CloseHandle,GetLastError,ERROR_ALREADY_EXISTS},System::Threading::CreateMutexW,}",
+      "line": 8,
+      "column": 9
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "to": "cargo:serde",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "serde::Serialize",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "to": "cargo:tauri",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "tauri::Manager",
+      "line": 4,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "to": "src-tauri/src/app_launch/mod.rs",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "super::{inbox,policy,LaunchState}",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/inbox.rs",
+      "specifier": "src-tauri/src/app_launch/inbox.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/instance_guard.rs",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "instance_guard::InstanceGuard",
+      "line": 10,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/instance_guard.rs",
+      "specifier": "src-tauri/src/app_launch/instance_guard.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/launch_commands.rs",
+      "specifier": "src-tauri/src/app_launch/launch_commands.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 4,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/policy.rs",
+      "specifier": "src-tauri/src/app_launch/policy.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 5,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/routing.rs",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "routing::{install,LaunchState}",
+      "line": 11,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/routing.rs",
+      "specifier": "src-tauri/src/app_launch/routing.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 6,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "to": "src-tauri/src/app_launch/tests.rs",
+      "specifier": "src-tauri/src/app_launch/tests.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "to": "cargo:windows-sys",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "windows_sys::Win32::Storage::FileSystem::{MoveFileExW,MOVEFILE_REPLACE_EXISTING,MOVEFILE_WRITE_THROUGH,}",
+      "line": 27,
+      "column": 9
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::{fs,path::Path}",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::io::Write",
+      "line": 16,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::os::windows::ffi::OsStrExt",
+      "line": 26,
+      "column": 9
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "to": "cargo:tauri",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "tauri::{Emitter,Manager}",
+      "line": 15,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::{collections::HashMap,path::PathBuf,sync::{atomic::{AtomicBool,Ordering},Arc,Mutex,},time::Duration,}",
+      "line": 6,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "to": "src-tauri/src/app_launch/inbox.rs",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "super::{inbox::{self,OpenRequest},policy,}",
+      "line": 2,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/tests.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::{ffi::OsString,fs,path::PathBuf,time::{SystemTime,UNIX_EPOCH},}",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/app_launch/tests.rs",
+      "to": "src-tauri/src/app_launch/mod.rs",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "super::{inbox,policy}",
+      "line": 2,
+      "column": 1
     },
     {
       "from": "src-tauri/src/document_store/cache.rs",
@@ -5245,12 +5616,40 @@
     },
     {
       "from": "src-tauri/src/main.rs",
+      "to": "cargo:tauri",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "tauri::Manager",
+      "line": 16,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/main.rs",
+      "to": "rust:std",
+      "kind": "rust-namespace",
+      "domain": null,
+      "specifier": "std::sync::{atomic::{AtomicBool,Ordering},Arc,}",
+      "line": 12,
+      "column": 5
+    },
+    {
+      "from": "src-tauri/src/main.rs",
+      "to": "src-tauri/src/app_launch/mod.rs",
+      "specifier": "src-tauri/src/app_launch/mod.rs",
+      "rootRelative": true,
+      "kind": "rust-module",
+      "domain": "rust-declaration",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src-tauri/src/main.rs",
       "to": "src-tauri/src/document_store/mod.rs",
       "specifier": "src-tauri/src/document_store/mod.rs",
       "rootRelative": true,
       "kind": "rust-module",
       "domain": "rust-declaration",
-      "line": 3,
+      "line": 4,
       "column": 1
     },
     {
@@ -5260,7 +5659,7 @@
       "rootRelative": true,
       "kind": "rust-module",
       "domain": "rust-declaration",
-      "line": 4,
+      "line": 5,
       "column": 1
     },
     {
@@ -5270,7 +5669,7 @@
       "rootRelative": true,
       "kind": "rust-module",
       "domain": "rust-declaration",
-      "line": 5,
+      "line": 6,
       "column": 1
     },
     {
@@ -5280,7 +5679,7 @@
       "rootRelative": true,
       "kind": "rust-module",
       "domain": "rust-declaration",
-      "line": 6,
+      "line": 7,
       "column": 1
     },
     {
@@ -5290,7 +5689,7 @@
       "rootRelative": true,
       "kind": "rust-module",
       "domain": "rust-declaration",
-      "line": 7,
+      "line": 8,
       "column": 1
     },
     {
@@ -5561,7 +5960,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "serde_json::json",
-      "line": 404,
+      "line": 482,
       "column": 5
     },
     {
@@ -5570,7 +5969,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "super::redact_value",
-      "line": 403,
+      "line": 481,
       "column": 5
     },
     {
@@ -6043,6 +6442,15 @@
     },
     {
       "from": "src/bootstrap/module-entry.js",
+      "to": "src/features/export/index.js",
+      "specifier": "../features/export/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/bootstrap/module-entry.js",
       "to": "src/features/help/index.js",
       "specifier": "../features/help/index.js",
       "kind": "import",
@@ -6056,7 +6464,7 @@
       "specifier": "../features/menu/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 9,
+      "line": 10,
       "column": 1
     },
     {
@@ -6065,7 +6473,7 @@
       "specifier": "../features/settings/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 11,
+      "line": 12,
       "column": 1
     },
     {
@@ -6083,7 +6491,7 @@
       "specifier": "../i18n/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 13,
+      "line": 14,
       "column": 1
     },
     {
@@ -6092,7 +6500,7 @@
       "specifier": "../main.js",
       "kind": "dynamic-import",
       "domain": "esm",
-      "line": 21,
+      "line": 22,
       "column": 29
     },
     {
@@ -6119,7 +6527,7 @@
       "specifier": "../theme/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 14,
+      "line": 15,
       "column": 1
     },
     {
@@ -6210,6 +6618,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/bootstrap/workspace-startup.js",
+      "to": "src/features/documents/index.js",
+      "specifier": "../features/documents/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
       "column": 1
     },
     {
@@ -6367,6 +6784,15 @@
     },
     {
       "from": "src/features/documents/index.js",
+      "to": "src/features/documents/application/launch-open-controller.js",
+      "specifier": "./application/launch-open-controller.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 28,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/index.js",
       "to": "src/features/documents/application/recent-files-read-source.js",
       "specifier": "./application/recent-files-read-source.js",
       "kind": "re-export",
@@ -6448,6 +6874,15 @@
     },
     {
       "from": "src/features/documents/index.js",
+      "to": "src/features/documents/infrastructure/window-session-storage.js",
+      "specifier": "./infrastructure/window-session-storage.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 27,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/index.js",
       "to": "src/features/documents/state/document-session-store.js",
       "specifier": "./state/document-session-store.js",
       "kind": "re-export",
@@ -6471,6 +6906,15 @@
       "kind": "re-export",
       "domain": "esm",
       "line": 22,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/index.js",
+      "to": "src/features/documents/ui/document-empty-view.js",
+      "specifier": "./ui/document-empty-view.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 26,
       "column": 1
     },
     {
@@ -6534,6 +6978,33 @@
       "kind": "import",
       "domain": "esm",
       "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/ui/document-empty-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/ui/document-empty-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/documents/ui/document-list-item-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
       "column": 1
     },
     {
@@ -6781,11 +7252,20 @@
     },
     {
       "from": "src/features/editor/index.js",
+      "to": "src/features/editor/domain/reading-policy.js",
+      "specifier": "./domain/reading-policy.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 15,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/index.js",
       "to": "src/features/editor/infrastructure/codemirror-editor-adapter.js",
       "specifier": "./infrastructure/codemirror-editor-adapter.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 22,
+      "line": 23,
       "column": 1
     },
     {
@@ -6794,7 +7274,7 @@
       "specifier": "./infrastructure/codemirror-extension-registry.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 30,
+      "line": 31,
       "column": 1
     },
     {
@@ -6803,7 +7283,7 @@
       "specifier": "./infrastructure/codemirror-hybrid-extension.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 24,
+      "line": 25,
       "column": 1
     },
     {
@@ -6812,7 +7292,7 @@
       "specifier": "./infrastructure/document-model-binding.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 39,
+      "line": 40,
       "column": 1
     },
     {
@@ -6821,7 +7301,7 @@
       "specifier": "./infrastructure/virtual-editor.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 23,
+      "line": 24,
       "column": 1
     },
     {
@@ -6830,7 +7310,7 @@
       "specifier": "./ui/editor-content-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 35,
+      "line": 36,
       "column": 1
     },
     {
@@ -6857,7 +7337,7 @@
       "specifier": "./ui/editor-toolbar-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 37,
+      "line": 38,
       "column": 1
     },
     {
@@ -6866,7 +7346,7 @@
       "specifier": "./ui/find-replace-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 16,
+      "line": 17,
       "column": 1
     },
     {
@@ -6875,7 +7355,7 @@
       "specifier": "./ui/image-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 18,
+      "line": 19,
       "column": 1
     },
     {
@@ -6884,7 +7364,7 @@
       "specifier": "./ui/inline-color-menu-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 15,
+      "line": 16,
       "column": 1
     },
     {
@@ -6893,7 +7373,7 @@
       "specifier": "./ui/link-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 17,
+      "line": 18,
       "column": 1
     },
     {
@@ -6902,7 +7382,7 @@
       "specifier": "./ui/math-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 20,
+      "line": 21,
       "column": 1
     },
     {
@@ -6911,7 +7391,7 @@
       "specifier": "./ui/mermaid-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 21,
+      "line": 22,
       "column": 1
     },
     {
@@ -6920,7 +7400,7 @@
       "specifier": "./ui/table-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 19,
+      "line": 20,
       "column": 1
     },
     {
@@ -6956,7 +7436,7 @@
       "specifier": "@codemirror/commands",
       "kind": "import",
       "domain": "esm",
-      "line": 18,
+      "line": 17,
       "column": 1
     },
     {
@@ -6965,7 +7445,7 @@
       "specifier": "@codemirror/lang-markdown",
       "kind": "import",
       "domain": "esm",
-      "line": 19,
+      "line": 18,
       "column": 1
     },
     {
@@ -6992,7 +7472,7 @@
       "specifier": "@lezer/markdown",
       "kind": "import",
       "domain": "esm",
-      "line": 24,
+      "line": 23,
       "column": 1
     },
     {
@@ -7001,7 +7481,7 @@
       "specifier": "./codemirror-hybrid-extension.js",
       "kind": "import",
       "domain": "esm",
-      "line": 26,
+      "line": 25,
       "column": 1
     },
     {
@@ -7010,7 +7490,7 @@
       "specifier": "./pointer-selection/precise-pointer-selection.js",
       "kind": "import",
       "domain": "esm",
-      "line": 25,
+      "line": 24,
       "column": 1
     },
     {
@@ -7258,6 +7738,24 @@
     },
     {
       "from": "src/features/editor/ui/editor-toolbar-view.js",
+      "to": "src/features/editor/domain/reading-policy.js",
+      "specifier": "../domain/reading-policy.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/editor-toolbar-view.js",
+      "to": "src/features/editor/ui/selection-toolbar-view.js",
+      "specifier": "./selection-toolbar-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/editor-toolbar-view.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
@@ -7267,11 +7765,29 @@
     },
     {
       "from": "src/features/editor/ui/find-replace-dialog-view.js",
-      "to": "src/ui/components/modal-shell.js",
-      "specifier": "../../../ui/components/modal-shell.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 11,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/find-replace-dialog-view.js",
+      "to": "src/ui/components/popover-shell.js",
+      "specifier": "../../../ui/components/popover-shell.js",
       "kind": "import",
       "domain": "esm",
       "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/find-replace-dialog-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 10,
       "column": 1
     },
     {
@@ -7348,6 +7864,24 @@
     },
     {
       "from": "src/features/editor/ui/mermaid-dialog-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/selection-toolbar-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/ui/selection-toolbar-view.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
@@ -7789,11 +8323,20 @@
     },
     {
       "from": "src/features/export/index.js",
+      "to": "src/features/export/ui/export-dialog-view.js",
+      "specifier": "./ui/export-dialog-view.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 26,
+      "column": 1
+    },
+    {
+      "from": "src/features/export/index.js",
       "to": "src/features/export/ui/export-image-dialog-view.js",
       "specifier": "./ui/export-image-dialog-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 26,
+      "line": 27,
       "column": 1
     },
     {
@@ -7812,6 +8355,33 @@
       "kind": "import",
       "domain": "esm",
       "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/features/export/ui/export-dialog-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src/features/export/ui/export-dialog-view.js",
+      "to": "src/ui/components/modal-shell.js",
+      "specifier": "../../../ui/components/modal-shell.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 4,
+      "column": 1
+    },
+    {
+      "from": "src/features/export/ui/export-dialog-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {
@@ -9580,6 +10150,15 @@
     },
     {
       "from": "src/features/layout/workspace-preferences.js",
+      "to": "src/features/layout/session-layout-controller.js",
+      "specifier": "./session-layout-controller.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/features/layout/workspace-preferences.js",
       "to": "src/features/telemetry/index.js",
       "specifier": "../telemetry/index.js",
       "kind": "import",
@@ -9598,20 +10177,11 @@
     },
     {
       "from": "src/features/link-preview/link-preview-controller.js",
-      "to": "src/ui/components/icon-view.js",
-      "specifier": "../../ui/components/icon-view.js",
-      "kind": "import",
-      "domain": "esm",
-      "line": 8,
-      "column": 1
-    },
-    {
-      "from": "src/features/link-preview/link-preview-controller.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../ui/dom/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 9,
+      "line": 8,
       "column": 1
     },
     {
@@ -9620,7 +10190,7 @@
       "specifier": "./menu-actions.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 14,
+      "line": 15,
       "column": 1
     },
     {
@@ -9683,7 +10253,16 @@
       "specifier": "./ui/menu-content-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 16,
+      "line": 17,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/index.js",
+      "to": "src/features/menu/ui/workspace-actions-view.js",
+      "specifier": "./ui/workspace-actions-view.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 14,
       "column": 1
     },
     {
@@ -9714,6 +10293,15 @@
       "column": 1
     },
     {
+      "from": "src/features/menu/menu-view.js",
+      "to": "src/features/menu/ui/menu-presentation.js",
+      "specifier": "./ui/menu-presentation.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
       "from": "src/features/menu/recent-files-menu-controller.js",
       "to": "src/features/menu/menu-command-bindings.js",
       "specifier": "./menu-command-bindings.js",
@@ -9732,12 +10320,66 @@
       "column": 1
     },
     {
+      "from": "src/features/menu/shell-menus.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
       "from": "src/features/menu/ui/menu-content-view.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
       "domain": "esm",
       "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/menu-presentation.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/workspace-actions-view.js",
+      "to": "src/features/menu/menu-command-bindings.js",
+      "specifier": "../menu-command-bindings.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 5,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/workspace-actions-view.js",
+      "to": "src/features/menu/recent-files-menu-controller.js",
+      "specifier": "../recent-files-menu-controller.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 4,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/workspace-actions-view.js",
+      "to": "src/ui/components/popover-shell.js",
+      "specifier": "../../../ui/components/popover-shell.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 3,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/workspace-actions-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {
@@ -10597,6 +11239,15 @@
     },
     {
       "from": "src/features/settings/create-settings-feature.js",
+      "to": "src/features/settings/application/launch-policy-controller.js",
+      "specifier": "./application/launch-policy-controller.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 12,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/create-settings-feature.js",
       "to": "src/features/settings/application/settings-apply-coordinator.js",
       "specifier": "./application/settings-apply-coordinator.js",
       "kind": "import",
@@ -10611,6 +11262,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/create-settings-feature.js",
+      "to": "src/features/settings/domain/settings-defaults.js",
+      "specifier": "./domain/settings-defaults.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 11,
       "column": 1
     },
     {
@@ -10974,12 +11634,30 @@
       "column": 1
     },
     {
+      "from": "src/features/settings/ui/launch-policy-field-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
+      "column": 1
+    },
+    {
       "from": "src/features/settings/ui/settings-dialog-view.js",
       "to": "src/features/settings/sections/section-registry.js",
       "specifier": "../sections/section-registry.js",
       "kind": "import",
       "domain": "esm",
-      "line": 11,
+      "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/settings-dialog-view.js",
+      "to": "src/features/settings/ui/launch-policy-field-view.js",
+      "specifier": "./launch-policy-field-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 14,
       "column": 1
     },
     {
@@ -10988,13 +11666,22 @@
       "specifier": "./settings-field-view.js",
       "kind": "import",
       "domain": "esm",
-      "line": 12,
+      "line": 11,
       "column": 1
     },
     {
       "from": "src/features/settings/ui/settings-dialog-view.js",
       "to": "src/features/settings/ui/settings-navigation-view.js",
       "specifier": "./settings-navigation-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 12,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/settings-dialog-view.js",
+      "to": "src/features/settings/ui/toolbar-preview-view.js",
+      "specifier": "./toolbar-preview-view.js",
       "kind": "import",
       "domain": "esm",
       "line": 13,
@@ -11006,15 +11693,6 @@
       "specifier": "../../../ui/components/icon-view.js",
       "kind": "import",
       "domain": "esm",
-      "line": 9,
-      "column": 1
-    },
-    {
-      "from": "src/features/settings/ui/settings-dialog-view.js",
-      "to": "src/ui/components/modal-shell.js",
-      "specifier": "../../../ui/components/modal-shell.js",
-      "kind": "import",
-      "domain": "esm",
       "line": 8,
       "column": 1
     },
@@ -11024,7 +11702,7 @@
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 10,
+      "line": 9,
       "column": 1
     },
     {
@@ -11083,11 +11761,47 @@
     },
     {
       "from": "src/features/settings/ui/settings-navigation-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/settings-navigation-view.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
       "domain": "esm",
       "line": 7,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/toolbar-preview-view.js",
+      "to": "src/features/settings/ui/settings-field-view.js",
+      "specifier": "./settings-field-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/toolbar-preview-view.js",
+      "to": "src/ui/components/icon-view.js",
+      "specifier": "../../../ui/components/icon-view.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 9,
+      "column": 1
+    },
+    {
+      "from": "src/features/settings/ui/toolbar-preview-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 8,
       "column": 1
     },
     {
@@ -11367,6 +12081,15 @@
       "kind": "re-export",
       "domain": "esm",
       "line": 29,
+      "column": 1
+    },
+    {
+      "from": "src/features/sync/index.js",
+      "to": "src/features/sync/selection/preview-component-mapping.js",
+      "specifier": "./selection/preview-component-mapping.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 53,
       "column": 1
     },
     {
@@ -11790,7 +12513,7 @@
       "kind": "glob",
       "domain": null,
       "query": "?inline",
-      "line": 105,
+      "line": 106,
       "column": 12
     },
     {
@@ -11799,7 +12522,7 @@
       "specifier": "katex/dist/katex.css?raw",
       "kind": "import",
       "domain": "esm",
-      "line": 13,
+      "line": 14,
       "column": 1
     },
     {
@@ -11808,7 +12531,7 @@
       "specifier": "katex/dist/katex.css",
       "kind": "import",
       "domain": "esm",
-      "line": 11,
+      "line": 12,
       "column": 1
     },
     {
@@ -11853,7 +12576,7 @@
       "specifier": "./features/documents/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 38,
+      "line": 39,
       "column": 1
     },
     {
@@ -11871,7 +12594,7 @@
       "specifier": "./features/e2e/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 35,
+      "line": 36,
       "column": 1
     },
     {
@@ -11889,7 +12612,7 @@
       "specifier": "./features/editor/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 20,
+      "line": 11,
       "column": 1
     },
     {
@@ -11903,11 +12626,20 @@
     },
     {
       "from": "src/main.js",
+      "to": "src/features/editor/index.js",
+      "specifier": "./features/editor/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 22,
+      "column": 1
+    },
+    {
+      "from": "src/main.js",
       "to": "src/features/export/index.js",
       "specifier": "./features/export/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 14,
+      "line": 15,
       "column": 1
     },
     {
@@ -11916,16 +12648,7 @@
       "specifier": "./features/hybrid-editor/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 37,
-      "column": 1
-    },
-    {
-      "from": "src/main.js",
-      "to": "src/features/import/index.js",
-      "specifier": "./features/import/index.js",
-      "kind": "import",
-      "domain": "esm",
-      "line": 15,
+      "line": 38,
       "column": 1
     },
     {
@@ -11939,11 +12662,20 @@
     },
     {
       "from": "src/main.js",
+      "to": "src/features/import/index.js",
+      "specifier": "./features/import/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 17,
+      "column": 1
+    },
+    {
+      "from": "src/main.js",
       "to": "src/features/layout/index.js",
       "specifier": "./features/layout/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 22,
+      "line": 23,
       "column": 1
     },
     {
@@ -11961,7 +12693,7 @@
       "specifier": "./features/link-preview/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 18,
+      "line": 19,
       "column": 1
     },
     {
@@ -11970,7 +12702,7 @@
       "specifier": "./features/menu/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 39,
+      "line": 40,
       "column": 1
     },
     {
@@ -11988,7 +12720,7 @@
       "specifier": "./features/persistence/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 27,
+      "line": 28,
       "column": 1
     },
     {
@@ -11997,7 +12729,7 @@
       "specifier": "./features/persistence/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 29,
+      "line": 30,
       "column": 1
     },
     {
@@ -12015,7 +12747,7 @@
       "specifier": "./features/preview/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 41,
+      "line": 42,
       "column": 1
     },
     {
@@ -12024,7 +12756,7 @@
       "specifier": "./features/settings/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 28,
+      "line": 29,
       "column": 1
     },
     {
@@ -12033,16 +12765,7 @@
       "specifier": "./features/sidebar/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 36,
-      "column": 1
-    },
-    {
-      "from": "src/main.js",
-      "to": "src/features/sync/index.js",
-      "specifier": "./features/sync/index.js",
-      "kind": "import",
-      "domain": "esm",
-      "line": 33,
+      "line": 37,
       "column": 1
     },
     {
@@ -12056,11 +12779,11 @@
     },
     {
       "from": "src/main.js",
-      "to": "src/features/telemetry/index.js",
-      "specifier": "./features/telemetry/index.js",
+      "to": "src/features/sync/index.js",
+      "specifier": "./features/sync/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 19,
+      "line": 35,
       "column": 1
     },
     {
@@ -12074,11 +12797,20 @@
     },
     {
       "from": "src/main.js",
+      "to": "src/features/telemetry/index.js",
+      "specifier": "./features/telemetry/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 20,
+      "column": 1
+    },
+    {
+      "from": "src/main.js",
       "to": "src/features/window/index.js",
       "specifier": "./features/window/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 40,
+      "line": 41,
       "column": 1
     },
     {
@@ -12087,7 +12819,7 @@
       "specifier": "./model-kernel/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 23,
+      "line": 24,
       "column": 1
     },
     {
@@ -12096,7 +12828,7 @@
       "specifier": "./platform/index.js",
       "kind": "import",
       "domain": "esm",
-      "line": 17,
+      "line": 18,
       "column": 1
     },
     {
@@ -12105,7 +12837,7 @@
       "specifier": "./shared/scheduling/task-scheduler.js",
       "kind": "import",
       "domain": "esm",
-      "line": 30,
+      "line": 31,
       "column": 1
     },
     {
@@ -12114,7 +12846,7 @@
       "specifier": "./shared/vendor/capability-loader.js",
       "kind": "import",
       "domain": "esm",
-      "line": 32,
+      "line": 33,
       "column": 1
     },
     {
@@ -12123,7 +12855,7 @@
       "specifier": "./styles/index.css",
       "kind": "import",
       "domain": "esm",
-      "line": 12,
+      "line": 13,
       "column": 1
     },
     {
@@ -12335,6 +13067,15 @@
     },
     {
       "from": "src/platform/desktop/desktop-platform.js",
+      "to": "src/platform/desktop/launch-client.js",
+      "specifier": "./launch-client.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/platform/desktop/desktop-platform.js",
       "to": "src/platform/desktop/link-client.js",
       "specifier": "./link-client.js",
       "kind": "import",
@@ -12394,6 +13135,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/platform/desktop/launch-client.js",
+      "to": "npm:@tauri-apps/api",
+      "specifier": "@tauri-apps/api/event",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {
@@ -12595,6 +13345,15 @@
       "column": 1
     },
     {
+      "from": "src/platform/index.js",
+      "to": "src/platform/ports/launch-port.js",
+      "specifier": "./ports/launch-port.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 22,
+      "column": 1
+    },
+    {
       "from": "src/platform/ports/clipboard-port.js",
       "to": "src/platform/ports/port-contract.js",
       "specifier": "./port-contract.js",
@@ -12766,6 +13525,15 @@
       "column": 1
     },
     {
+      "from": "src/platform/ports/launch-port.js",
+      "to": "src/platform/ports/port-contract.js",
+      "specifier": "./port-contract.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
+      "column": 1
+    },
+    {
       "from": "src/platform/ports/links-port.js",
       "to": "src/platform/ports/port-contract.js",
       "specifier": "./port-contract.js",
@@ -12835,6 +13603,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 11,
+      "column": 1
+    },
+    {
+      "from": "src/platform/ports/platform-port-set.js",
+      "to": "src/platform/ports/launch-port.js",
+      "specifier": "./launch-port.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 13,
       "column": 1
     },
     {
@@ -12944,6 +13721,26 @@
       "domain": "esm",
       "line": 9,
       "column": 25
+    },
+    {
+      "from": "src/styles/foundation/typography.css",
+      "to": "public/assets/fonts/JetBrainsMono-Regular.woff2",
+      "specifier": "/assets/fonts/JetBrainsMono-Regular.woff2",
+      "kind": "css-url",
+      "domain": null,
+      "column": 45,
+      "line": 3,
+      "offset": 287
+    },
+    {
+      "from": "src/styles/foundation/typography.css",
+      "to": "public/assets/fonts/NotoSansSC-VF.ttf",
+      "specifier": "/assets/fonts/NotoSansSC-VF.ttf",
+      "kind": "css-url",
+      "domain": null,
+      "column": 43,
+      "line": 2,
+      "offset": 115
     },
     {
       "from": "src/styles/index.css",
@@ -13087,6 +13884,16 @@
     },
     {
       "from": "src/styles/index.css",
+      "to": "src/styles/features/document-surface.css",
+      "specifier": "./features/document-surface.css",
+      "kind": "css-import",
+      "domain": "css",
+      "column": 1,
+      "line": 55,
+      "offset": 1996
+    },
+    {
+      "from": "src/styles/index.css",
       "to": "src/styles/features/editor.css",
       "specifier": "./features/editor.css",
       "kind": "css-import",
@@ -13114,6 +13921,16 @@
       "column": 1,
       "line": 51,
       "offset": 1836
+    },
+    {
+      "from": "src/styles/index.css",
+      "to": "src/styles/features/find-replace.css",
+      "specifier": "./features/find-replace.css",
+      "kind": "css-import",
+      "domain": "css",
+      "column": 1,
+      "line": 54,
+      "offset": 1957
     },
     {
       "from": "src/styles/index.css",
@@ -13224,6 +14041,16 @@
       "column": 1,
       "line": 36,
       "offset": 1279
+    },
+    {
+      "from": "src/styles/index.css",
+      "to": "src/styles/features/selection-toolbar.css",
+      "specifier": "./features/selection-toolbar.css",
+      "kind": "css-import",
+      "domain": "css",
+      "column": 1,
+      "line": 53,
+      "offset": 1913
     },
     {
       "from": "src/styles/index.css",
@@ -13437,6 +14264,16 @@
     },
     {
       "from": "src/styles/index.css",
+      "to": "src/styles/shell/writing-workspace.css",
+      "specifier": "./shell/writing-workspace.css",
+      "kind": "css-import",
+      "domain": "css",
+      "column": 1,
+      "line": 52,
+      "offset": 1872
+    },
+    {
+      "from": "src/styles/index.css",
       "to": "src/styles/themes/dark.css",
       "specifier": "./themes/dark.css",
       "kind": "css-import",
@@ -13516,6 +14353,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/ui/components/popover-shell.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {
@@ -13800,6 +14646,142 @@
   ],
   "cycles": [],
   "rustCompilerReferences": [
+    {
+      "from": "src-tauri/src/app_launch/inbox.rs",
+      "specifier": "serde::{Deserialize,Serialize}",
+      "line": 2,
+      "column": 1,
+      "modulePrefix": "cargo:serde",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/inbox.rs",
+      "specifier": "std::{fs,io::Write,path::{Path,PathBuf},time::{SystemTime,UNIX_EPOCH},}",
+      "line": 3,
+      "column": 1,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/instance_guard.rs",
+      "specifier": "windows_sys::Win32::{Foundation::{CloseHandle,GetLastError,ERROR_ALREADY_EXISTS},System::Threading::CreateMutexW,}",
+      "line": 8,
+      "column": 9,
+      "modulePrefix": "cargo:windows-sys",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "specifier": "serde::Serialize",
+      "line": 3,
+      "column": 1,
+      "modulePrefix": "cargo:serde",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "specifier": "super::{inbox,policy,LaunchState}",
+      "line": 2,
+      "column": 1,
+      "modulePrefix": "src-tauri/src/app_launch/mod.rs",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/launch_commands.rs",
+      "specifier": "tauri::Manager",
+      "line": 4,
+      "column": 1,
+      "modulePrefix": "cargo:tauri",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "specifier": "instance_guard::InstanceGuard",
+      "line": 10,
+      "column": 5,
+      "modulePrefix": "src-tauri/src/app_launch/instance_guard.rs",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/mod.rs",
+      "specifier": "routing::{install,LaunchState}",
+      "line": 11,
+      "column": 5,
+      "modulePrefix": "src-tauri/src/app_launch/routing.rs",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "specifier": "std::{fs,path::Path}",
+      "line": 2,
+      "column": 1,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "specifier": "std::io::Write",
+      "line": 16,
+      "column": 5,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "specifier": "std::os::windows::ffi::OsStrExt",
+      "line": 26,
+      "column": 9,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/policy.rs",
+      "specifier": "windows_sys::Win32::Storage::FileSystem::{MoveFileExW,MOVEFILE_REPLACE_EXISTING,MOVEFILE_WRITE_THROUGH,}",
+      "line": 27,
+      "column": 9,
+      "modulePrefix": "cargo:windows-sys",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "specifier": "std::{collections::HashMap,path::PathBuf,sync::{atomic::{AtomicBool,Ordering},Arc,Mutex,},time::Duration,}",
+      "line": 6,
+      "column": 1,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "specifier": "super::{inbox::{self,OpenRequest},policy,}",
+      "line": 2,
+      "column": 1,
+      "modulePrefix": "src-tauri/src/app_launch/inbox.rs",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/routing.rs",
+      "specifier": "tauri::{Emitter,Manager}",
+      "line": 15,
+      "column": 1,
+      "modulePrefix": "cargo:tauri",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/tests.rs",
+      "specifier": "std::{ffi::OsString,fs,path::PathBuf,time::{SystemTime,UNIX_EPOCH},}",
+      "line": 3,
+      "column": 1,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/app_launch/tests.rs",
+      "specifier": "super::{inbox,policy}",
+      "line": 2,
+      "column": 1,
+      "modulePrefix": "src-tauri/src/app_launch/mod.rs",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
     {
       "from": "src-tauri/src/document_store/cache.rs",
       "specifier": "std::{collections::{HashMap,HashSet},sync::{Condvar,Mutex},}",
@@ -15065,6 +16047,22 @@
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
     },
     {
+      "from": "src-tauri/src/main.rs",
+      "specifier": "std::sync::{atomic::{AtomicBool,Ordering},Arc,}",
+      "line": 12,
+      "column": 5,
+      "modulePrefix": "rust:std",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
+      "from": "src-tauri/src/main.rs",
+      "specifier": "tauri::Manager",
+      "line": 16,
+      "column": 5,
+      "modulePrefix": "cargo:tauri",
+      "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
+    },
+    {
       "from": "src-tauri/src/performance_log/batch.rs",
       "specifier": "serde_json::{json,Value}",
       "line": 6,
@@ -15211,7 +16209,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "serde_json::json",
-      "line": 404,
+      "line": 482,
       "column": 5,
       "modulePrefix": "cargo:serde_json",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
@@ -15219,7 +16217,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "super::redact_value",
-      "line": 403,
+      "line": 481,
       "column": 5,
       "modulePrefix": "src-tauri/src/performance_log/mod.rs",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
@@ -15473,7 +16471,7 @@
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
     }
   ],
-  "nativeLockSha256": "34c46780139164bca5dcfe00274b6933d218dba22c179dfbadbaca5248a675f0",
+  "nativeLockSha256": "0bd1f7c7d684c4242dec6c4b9aa32c3461dfe43c7c01fd5927c14f2bbbe4f624",
   "scope": [
     "Every actual production file is a node, including isolated modules; resolved assets and conditional Rust test inputs are explicit.",
     "ESM imports/re-exports/literal dynamic imports, module-relative URLs, CSS imports/URLs, HTML resources and Rust file declarations/includes are recorded.",

@@ -1,0 +1,4533 @@
+{
+  "date": "2026-10-27",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "scope": "Figma全组件复审与修订；不接入软件",
+  "status": "figma_revised_awaiting_visual_acceptance_not_implemented",
+  "method": "Impeccable polish guidance + Figma structural inspection and screenshot review; no CLI detector claim",
+  "coverage": {
+    "counts": [
+      {
+        "id": "78:1065",
+        "name": "MDR Blue/Button",
+        "count": 18
+      },
+      {
+        "id": "78:1098",
+        "name": "MDR Blue/Navigation",
+        "count": 4
+      },
+      {
+        "id": "78:1123",
+        "name": "MDR Blue/Field",
+        "count": 4
+      },
+      {
+        "id": "78:1128",
+        "name": "MDR Blue/Toggle",
+        "count": 8
+      },
+      {
+        "id": "94:1182",
+        "name": "MDR Blue/Icon button",
+        "count": 10
+      },
+      {
+        "id": "94:1239",
+        "name": "MDR Blue/Checkbox",
+        "count": 12
+      },
+      {
+        "id": "94:1250",
+        "name": "MDR Blue/Mode item",
+        "count": 5
+      },
+      {
+        "id": "94:1287",
+        "name": "MDR Blue/Sidebar action",
+        "count": 6
+      },
+      {
+        "id": "94:1296",
+        "name": "MDR Blue/Text input",
+        "count": 4
+      },
+      {
+        "id": "94:1357",
+        "name": "MDR Blue/Menu item",
+        "count": 6
+      },
+      {
+        "id": "94:1374",
+        "name": "MDR Blue/Format item",
+        "count": 8
+      },
+      {
+        "id": "94:1387",
+        "name": "MDR Blue/Search option",
+        "count": 6
+      },
+      {
+        "id": "94:1400",
+        "name": "MDR Blue/Swatch",
+        "count": 6
+      },
+      {
+        "id": "94:1403",
+        "name": "MDR Blue/Divider",
+        "count": 2
+      },
+      {
+        "id": "94:1406",
+        "name": "MDR Blue/Tooltip",
+        "count": 1
+      },
+      {
+        "id": "95:1963",
+        "name": "MDR Blue/Mode switch",
+        "count": 4
+      },
+      {
+        "id": "95:2036",
+        "name": "MDR Blue/Titlebar",
+        "count": 2
+      },
+      {
+        "id": "95:2102",
+        "name": "MDR Blue/Statusbar",
+        "count": 8
+      },
+      {
+        "id": "95:2124",
+        "name": "MDR Blue/Sidebar tabs",
+        "count": 3
+      },
+      {
+        "id": "95:2249",
+        "name": "MDR Blue/Sidebar content",
+        "count": 4
+      },
+      {
+        "id": "95:2460",
+        "name": "MDR Blue/Settings navigation",
+        "count": 5
+      },
+      {
+        "id": "95:2500",
+        "name": "MDR Blue/Settings row",
+        "count": 10
+      },
+      {
+        "id": "95:2571",
+        "name": "MDR Blue/Selection toolbar",
+        "count": 4
+      },
+      {
+        "id": "95:2731",
+        "name": "MDR Blue/Find panel",
+        "count": 4
+      },
+      {
+        "id": "95:2756",
+        "name": "MDR Blue/Notice",
+        "count": 4
+      },
+      {
+        "id": "95:2798",
+        "name": "MDR Blue/Empty state",
+        "count": 4
+      },
+      {
+        "id": "95:2841",
+        "name": "MDR Blue/Progress",
+        "count": 6
+      },
+      {
+        "id": "95:2990",
+        "name": "MDR Blue/Table picker",
+        "count": 2
+      },
+      {
+        "id": "95:3041",
+        "name": "MDR Blue/Color palette",
+        "count": 2
+      },
+      {
+        "id": "95:3046",
+        "name": "MDR Blue/Scrollbar",
+        "count": 2
+      },
+      {
+        "id": "95:3053",
+        "name": "MDR Blue/Resize handle",
+        "count": 3
+      },
+      {
+        "id": "98:4857",
+        "name": "MDR Blue/Export dialog",
+        "count": 10
+      },
+      {
+        "id": "98:5130",
+        "name": "MDR Blue/Help panel",
+        "count": 12
+      },
+      {
+        "id": "98:5457",
+        "name": "MDR Blue/Insert form",
+        "count": 10
+      },
+      {
+        "id": "98:6043",
+        "name": "MDR Blue/Menu panel",
+        "count": 8
+      },
+      {
+        "id": "98:6072",
+        "name": "MDR Blue/Code block",
+        "count": 3
+      },
+      {
+        "id": "98:6127",
+        "name": "MDR Blue/Document block",
+        "count": 10
+      },
+      {
+        "id": "98:6172",
+        "name": "MDR Blue/Workspace header",
+        "count": 2
+      },
+      {
+        "id": "99:5384",
+        "name": "MDR Blue/Pane header",
+        "count": 2
+      },
+      {
+        "id": "99:5527",
+        "name": "MDR Blue/Toolbar checklist",
+        "count": 2
+      },
+      {
+        "id": "99:5851",
+        "name": "MDR Blue/Settings panel",
+        "count": 10
+      },
+      {
+        "id": "99:6098",
+        "name": "MDR Blue/Sidebar shell",
+        "count": 5
+      },
+      {
+        "id": "99:6149",
+        "name": "MDR Blue/Document surface",
+        "count": 3
+      },
+      {
+        "id": "99:6177",
+        "name": "MDR Blue/Confirmation",
+        "count": 3
+      },
+      {
+        "id": "100:7134",
+        "name": "MDR Blue/Document row",
+        "count": 8
+      },
+      {
+        "id": "100:7155",
+        "name": "MDR Blue/Menu switch",
+        "count": 4
+      },
+      {
+        "id": "100:7286",
+        "name": "MDR Blue/Web clipper",
+        "count": 5
+      },
+      {
+        "id": "100:7382",
+        "name": "MDR Blue/Image export advanced",
+        "count": 3
+      },
+      {
+        "id": "100:7416",
+        "name": "MDR Blue/Link preview",
+        "count": 6
+      },
+      {
+        "id": "100:7426",
+        "name": "MDR Blue/Drag overlay",
+        "count": 1
+      },
+      {
+        "id": "100:7433",
+        "name": "MDR Blue/Preview recovery",
+        "count": 2
+      },
+      {
+        "id": "100:7462",
+        "name": "MDR Blue/Widget toolbar",
+        "count": 4
+      },
+      {
+        "id": "101:7532",
+        "name": "MDR Blue/Document surface narrow",
+        "count": 3
+      },
+      {
+        "id": "101:8134",
+        "name": "MDR Blue/Context menu",
+        "count": 3
+      },
+      {
+        "id": "101:8222",
+        "name": "MDR Blue/Embedded block",
+        "count": 9
+      },
+      {
+        "id": "107:8433",
+        "name": "MDR Blue/Duration field",
+        "count": 3
+      },
+      {
+        "id": "107:8791",
+        "name": "MDR Blue/Select menu",
+        "count": 7
+      },
+      {
+        "id": "115:8784",
+        "name": "MDR Blue/Window control",
+        "count": 20
+      },
+      {
+        "id": "115:10391",
+        "name": "MDR Blue/Tree row",
+        "count": 16
+      },
+      {
+        "id": "115:10482",
+        "name": "MDR Blue/Outline row",
+        "count": 18
+      },
+      {
+        "id": "115:10493",
+        "name": "MDR Blue/Collapsed pane",
+        "count": 2
+      }
+    ],
+    "variants": [
+      {
+        "set": "78:1065",
+        "id": "78:1035",
+        "name": "Tone=primary, State=default",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1037",
+        "name": "Tone=primary, State=hover",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1039",
+        "name": "Tone=primary, State=pressed",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1041",
+        "name": "Tone=primary, State=focus",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1043",
+        "name": "Tone=primary, State=disabled",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1045",
+        "name": "Tone=secondary, State=default",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1047",
+        "name": "Tone=secondary, State=hover",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1049",
+        "name": "Tone=secondary, State=pressed",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1051",
+        "name": "Tone=secondary, State=focus",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1053",
+        "name": "Tone=secondary, State=disabled",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1055",
+        "name": "Tone=quiet, State=default",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1057",
+        "name": "Tone=quiet, State=hover",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1059",
+        "name": "Tone=quiet, State=pressed",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1061",
+        "name": "Tone=quiet, State=focus",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "78:1063",
+        "name": "Tone=quiet, State=disabled",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "94:1053",
+        "name": "Tone=primary, State=loading",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "94:1055",
+        "name": "Tone=secondary, State=loading",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1065",
+        "id": "94:1057",
+        "name": "Tone=quiet, State=loading",
+        "w": 104,
+        "h": 36
+      },
+      {
+        "set": "78:1098",
+        "id": "78:1066",
+        "name": "State=default",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "78:1098",
+        "id": "78:1074",
+        "name": "State=hover",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "78:1098",
+        "id": "78:1082",
+        "name": "State=selected",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "78:1098",
+        "id": "78:1090",
+        "name": "State=focus",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "78:1123",
+        "id": "78:1099",
+        "name": "State=default",
+        "w": 224,
+        "h": 36
+      },
+      {
+        "set": "78:1123",
+        "id": "78:1105",
+        "name": "State=focus",
+        "w": 224,
+        "h": 36
+      },
+      {
+        "set": "78:1123",
+        "id": "78:1111",
+        "name": "State=error",
+        "w": 224,
+        "h": 36
+      },
+      {
+        "set": "78:1123",
+        "id": "78:1117",
+        "name": "State=disabled",
+        "w": 224,
+        "h": 36
+      },
+      {
+        "set": "78:1128",
+        "id": "78:1124",
+        "name": "Checked=false, State=default",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "78:1126",
+        "name": "Checked=true, State=default",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1110",
+        "name": "Checked=false, State=hover",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1112",
+        "name": "Checked=false, State=focus",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1114",
+        "name": "Checked=false, State=disabled",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1116",
+        "name": "Checked=true, State=hover",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1118",
+        "name": "Checked=true, State=focus",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "78:1128",
+        "id": "94:1120",
+        "name": "Checked=true, State=disabled",
+        "w": 36,
+        "h": 20
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1122",
+        "name": "Size=compact, State=default",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1137",
+        "name": "Size=compact, State=hover",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1142",
+        "name": "Size=compact, State=pressed",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1147",
+        "name": "Size=compact, State=focus",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1152",
+        "name": "Size=compact, State=disabled",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1157",
+        "name": "Size=standard, State=default",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1162",
+        "name": "Size=standard, State=hover",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1167",
+        "name": "Size=standard, State=pressed",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1172",
+        "name": "Size=standard, State=focus",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "set": "94:1182",
+        "id": "94:1177",
+        "name": "Size=standard, State=disabled",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1183",
+        "name": "Checked=false, State=default",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1186",
+        "name": "Checked=false, State=hover",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1189",
+        "name": "Checked=false, State=focus",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1192",
+        "name": "Checked=false, State=disabled",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1195",
+        "name": "Checked=true, State=default",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1202",
+        "name": "Checked=true, State=hover",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1209",
+        "name": "Checked=true, State=focus",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1216",
+        "name": "Checked=true, State=disabled",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1223",
+        "name": "Checked=mixed, State=default",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1227",
+        "name": "Checked=mixed, State=hover",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1231",
+        "name": "Checked=mixed, State=focus",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1239",
+        "id": "94:1235",
+        "name": "Checked=mixed, State=disabled",
+        "w": 160,
+        "h": 32
+      },
+      {
+        "set": "94:1250",
+        "id": "94:1240",
+        "name": "State=default",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "set": "94:1250",
+        "id": "94:1242",
+        "name": "State=hover",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "set": "94:1250",
+        "id": "94:1244",
+        "name": "State=selected",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "set": "94:1250",
+        "id": "94:1246",
+        "name": "State=focus",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "set": "94:1250",
+        "id": "94:1248",
+        "name": "State=disabled",
+        "w": 64,
+        "h": 32
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1251",
+        "name": "Kind=recent, State=default",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1257",
+        "name": "Kind=recent, State=hover",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1263",
+        "name": "Kind=recent, State=focus",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1269",
+        "name": "Kind=back, State=default",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1275",
+        "name": "Kind=back, State=hover",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1287",
+        "id": "94:1281",
+        "name": "Kind=back, State=focus",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "94:1296",
+        "id": "94:1288",
+        "name": "State=default",
+        "w": 240,
+        "h": 36
+      },
+      {
+        "set": "94:1296",
+        "id": "94:1290",
+        "name": "State=focus",
+        "w": 240,
+        "h": 36
+      },
+      {
+        "set": "94:1296",
+        "id": "94:1292",
+        "name": "State=error",
+        "w": 240,
+        "h": 36
+      },
+      {
+        "set": "94:1296",
+        "id": "94:1294",
+        "name": "State=disabled",
+        "w": 240,
+        "h": 36
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1297",
+        "name": "State=default",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1307",
+        "name": "State=hover",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1317",
+        "name": "State=focus",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1327",
+        "name": "State=selected",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1337",
+        "name": "State=disabled",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1357",
+        "id": "94:1347",
+        "name": "State=danger",
+        "w": 248,
+        "h": 32
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1358",
+        "name": "Size=compact, State=default",
+        "w": 36,
+        "h": 28
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1360",
+        "name": "Size=compact, State=selected",
+        "w": 36,
+        "h": 28
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1362",
+        "name": "Size=compact, State=focus",
+        "w": 36,
+        "h": 28
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1364",
+        "name": "Size=compact, State=disabled",
+        "w": 36,
+        "h": 28
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1366",
+        "name": "Size=standard, State=default",
+        "w": 36,
+        "h": 32
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1368",
+        "name": "Size=standard, State=selected",
+        "w": 36,
+        "h": 32
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1370",
+        "name": "Size=standard, State=focus",
+        "w": 36,
+        "h": 32
+      },
+      {
+        "set": "94:1374",
+        "id": "94:1372",
+        "name": "Size=standard, State=disabled",
+        "w": 36,
+        "h": 32
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1375",
+        "name": "Selected=false, State=default",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1377",
+        "name": "Selected=false, State=focus",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1379",
+        "name": "Selected=false, State=disabled",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1381",
+        "name": "Selected=true, State=default",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1383",
+        "name": "Selected=true, State=focus",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1387",
+        "id": "94:1385",
+        "name": "Selected=true, State=disabled",
+        "w": 88,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1388",
+        "name": "Selected=false, State=default",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1390",
+        "name": "Selected=false, State=focus",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1392",
+        "name": "Selected=false, State=disabled",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1394",
+        "name": "Selected=true, State=default",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1396",
+        "name": "Selected=true, State=focus",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1400",
+        "id": "94:1398",
+        "name": "Selected=true, State=disabled",
+        "w": 28,
+        "h": 28
+      },
+      {
+        "set": "94:1403",
+        "id": "94:1401",
+        "name": "Orientation=horizontal",
+        "w": 160,
+        "h": 1
+      },
+      {
+        "set": "94:1403",
+        "id": "94:1402",
+        "name": "Orientation=vertical",
+        "w": 1,
+        "h": 20
+      },
+      {
+        "set": "94:1406",
+        "id": "94:1404",
+        "name": "State=visible",
+        "w": 80,
+        "h": 28
+      },
+      {
+        "set": "95:1963",
+        "id": "95:1927",
+        "name": "Selected=hybrid",
+        "w": 272,
+        "h": 40
+      },
+      {
+        "set": "95:1963",
+        "id": "95:1936",
+        "name": "Selected=both",
+        "w": 272,
+        "h": 40
+      },
+      {
+        "set": "95:1963",
+        "id": "95:1945",
+        "name": "Selected=edit",
+        "w": 272,
+        "h": 40
+      },
+      {
+        "set": "95:1963",
+        "id": "95:1954",
+        "name": "Selected=preview",
+        "w": 272,
+        "h": 40
+      },
+      {
+        "set": "95:2036",
+        "id": "95:1964",
+        "name": "Width=desktop",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2036",
+        "id": "95:2000",
+        "name": "Width=narrow",
+        "w": 600,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2037",
+        "name": "Status=saved",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2048",
+        "name": "Status=modified",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2059",
+        "name": "Status=saving",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2070",
+        "name": "Status=failed",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2081",
+        "name": "Status=loading",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "95:2092",
+        "name": "Status=reading",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "144:9108",
+        "name": "Status=previewRecovering",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2102",
+        "id": "144:9127",
+        "name": "Status=previewFailed",
+        "w": 1280,
+        "h": 40
+      },
+      {
+        "set": "95:2124",
+        "id": "95:2103",
+        "name": "Selected=documents",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "95:2124",
+        "id": "95:2110",
+        "name": "Selected=files",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "95:2124",
+        "id": "95:2117",
+        "name": "Selected=outline",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "95:2249",
+        "id": "95:2125",
+        "name": "View=documents",
+        "w": 208,
+        "h": 317
+      },
+      {
+        "set": "95:2249",
+        "id": "95:2162",
+        "name": "View=files",
+        "w": 208,
+        "h": 257
+      },
+      {
+        "set": "95:2249",
+        "id": "95:2199",
+        "name": "View=outline",
+        "w": 208,
+        "h": 257
+      },
+      {
+        "set": "95:2249",
+        "id": "95:2234",
+        "name": "View=empty",
+        "w": 208,
+        "h": 296
+      },
+      {
+        "set": "95:2460",
+        "id": "95:2250",
+        "name": "Selected=general",
+        "w": 208,
+        "h": 268
+      },
+      {
+        "set": "95:2460",
+        "id": "95:2292",
+        "name": "Selected=editor",
+        "w": 208,
+        "h": 268
+      },
+      {
+        "set": "95:2460",
+        "id": "95:2334",
+        "name": "Selected=save",
+        "w": 208,
+        "h": 268
+      },
+      {
+        "set": "95:2460",
+        "id": "95:2376",
+        "name": "Selected=toolbar",
+        "w": 208,
+        "h": 268
+      },
+      {
+        "set": "95:2460",
+        "id": "95:2418",
+        "name": "Selected=performance",
+        "w": 208,
+        "h": 268
+      },
+      {
+        "set": "95:2500",
+        "id": "95:2461",
+        "name": "Control=select, Width=desktop",
+        "w": 712,
+        "h": 64
+      },
+      {
+        "set": "95:2500",
+        "id": "95:2471",
+        "name": "Control=toggle, Width=desktop",
+        "w": 712,
+        "h": 64
+      },
+      {
+        "set": "95:2500",
+        "id": "95:2478",
+        "name": "Control=text, Width=desktop",
+        "w": 712,
+        "h": 64
+      },
+      {
+        "set": "95:2500",
+        "id": "95:2484",
+        "name": "Control=color, Width=desktop",
+        "w": 712,
+        "h": 64
+      },
+      {
+        "set": "95:2500",
+        "id": "95:2492",
+        "name": "Control=directory, Width=desktop",
+        "w": 712,
+        "h": 64
+      },
+      {
+        "set": "95:2500",
+        "id": "101:7438",
+        "name": "Control=select, Width=narrow",
+        "w": 376,
+        "h": 90
+      },
+      {
+        "set": "95:2500",
+        "id": "101:7449",
+        "name": "Control=toggle, Width=narrow",
+        "w": 376,
+        "h": 56
+      },
+      {
+        "set": "95:2500",
+        "id": "101:7457",
+        "name": "Control=text, Width=narrow",
+        "w": 376,
+        "h": 90
+      },
+      {
+        "set": "95:2500",
+        "id": "101:7464",
+        "name": "Control=color, Width=narrow",
+        "w": 376,
+        "h": 90
+      },
+      {
+        "set": "95:2500",
+        "id": "101:7473",
+        "name": "Control=directory, Width=narrow",
+        "w": 376,
+        "h": 90
+      },
+      {
+        "set": "95:2571",
+        "id": "95:2501",
+        "name": "Density=compact, Pinned=false",
+        "w": 362,
+        "h": 36
+      },
+      {
+        "set": "95:2571",
+        "id": "95:2516",
+        "name": "Density=compact, Pinned=true",
+        "w": 392,
+        "h": 36
+      },
+      {
+        "set": "95:2571",
+        "id": "95:2536",
+        "name": "Density=standard, Pinned=false",
+        "w": 362,
+        "h": 40
+      },
+      {
+        "set": "95:2571",
+        "id": "95:2551",
+        "name": "Density=standard, Pinned=true",
+        "w": 392,
+        "h": 40
+      },
+      {
+        "set": "95:2731",
+        "id": "95:2572",
+        "name": "State=results",
+        "w": 456,
+        "h": 140
+      },
+      {
+        "set": "95:2731",
+        "id": "95:2613",
+        "name": "State=empty",
+        "w": 456,
+        "h": 140
+      },
+      {
+        "set": "95:2731",
+        "id": "95:2654",
+        "name": "State=invalid",
+        "w": 456,
+        "h": 140
+      },
+      {
+        "set": "95:2731",
+        "id": "95:2696",
+        "name": "State=reading",
+        "w": 456,
+        "h": 100
+      },
+      {
+        "set": "95:2756",
+        "id": "95:2732",
+        "name": "Tone=info",
+        "w": 384,
+        "h": 70
+      },
+      {
+        "set": "95:2756",
+        "id": "95:2738",
+        "name": "Tone=success",
+        "w": 384,
+        "h": 70
+      },
+      {
+        "set": "95:2756",
+        "id": "95:2744",
+        "name": "Tone=warning",
+        "w": 384,
+        "h": 70
+      },
+      {
+        "set": "95:2756",
+        "id": "95:2750",
+        "name": "Tone=error",
+        "w": 384,
+        "h": 70
+      },
+      {
+        "set": "95:2798",
+        "id": "95:2757",
+        "name": "Kind=document",
+        "w": 440,
+        "h": 192
+      },
+      {
+        "set": "95:2798",
+        "id": "95:2768",
+        "name": "Kind=files",
+        "w": 440,
+        "h": 192
+      },
+      {
+        "set": "95:2798",
+        "id": "95:2776",
+        "name": "Kind=outline",
+        "w": 440,
+        "h": 192
+      },
+      {
+        "set": "95:2798",
+        "id": "95:2787",
+        "name": "Kind=failed",
+        "w": 440,
+        "h": 192
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2799",
+        "name": "Stage=preparing",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2806",
+        "name": "Stage=rendering",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2813",
+        "name": "Stage=writing",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2820",
+        "name": "Stage=complete",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2827",
+        "name": "Stage=failed",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2841",
+        "id": "95:2834",
+        "name": "Stage=cancelled",
+        "w": 384,
+        "h": 160
+      },
+      {
+        "set": "95:2990",
+        "id": "95:2842",
+        "name": "State=default",
+        "w": 212,
+        "h": 244
+      },
+      {
+        "set": "95:2990",
+        "id": "95:2916",
+        "name": "State=selected",
+        "w": 212,
+        "h": 244
+      },
+      {
+        "set": "95:3041",
+        "id": "95:2991",
+        "name": "Kind=text",
+        "w": 232,
+        "h": 232
+      },
+      {
+        "set": "95:3041",
+        "id": "95:3016",
+        "name": "Kind=highlight",
+        "w": 232,
+        "h": 232
+      },
+      {
+        "set": "95:3046",
+        "id": "95:3042",
+        "name": "Orientation=vertical",
+        "w": 8,
+        "h": 120
+      },
+      {
+        "set": "95:3046",
+        "id": "95:3044",
+        "name": "Orientation=horizontal",
+        "w": 120,
+        "h": 8
+      },
+      {
+        "set": "95:3053",
+        "id": "95:3047",
+        "name": "State=default",
+        "w": 9,
+        "h": 128
+      },
+      {
+        "set": "95:3053",
+        "id": "95:3049",
+        "name": "State=hover",
+        "w": 9,
+        "h": 128
+      },
+      {
+        "set": "95:3053",
+        "id": "95:3051",
+        "name": "State=focus",
+        "w": 9,
+        "h": 128
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4508",
+        "name": "Format=markdown, State=default",
+        "w": 420,
+        "h": 234
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4539",
+        "name": "Format=markdown, State=error",
+        "w": 420,
+        "h": 264
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4571",
+        "name": "Format=html, State=default",
+        "w": 420,
+        "h": 234
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4602",
+        "name": "Format=html, State=error",
+        "w": 420,
+        "h": 264
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4634",
+        "name": "Format=word, State=default",
+        "w": 420,
+        "h": 234
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4665",
+        "name": "Format=word, State=error",
+        "w": 420,
+        "h": 264
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4697",
+        "name": "Format=image, State=default",
+        "w": 420,
+        "h": 286
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4745",
+        "name": "Format=image, State=error",
+        "w": 420,
+        "h": 316
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4794",
+        "name": "Format=pdf, State=default",
+        "w": 420,
+        "h": 234
+      },
+      {
+        "set": "98:4857",
+        "id": "98:4825",
+        "name": "Format=pdf, State=error",
+        "w": 420,
+        "h": 264
+      },
+      {
+        "set": "98:5130",
+        "id": "98:4858",
+        "name": "Page=start, Width=desktop",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "98:4930",
+        "name": "Page=markdown, Width=desktop",
+        "w": 520,
+        "h": 292
+      },
+      {
+        "set": "98:5130",
+        "id": "98:4998",
+        "name": "Page=shortcuts, Width=desktop",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "98:5070",
+        "name": "Page=about, Width=desktop",
+        "w": 520,
+        "h": 236
+      },
+      {
+        "set": "98:5130",
+        "id": "100:6696",
+        "name": "Page=views, Width=desktop",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "100:6765",
+        "name": "Page=files, Width=desktop",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "105:13986",
+        "name": "Page=start, Width=narrow",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "105:14071",
+        "name": "Page=markdown, Width=narrow",
+        "w": 520,
+        "h": 292
+      },
+      {
+        "set": "98:5130",
+        "id": "105:14152",
+        "name": "Page=shortcuts, Width=narrow",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "105:14237",
+        "name": "Page=about, Width=narrow",
+        "w": 520,
+        "h": 236
+      },
+      {
+        "set": "98:5130",
+        "id": "105:14310",
+        "name": "Page=views, Width=narrow",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5130",
+        "id": "105:14395",
+        "name": "Page=files, Width=narrow",
+        "w": 520,
+        "h": 320
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5131",
+        "name": "Kind=link, State=default",
+        "w": 384,
+        "h": 188
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5153",
+        "name": "Kind=link, State=error",
+        "w": 384,
+        "h": 218
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5176",
+        "name": "Kind=imageUrl, State=default",
+        "w": 400,
+        "h": 340
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5208",
+        "name": "Kind=imageUrl, State=error",
+        "w": 400,
+        "h": 370
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5241",
+        "name": "Kind=imageFile, State=default",
+        "w": 400,
+        "h": 332
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5273",
+        "name": "Kind=imageFile, State=error",
+        "w": 400,
+        "h": 362
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5306",
+        "name": "Kind=mermaid, State=default",
+        "w": 440,
+        "h": 326
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5336",
+        "name": "Kind=mermaid, State=error",
+        "w": 440,
+        "h": 356
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5412",
+        "name": "Kind=rename, State=default",
+        "w": 384,
+        "h": 188
+      },
+      {
+        "set": "98:5457",
+        "id": "98:5434",
+        "name": "Kind=rename, State=error",
+        "w": 384,
+        "h": 218
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5458",
+        "name": "Menu=file",
+        "w": 288,
+        "h": 327
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5550",
+        "name": "Menu=edit",
+        "w": 216,
+        "h": 263
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5623",
+        "name": "Menu=view",
+        "w": 272,
+        "h": 254
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5695",
+        "name": "Menu=insert",
+        "w": 264,
+        "h": 391
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5786",
+        "name": "Menu=help",
+        "w": 160,
+        "h": 44
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5797",
+        "name": "Menu=recent",
+        "w": 248,
+        "h": 117
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5921",
+        "name": "Menu=headings",
+        "w": 208,
+        "h": 245
+      },
+      {
+        "set": "98:6043",
+        "id": "98:5992",
+        "name": "Menu=export",
+        "w": 192,
+        "h": 181
+      },
+      {
+        "set": "98:6072",
+        "id": "98:6044",
+        "name": "State=preview",
+        "w": 640,
+        "h": 136
+      },
+      {
+        "set": "98:6072",
+        "id": "98:6053",
+        "name": "State=editing",
+        "w": 640,
+        "h": 136
+      },
+      {
+        "set": "98:6072",
+        "id": "98:6062",
+        "name": "State=error",
+        "w": 640,
+        "h": 164
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6073",
+        "name": "Kind=paragraph",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6075",
+        "name": "Kind=heading",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6078",
+        "name": "Kind=quote",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6080",
+        "name": "Kind=task",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6091",
+        "name": "Kind=list",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6093",
+        "name": "Kind=table",
+        "w": 640,
+        "h": 108
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6106",
+        "name": "Kind=image",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6115",
+        "name": "Kind=math",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6117",
+        "name": "Kind=diagram",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6127",
+        "id": "98:6125",
+        "name": "Kind=divider",
+        "w": 640,
+        "h": 112
+      },
+      {
+        "set": "98:6172",
+        "id": "98:6128",
+        "name": "Width=desktop",
+        "w": 1040,
+        "h": 76
+      },
+      {
+        "set": "98:6172",
+        "id": "98:6150",
+        "name": "Width=narrow",
+        "w": 600,
+        "h": 104
+      },
+      {
+        "set": "99:5384",
+        "id": "99:5364",
+        "name": "Role=editor",
+        "w": 480,
+        "h": 36
+      },
+      {
+        "set": "99:5384",
+        "id": "99:5374",
+        "name": "Role=preview",
+        "w": 480,
+        "h": 36
+      },
+      {
+        "set": "99:5527",
+        "id": "99:5385",
+        "name": "Kind=primary",
+        "w": 712,
+        "h": 414
+      },
+      {
+        "set": "99:5527",
+        "id": "99:5468",
+        "name": "Kind=hidden",
+        "w": 712,
+        "h": 414
+      },
+      {
+        "set": "99:5851",
+        "id": "99:5528",
+        "name": "Section=general, Width=desktop",
+        "w": 760,
+        "h": 449
+      },
+      {
+        "set": "99:5851",
+        "id": "99:5577",
+        "name": "Section=editor, Width=desktop",
+        "w": 760,
+        "h": 405
+      },
+      {
+        "set": "99:5851",
+        "id": "99:5615",
+        "name": "Section=save, Width=desktop",
+        "w": 760,
+        "h": 373
+      },
+      {
+        "set": "99:5851",
+        "id": "99:5647",
+        "name": "Section=toolbar, Width=desktop",
+        "w": 760,
+        "h": 1197
+      },
+      {
+        "set": "99:5851",
+        "id": "99:5831",
+        "name": "Section=performance, Width=desktop",
+        "w": 760,
+        "h": 255
+      },
+      {
+        "set": "99:5851",
+        "id": "101:7547",
+        "name": "Section=general, Width=narrow",
+        "w": 408,
+        "h": 503
+      },
+      {
+        "set": "99:5851",
+        "id": "101:7633",
+        "name": "Section=editor, Width=narrow",
+        "w": 408,
+        "h": 467
+      },
+      {
+        "set": "99:5851",
+        "id": "101:7697",
+        "name": "Section=save, Width=narrow",
+        "w": 408,
+        "h": 401
+      },
+      {
+        "set": "99:5851",
+        "id": "101:7750",
+        "name": "Section=toolbar, Width=narrow",
+        "w": 408,
+        "h": 1199
+      },
+      {
+        "set": "99:5851",
+        "id": "101:7951",
+        "name": "Section=performance, Width=narrow",
+        "w": 408,
+        "h": 265
+      },
+      {
+        "set": "99:6098",
+        "id": "99:5852",
+        "name": "View=documents",
+        "w": 240,
+        "h": 780
+      },
+      {
+        "set": "99:6098",
+        "id": "99:5908",
+        "name": "View=files",
+        "w": 240,
+        "h": 780
+      },
+      {
+        "set": "99:6098",
+        "id": "99:5959",
+        "name": "View=outline",
+        "w": 240,
+        "h": 780
+      },
+      {
+        "set": "99:6098",
+        "id": "99:6013",
+        "name": "View=empty",
+        "w": 240,
+        "h": 780
+      },
+      {
+        "set": "99:6098",
+        "id": "99:6047",
+        "name": "View=settings",
+        "w": 240,
+        "h": 780
+      },
+      {
+        "set": "99:6149",
+        "id": "99:6099",
+        "name": "Mode=rendered",
+        "w": 992,
+        "h": 656
+      },
+      {
+        "set": "99:6149",
+        "id": "99:6122",
+        "name": "Mode=source",
+        "w": 992,
+        "h": 656
+      },
+      {
+        "set": "99:6149",
+        "id": "99:6126",
+        "name": "Mode=reading",
+        "w": 992,
+        "h": 656
+      },
+      {
+        "set": "99:6177",
+        "id": "99:6150",
+        "name": "Action=reset",
+        "w": 384,
+        "h": 146
+      },
+      {
+        "set": "99:6177",
+        "id": "99:6159",
+        "name": "Action=clear",
+        "w": 384,
+        "h": 146
+      },
+      {
+        "set": "99:6177",
+        "id": "99:6168",
+        "name": "Action=clearRecent",
+        "w": 384,
+        "h": 146
+      },
+      {
+        "set": "100:7134",
+        "id": "100:6994",
+        "name": "State=default, Dirty=false",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7011",
+        "name": "State=default, Dirty=true",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7029",
+        "name": "State=hover, Dirty=false",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7046",
+        "name": "State=hover, Dirty=true",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7064",
+        "name": "State=selected, Dirty=false",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7081",
+        "name": "State=selected, Dirty=true",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7099",
+        "name": "State=focus, Dirty=false",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7134",
+        "id": "100:7116",
+        "name": "State=focus, Dirty=true",
+        "w": 208,
+        "h": 40
+      },
+      {
+        "set": "100:7155",
+        "id": "100:7135",
+        "name": "Checked=false, State=default",
+        "w": 264,
+        "h": 36
+      },
+      {
+        "set": "100:7155",
+        "id": "100:7140",
+        "name": "Checked=false, State=disabled",
+        "w": 264,
+        "h": 36
+      },
+      {
+        "set": "100:7155",
+        "id": "100:7145",
+        "name": "Checked=true, State=default",
+        "w": 264,
+        "h": 36
+      },
+      {
+        "set": "100:7155",
+        "id": "100:7150",
+        "name": "Checked=true, State=disabled",
+        "w": 264,
+        "h": 36
+      },
+      {
+        "set": "100:7286",
+        "id": "100:7176",
+        "name": "State=ready",
+        "w": 440,
+        "h": 220
+      },
+      {
+        "set": "100:7286",
+        "id": "100:7203",
+        "name": "State=fetching",
+        "w": 440,
+        "h": 220
+      },
+      {
+        "set": "100:7286",
+        "id": "100:7230",
+        "name": "State=success",
+        "w": 440,
+        "h": 220
+      },
+      {
+        "set": "100:7286",
+        "id": "100:7257",
+        "name": "State=manual",
+        "w": 440,
+        "h": 340
+      },
+      {
+        "set": "100:7286",
+        "id": "107:8973",
+        "name": "State=proxy",
+        "w": 440,
+        "h": 304
+      },
+      {
+        "set": "100:7382",
+        "id": "100:7287",
+        "name": "State=empty",
+        "w": 480,
+        "h": 284
+      },
+      {
+        "set": "100:7382",
+        "id": "100:7318",
+        "name": "State=ready",
+        "w": 480,
+        "h": 406
+      },
+      {
+        "set": "100:7382",
+        "id": "100:7351",
+        "name": "State=failed",
+        "w": 480,
+        "h": 284
+      },
+      {
+        "set": "100:7416",
+        "id": "100:7383",
+        "name": "State=loading, Width=desktop",
+        "w": 400,
+        "h": 146
+      },
+      {
+        "set": "100:7416",
+        "id": "100:7394",
+        "name": "State=ready, Width=desktop",
+        "w": 720,
+        "h": 468
+      },
+      {
+        "set": "100:7416",
+        "id": "100:7405",
+        "name": "State=blocked, Width=desktop",
+        "w": 400,
+        "h": 146
+      },
+      {
+        "set": "100:7416",
+        "id": "109:11812",
+        "name": "State=loading, Width=narrow",
+        "w": 400,
+        "h": 146
+      },
+      {
+        "set": "100:7416",
+        "id": "109:11823",
+        "name": "State=ready, Width=narrow",
+        "w": 568,
+        "h": 388
+      },
+      {
+        "set": "100:7416",
+        "id": "109:11834",
+        "name": "State=blocked, Width=narrow",
+        "w": 400,
+        "h": 146
+      },
+      {
+        "set": "100:7426",
+        "id": "100:7417",
+        "name": "State=active",
+        "w": 360,
+        "h": 122
+      },
+      {
+        "set": "100:7433",
+        "id": "100:7427",
+        "name": "State=recovering",
+        "w": 96,
+        "h": 24
+      },
+      {
+        "set": "100:7433",
+        "id": "100:7430",
+        "name": "State=failed",
+        "w": 144,
+        "h": 24
+      },
+      {
+        "set": "100:7462",
+        "id": "100:7434",
+        "name": "Kind=code",
+        "w": 640,
+        "h": 36
+      },
+      {
+        "set": "100:7462",
+        "id": "100:7441",
+        "name": "Kind=html",
+        "w": 640,
+        "h": 36
+      },
+      {
+        "set": "100:7462",
+        "id": "100:7448",
+        "name": "Kind=table",
+        "w": 640,
+        "h": 36
+      },
+      {
+        "set": "100:7462",
+        "id": "100:7455",
+        "name": "Kind=image",
+        "w": 640,
+        "h": 36
+      },
+      {
+        "set": "101:7532",
+        "id": "101:7482",
+        "name": "Mode=rendered",
+        "w": 568,
+        "h": 644
+      },
+      {
+        "set": "101:7532",
+        "id": "101:7505",
+        "name": "Mode=source",
+        "w": 568,
+        "h": 644
+      },
+      {
+        "set": "101:7532",
+        "id": "101:7509",
+        "name": "Mode=reading",
+        "w": 568,
+        "h": 644
+      },
+      {
+        "set": "101:8134",
+        "id": "101:7981",
+        "name": "Target=document",
+        "w": 216,
+        "h": 254
+      },
+      {
+        "set": "101:8134",
+        "id": "101:8052",
+        "name": "Target=sidebar",
+        "w": 256,
+        "h": 149
+      },
+      {
+        "set": "101:8134",
+        "id": "101:8093",
+        "name": "Target=outline",
+        "w": 224,
+        "h": 117
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8135",
+        "name": "Kind=html, State=rendered",
+        "w": 640,
+        "h": 94
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8144",
+        "name": "Kind=html, State=editing",
+        "w": 640,
+        "h": 96
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8153",
+        "name": "Kind=html, State=error",
+        "w": 640,
+        "h": 142
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8164",
+        "name": "Kind=image, State=rendered",
+        "w": 640,
+        "h": 94
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8173",
+        "name": "Kind=image, State=editing",
+        "w": 640,
+        "h": 96
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8182",
+        "name": "Kind=image, State=error",
+        "w": 640,
+        "h": 142
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8193",
+        "name": "Kind=math, State=rendered",
+        "w": 640,
+        "h": 94
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8202",
+        "name": "Kind=math, State=editing",
+        "w": 640,
+        "h": 96
+      },
+      {
+        "set": "101:8222",
+        "id": "101:8211",
+        "name": "Kind=math, State=error",
+        "w": 640,
+        "h": 142
+      },
+      {
+        "set": "107:8433",
+        "id": "107:8403",
+        "name": "State=preset",
+        "w": 240,
+        "h": 36
+      },
+      {
+        "set": "107:8433",
+        "id": "107:8410",
+        "name": "State=custom",
+        "w": 240,
+        "h": 80
+      },
+      {
+        "set": "107:8433",
+        "id": "107:8421",
+        "name": "State=error",
+        "w": 240,
+        "h": 108
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8464",
+        "name": "Options=language",
+        "w": 240,
+        "h": 332
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8565",
+        "name": "Options=theme",
+        "w": 240,
+        "h": 76
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8586",
+        "name": "Options=layout",
+        "w": 240,
+        "h": 140
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8627",
+        "name": "Options=font",
+        "w": 240,
+        "h": 172
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8678",
+        "name": "Options=performance",
+        "w": 240,
+        "h": 140
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8719",
+        "name": "Options=density",
+        "w": 240,
+        "h": 76
+      },
+      {
+        "set": "107:8791",
+        "id": "107:8740",
+        "name": "Options=autosave",
+        "w": 240,
+        "h": 172
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8694",
+        "name": "Action=minimize, State=default",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8698",
+        "name": "Action=minimize, State=hover",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8702",
+        "name": "Action=minimize, State=pressed",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8706",
+        "name": "Action=minimize, State=focus",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8710",
+        "name": "Action=minimize, State=disabled",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8714",
+        "name": "Action=maximize, State=default",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8718",
+        "name": "Action=maximize, State=hover",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8722",
+        "name": "Action=maximize, State=pressed",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8726",
+        "name": "Action=maximize, State=focus",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8730",
+        "name": "Action=maximize, State=disabled",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8734",
+        "name": "Action=restore, State=default",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8739",
+        "name": "Action=restore, State=hover",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8744",
+        "name": "Action=restore, State=pressed",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8749",
+        "name": "Action=restore, State=focus",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8754",
+        "name": "Action=restore, State=disabled",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8759",
+        "name": "Action=close, State=default",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8764",
+        "name": "Action=close, State=hover",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8769",
+        "name": "Action=close, State=pressed",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8774",
+        "name": "Action=close, State=focus",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:8784",
+        "id": "115:8779",
+        "name": "Action=close, State=disabled",
+        "w": 40,
+        "h": 40
+      },
+      {
+        "set": "115:10391",
+        "id": "115:8851",
+        "name": "Type=folder, Depth=0, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:8963",
+        "name": "Type=folder, Depth=0, State=hover",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9101",
+        "name": "Type=folder, Depth=0, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9239",
+        "name": "Type=folder, Depth=0, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9403",
+        "name": "Type=folder, Depth=1, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9567",
+        "name": "Type=folder, Depth=1, State=hover",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9705",
+        "name": "Type=folder, Depth=1, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9843",
+        "name": "Type=folder, Depth=1, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:9955",
+        "name": "Type=file, Depth=0, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10016",
+        "name": "Type=file, Depth=0, State=hover",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10077",
+        "name": "Type=file, Depth=0, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10138",
+        "name": "Type=file, Depth=0, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10199",
+        "name": "Type=file, Depth=1, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10260",
+        "name": "Type=file, Depth=1, State=hover",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10321",
+        "name": "Type=file, Depth=1, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10391",
+        "id": "115:10382",
+        "name": "Type=file, Depth=1, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10392",
+        "name": "Level=1, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10397",
+        "name": "Level=1, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10402",
+        "name": "Level=1, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10407",
+        "name": "Level=2, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10412",
+        "name": "Level=2, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10417",
+        "name": "Level=2, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10422",
+        "name": "Level=3, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10427",
+        "name": "Level=3, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10432",
+        "name": "Level=3, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10437",
+        "name": "Level=4, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10442",
+        "name": "Level=4, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10447",
+        "name": "Level=4, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10452",
+        "name": "Level=5, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10457",
+        "name": "Level=5, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10462",
+        "name": "Level=5, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10467",
+        "name": "Level=6, State=default",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10472",
+        "name": "Level=6, State=selected",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10482",
+        "id": "115:10477",
+        "name": "Level=6, State=focus",
+        "w": 208,
+        "h": 36
+      },
+      {
+        "set": "115:10493",
+        "id": "115:10483",
+        "name": "Side=editor",
+        "w": 44,
+        "h": 656
+      },
+      {
+        "set": "115:10493",
+        "id": "115:10488",
+        "name": "Side=preview",
+        "w": 44,
+        "h": 656
+      }
+    ],
+    "nodes": 5607,
+    "unexpectedBounds": [],
+    "intentionalScroll": [
+      {
+        "variant": "99:6099",
+        "node": "99:6101",
+        "source": "99:6101",
+        "parent": "99:6100",
+        "name": "文档内容",
+        "box": [
+          104,
+          0,
+          720,
+          920
+        ],
+        "ps": [
+          928,
+          592
+        ]
+      },
+      {
+        "variant": "99:6122",
+        "node": "99:6124",
+        "source": "99:6124",
+        "parent": "99:6123",
+        "name": "文档内容",
+        "box": [
+          104,
+          0,
+          720,
+          920
+        ],
+        "ps": [
+          928,
+          592
+        ]
+      },
+      {
+        "variant": "99:6126",
+        "node": "99:6128",
+        "source": "99:6128",
+        "parent": "99:6127",
+        "name": "文档内容",
+        "box": [
+          104,
+          0,
+          720,
+          920
+        ],
+        "ps": [
+          928,
+          592
+        ]
+      },
+      {
+        "variant": "100:7318",
+        "node": "100:7340",
+        "source": "100:7340",
+        "parent": "100:7339",
+        "name": "导出正文缩略",
+        "box": [
+          8,
+          8,
+          424,
+          300
+        ],
+        "ps": [
+          440,
+          160
+        ]
+      },
+      {
+        "variant": "101:7482",
+        "node": "101:7484",
+        "source": "101:7484",
+        "parent": "101:7483",
+        "name": "文档内容",
+        "box": [
+          0,
+          0,
+          520,
+          960
+        ],
+        "ps": [
+          520,
+          596
+        ]
+      },
+      {
+        "variant": "101:7505",
+        "node": "101:7507",
+        "source": "101:7507",
+        "parent": "101:7506",
+        "name": "文档内容",
+        "box": [
+          0,
+          0,
+          520,
+          960
+        ],
+        "ps": [
+          520,
+          596
+        ]
+      },
+      {
+        "variant": "101:7509",
+        "node": "101:7511",
+        "source": "101:7511",
+        "parent": "101:7510",
+        "name": "文档内容",
+        "box": [
+          0,
+          0,
+          520,
+          960
+        ],
+        "ps": [
+          520,
+          596
+        ]
+      }
+    ],
+    "variantOverlaps": []
+  },
+  "desktop": {
+    "screens": [
+      {
+        "id": "104:1006",
+        "name": "写作 · 1280",
+        "nodes": 143
+      },
+      {
+        "id": "104:1298",
+        "name": "分栏 · 编辑与预览",
+        "nodes": 166
+      },
+      {
+        "id": "104:1480",
+        "name": "源码 · 直接编辑",
+        "nodes": 124
+      },
+      {
+        "id": "104:1605",
+        "name": "纯阅读 · 只看不改",
+        "nodes": 142
+      },
+      {
+        "id": "104:1751",
+        "name": "专注 · 正文优先",
+        "nodes": 87
+      },
+      {
+        "id": "104:1838",
+        "name": "空会话 · 新建与打开",
+        "nodes": 106
+      },
+      {
+        "id": "104:1979",
+        "name": "文件 · 本地目录树",
+        "nodes": 140
+      },
+      {
+        "id": "104:2180",
+        "name": "大纲 · 标题导航",
+        "nodes": 129
+      },
+      {
+        "id": "104:2390",
+        "name": "设置 · 常规",
+        "nodes": 133
+      },
+      {
+        "id": "104:2662",
+        "name": "设置 · 编辑器",
+        "nodes": 125
+      },
+      {
+        "id": "104:2858",
+        "name": "设置 · 保存与导出",
+        "nodes": 125
+      },
+      {
+        "id": "104:3044",
+        "name": "设置 · 工具条",
+        "nodes": 276
+      },
+      {
+        "id": "104:3624",
+        "name": "设置 · 性能",
+        "nodes": 105
+      },
+      {
+        "id": "104:3784",
+        "name": "查找与替换 · 紧凑浮层",
+        "nodes": 177
+      },
+      {
+        "id": "104:3973",
+        "name": "导出 · 格式与图片选项",
+        "nodes": 199
+      },
+      {
+        "id": "104:4180",
+        "name": "帮助 · 六类完整内容",
+        "nodes": 193
+      },
+      {
+        "id": "104:4452",
+        "name": "选区工具条 · 更多进入工具条设置",
+        "nodes": 166
+      },
+      {
+        "id": "104:4785",
+        "name": "保存失败 · 保留内容与重试",
+        "nodes": 149
+      },
+      {
+        "id": "104:4936",
+        "name": "预览恢复 · 原文不受影响",
+        "nodes": 166
+      },
+      {
+        "id": "104:5104",
+        "name": "网页导入 · 手动恢复",
+        "nodes": 168
+      },
+      {
+        "id": "104:5281",
+        "name": "高级图片导出 · 预览与比例",
+        "nodes": 181
+      },
+      {
+        "id": "104:5466",
+        "name": "文档右键 · 完整操作",
+        "nodes": 211
+      },
+      {
+        "id": "104:5740",
+        "name": "深色 · 写作",
+        "nodes": 143
+      },
+      {
+        "id": "111:5884",
+        "name": "文件菜单 · 设置入口",
+        "nodes": 231
+      },
+      {
+        "id": "111:6204",
+        "name": "最近打开 · 本地文件记录",
+        "nodes": 176
+      },
+      {
+        "id": "111:6415",
+        "name": "链接预览 · 加载与外部打开",
+        "nodes": 155
+      },
+      {
+        "id": "111:6576",
+        "name": "导出进度 · 写入不可取消",
+        "nodes": 155
+      },
+      {
+        "id": "111:6732",
+        "name": "文字颜色 · 完整预设",
+        "nodes": 199
+      },
+      {
+        "id": "111:6939",
+        "name": "插入表格 · 8×8尺寸",
+        "nodes": 218
+      },
+      {
+        "id": "111:7160",
+        "name": "插入链接 · 紧凑输入",
+        "nodes": 164
+      },
+      {
+        "id": "111:7334",
+        "name": "插入图片 · 文件与描述",
+        "nodes": 174
+      },
+      {
+        "id": "111:7521",
+        "name": "Mermaid · 错误保留源码",
+        "nodes": 173
+      },
+      {
+        "id": "111:7708",
+        "name": "设置保存失败 · 草稿保留",
+        "nodes": 139
+      },
+      {
+        "id": "117:10628",
+        "name": "分栏 · 编辑区收起",
+        "nodes": 159
+      }
+    ],
+    "issues": [],
+    "scrollCount": 31
+  },
+  "narrow": {
+    "screens": [
+      {
+        "id": "105:7991",
+        "name": "600px · 写作",
+        "nodes": 84
+      },
+      {
+        "id": "105:8076",
+        "name": "600×480 · 短窗口",
+        "nodes": 84
+      },
+      {
+        "id": "105:8161",
+        "name": "600px · 源码",
+        "nodes": 65
+      },
+      {
+        "id": "105:8227",
+        "name": "600px · 纯阅读",
+        "nodes": 83
+      },
+      {
+        "id": "105:8311",
+        "name": "600px · 设置 / general",
+        "nodes": 133
+      },
+      {
+        "id": "105:8454",
+        "name": "600px · 设置 / editor",
+        "nodes": 125
+      },
+      {
+        "id": "105:8627",
+        "name": "600px · 设置 / save",
+        "nodes": 125
+      },
+      {
+        "id": "105:8794",
+        "name": "600px · 设置 / toolbar",
+        "nodes": 276
+      },
+      {
+        "id": "105:9111",
+        "name": "600px · 设置 / performance",
+        "nodes": 105
+      },
+      {
+        "id": "105:9266",
+        "name": "600×480 · 设置可滚动",
+        "nodes": 125
+      },
+      {
+        "id": "105:9433",
+        "name": "600px · 查找替换",
+        "nodes": 118
+      },
+      {
+        "id": "105:9550",
+        "name": "600×480 · 紧凑导出",
+        "nodes": 140
+      },
+      {
+        "id": "105:9681",
+        "name": "600px · 帮助",
+        "nodes": 134
+      },
+      {
+        "id": "105:9852",
+        "name": "600px · 紧凑工具条",
+        "nodes": 107
+      },
+      {
+        "id": "105:9952",
+        "name": "600px · 深色",
+        "nodes": 84
+      },
+      {
+        "id": "105:10037",
+        "name": "600px · 保存失败",
+        "nodes": 90
+      },
+      {
+        "id": "111:16324",
+        "name": "600×480 · 链接预览",
+        "nodes": 96
+      },
+      {
+        "id": "111:16421",
+        "name": "600×480 · 网页导入恢复",
+        "nodes": 109
+      },
+      {
+        "id": "111:16533",
+        "name": "600×480 · 图片表单",
+        "nodes": 116
+      },
+      {
+        "id": "111:16649",
+        "name": "600×480 · 高级图片预览",
+        "nodes": 122
+      },
+      {
+        "id": "111:16768",
+        "name": "600px · 纯阅读查找",
+        "nodes": 110
+      },
+      {
+        "id": "117:4113",
+        "name": "600px · 分栏",
+        "nodes": 107
+      }
+    ],
+    "issues": [],
+    "scrollCount": 20
+  },
+  "changedFamilies": [
+    {
+      "id": "98:4857",
+      "name": "MDR Blue/Export dialog"
+    },
+    {
+      "id": "98:5457",
+      "name": "MDR Blue/Insert form"
+    },
+    {
+      "id": "99:6177",
+      "name": "MDR Blue/Confirmation"
+    },
+    {
+      "id": "100:7286",
+      "name": "MDR Blue/Web clipper"
+    },
+    {
+      "id": "100:7382",
+      "name": "MDR Blue/Image export advanced"
+    },
+    {
+      "id": "100:7416",
+      "name": "MDR Blue/Link preview"
+    },
+    {
+      "id": "99:5851",
+      "name": "MDR Blue/Settings panel"
+    },
+    {
+      "id": "95:2500",
+      "name": "MDR Blue/Settings row"
+    },
+    {
+      "id": "95:2756",
+      "name": "MDR Blue/Notice"
+    },
+    {
+      "id": "95:3041",
+      "name": "MDR Blue/Color palette"
+    },
+    {
+      "id": "95:2460",
+      "name": "MDR Blue/Settings navigation"
+    },
+    {
+      "id": "98:6072",
+      "name": "MDR Blue/Code block"
+    },
+    {
+      "id": "98:6127",
+      "name": "MDR Blue/Document block"
+    },
+    {
+      "id": "98:6172",
+      "name": "MDR Blue/Workspace header"
+    },
+    {
+      "id": "101:8222",
+      "name": "MDR Blue/Embedded block"
+    },
+    {
+      "id": "99:5527",
+      "name": "MDR Blue/Toolbar checklist"
+    },
+    {
+      "id": "115:10493",
+      "name": "MDR Blue/Collapsed pane"
+    },
+    {
+      "id": "78:1098",
+      "name": "MDR Blue/Navigation"
+    },
+    {
+      "id": "94:1400",
+      "name": "MDR Blue/Swatch"
+    },
+    {
+      "id": "78:1123",
+      "name": "MDR Blue/Field"
+    },
+    {
+      "id": "94:1296",
+      "name": "MDR Blue/Text input"
+    }
+  ],
+  "reviewBoards": [
+    {
+      "id": "194:10201",
+      "families": [
+        {
+          "set": "78:1065",
+          "variant": "78:1035",
+          "instance": "194:10206"
+        },
+        {
+          "set": "78:1098",
+          "variant": "78:1066",
+          "instance": "194:10210"
+        },
+        {
+          "set": "78:1123",
+          "variant": "78:1099",
+          "instance": "194:10220"
+        },
+        {
+          "set": "78:1128",
+          "variant": "78:1124",
+          "instance": "194:10228"
+        },
+        {
+          "set": "94:1182",
+          "variant": "94:1122",
+          "instance": "194:10232"
+        },
+        {
+          "set": "94:1239",
+          "variant": "94:1183",
+          "instance": "194:10239"
+        },
+        {
+          "set": "94:1250",
+          "variant": "94:1240",
+          "instance": "194:10244"
+        },
+        {
+          "set": "94:1287",
+          "variant": "94:1251",
+          "instance": "194:10248"
+        },
+        {
+          "set": "94:1296",
+          "variant": "94:1288",
+          "instance": "194:10257"
+        },
+        {
+          "set": "94:1357",
+          "variant": "94:1297",
+          "instance": "194:10261"
+        },
+        {
+          "set": "94:1374",
+          "variant": "94:1358",
+          "instance": "194:10268"
+        },
+        {
+          "set": "94:1387",
+          "variant": "94:1375",
+          "instance": "194:10272"
+        },
+        {
+          "set": "94:1400",
+          "variant": "94:1388",
+          "instance": "194:10276"
+        },
+        {
+          "set": "94:1403",
+          "variant": "94:1401",
+          "instance": "194:10280"
+        },
+        {
+          "set": "94:1406",
+          "variant": "94:1404",
+          "instance": "194:10283"
+        },
+        {
+          "set": "95:1963",
+          "variant": "95:1927",
+          "instance": "194:10288"
+        },
+        {
+          "set": "95:2036",
+          "variant": "95:1964",
+          "instance": "194:10300"
+        },
+        {
+          "set": "95:2102",
+          "variant": "95:2037",
+          "instance": "194:10330"
+        },
+        {
+          "set": "95:2124",
+          "variant": "95:2103",
+          "instance": "194:10344"
+        },
+        {
+          "set": "95:2249",
+          "variant": "95:2125",
+          "instance": "194:10353"
+        },
+        {
+          "set": "95:2460",
+          "variant": "95:2250",
+          "instance": "194:10398"
+        },
+        {
+          "set": "95:2500",
+          "variant": "95:2461",
+          "instance": "194:10435"
+        },
+        {
+          "set": "95:2571",
+          "variant": "95:2501",
+          "instance": "194:10448"
+        },
+        {
+          "set": "95:2731",
+          "variant": "95:2572",
+          "instance": "194:10474"
+        },
+        {
+          "set": "95:2756",
+          "variant": "95:2732",
+          "instance": "194:10510"
+        },
+        {
+          "set": "95:2798",
+          "variant": "95:2757",
+          "instance": "194:10518"
+        }
+      ]
+    },
+    {
+      "id": "194:10529",
+      "families": [
+        {
+          "set": "95:2841",
+          "variant": "95:2799",
+          "instance": "194:10534"
+        },
+        {
+          "set": "95:2990",
+          "variant": "95:2842",
+          "instance": "194:10547"
+        },
+        {
+          "set": "95:3041",
+          "variant": "95:2991",
+          "instance": "194:10624"
+        },
+        {
+          "set": "95:3046",
+          "variant": "95:3042",
+          "instance": "194:10660"
+        },
+        {
+          "set": "95:3053",
+          "variant": "95:3047",
+          "instance": "194:10664"
+        },
+        {
+          "set": "98:4857",
+          "variant": "98:4508",
+          "instance": "194:10669"
+        },
+        {
+          "set": "98:5130",
+          "variant": "98:4858",
+          "instance": "194:10707"
+        },
+        {
+          "set": "98:5457",
+          "variant": "98:5131",
+          "instance": "194:10765"
+        },
+        {
+          "set": "98:6043",
+          "variant": "98:5458",
+          "instance": "194:10787"
+        }
+      ]
+    },
+    {
+      "id": "194:10876",
+      "families": [
+        {
+          "set": "98:6072",
+          "variant": "98:6044",
+          "instance": "194:10881"
+        },
+        {
+          "set": "98:6127",
+          "variant": "98:6073",
+          "instance": "194:10892"
+        },
+        {
+          "set": "98:6172",
+          "variant": "98:6128",
+          "instance": "194:10897"
+        },
+        {
+          "set": "99:5384",
+          "variant": "99:5364",
+          "instance": "194:10923"
+        },
+        {
+          "set": "99:5527",
+          "variant": "99:5385",
+          "instance": "194:10932"
+        }
+      ]
+    },
+    {
+      "id": "194:11015",
+      "families": [
+        {
+          "set": "99:5851",
+          "variant": "99:5528",
+          "instance": "194:11020"
+        },
+        {
+          "set": "99:6098",
+          "variant": "99:5852",
+          "instance": "194:11071"
+        }
+      ]
+    },
+    {
+      "id": "194:11130",
+      "families": [
+        {
+          "set": "99:6149",
+          "variant": "99:6099",
+          "instance": "194:11135"
+        },
+        {
+          "set": "99:6177",
+          "variant": "99:6150",
+          "instance": "194:11161"
+        },
+        {
+          "set": "100:7134",
+          "variant": "100:6994",
+          "instance": "194:11174"
+        },
+        {
+          "set": "100:7155",
+          "variant": "100:7135",
+          "instance": "194:11186"
+        },
+        {
+          "set": "100:7286",
+          "variant": "100:7176",
+          "instance": "194:11194"
+        },
+        {
+          "set": "100:7382",
+          "variant": "100:7287",
+          "instance": "194:11219"
+        }
+      ]
+    },
+    {
+      "id": "194:11254",
+      "families": [
+        {
+          "set": "100:7416",
+          "variant": "100:7383",
+          "instance": "194:11259"
+        },
+        {
+          "set": "100:7426",
+          "variant": "100:7417",
+          "instance": "194:11272"
+        },
+        {
+          "set": "100:7433",
+          "variant": "100:7427",
+          "instance": "194:11283"
+        },
+        {
+          "set": "100:7462",
+          "variant": "100:7434",
+          "instance": "194:11294"
+        },
+        {
+          "set": "101:7532",
+          "variant": "101:7482",
+          "instance": "194:11303"
+        }
+      ]
+    },
+    {
+      "id": "194:11326",
+      "families": [
+        {
+          "set": "101:8134",
+          "variant": "101:7981",
+          "instance": "194:11331"
+        },
+        {
+          "set": "101:8222",
+          "variant": "101:8135",
+          "instance": "194:11401"
+        },
+        {
+          "set": "107:8433",
+          "variant": "107:8403",
+          "instance": "194:11412"
+        },
+        {
+          "set": "107:8791",
+          "variant": "107:8464",
+          "instance": "194:11422"
+        },
+        {
+          "set": "115:8784",
+          "variant": "115:8694",
+          "instance": "194:11475"
+        },
+        {
+          "set": "115:10391",
+          "variant": "115:8851",
+          "instance": "194:11481"
+        },
+        {
+          "set": "115:10482",
+          "variant": "115:10392",
+          "instance": "194:11491"
+        },
+        {
+          "set": "115:10493",
+          "variant": "115:10483",
+          "instance": "194:11498"
+        }
+      ]
+    }
+  ],
+  "stateBoards": [
+    "200:11286",
+    "200:11548",
+    "200:11810"
+  ],
+  "mutations": [
+    {
+      "mutatedNodeIds": [
+        "98:4535",
+        "98:4567",
+        "98:4598",
+        "98:4630",
+        "98:4661",
+        "98:4693",
+        "135:9090",
+        "98:4741",
+        "135:9092",
+        "98:4790",
+        "98:4821",
+        "98:4853",
+        "98:5149",
+        "98:5172",
+        "98:5174",
+        "98:5204",
+        "98:5237",
+        "98:5239",
+        "98:5269",
+        "98:5302",
+        "98:5304",
+        "98:5332",
+        "98:5363",
+        "98:5365",
+        "98:5430",
+        "98:5453",
+        "98:5455",
+        "99:6155",
+        "99:6164",
+        "99:6173",
+        "100:7199",
+        "100:7226",
+        "100:7253",
+        "100:7282",
+        "107:8985",
+        "100:7311",
+        "100:7344",
+        "100:7375",
+        "100:7389",
+        "100:7400",
+        "100:7411",
+        "109:11817",
+        "109:11828",
+        "109:11839",
+        "99:5575",
+        "99:5572",
+        "I99:5590;107:8301",
+        "I99:5599;107:8301",
+        "99:5613",
+        "99:5610",
+        "99:5645",
+        "99:5642",
+        "99:5829",
+        "99:5826",
+        "99:5849",
+        "99:5846",
+        "101:7557",
+        "101:7554",
+        "I101:7636;107:8312",
+        "I101:7637;107:8312",
+        "101:7643",
+        "101:7640",
+        "101:7706",
+        "101:7703",
+        "101:7761",
+        "101:7758",
+        "101:7959",
+        "101:7956",
+        "107:8301",
+        "107:8312",
+        "95:2736",
+        "95:2742",
+        "95:2748",
+        "95:2754",
+        "174:10424",
+        "107:8293",
+        "107:8282",
+        "107:8283",
+        "I107:8283;94:1389",
+        "107:8285",
+        "I107:8285;94:1389",
+        "107:8287",
+        "I107:8287;94:1389",
+        "107:8289",
+        "I107:8289;94:1389",
+        "107:8291",
+        "I107:8291;94:1389",
+        "107:8294",
+        "I107:8294;94:1389",
+        "107:8296",
+        "I107:8296;94:1389",
+        "107:8298",
+        "I107:8298;94:1389",
+        "95:2250",
+        "95:2292",
+        "95:2334",
+        "95:2376",
+        "95:2418",
+        "98:6045",
+        "98:6048",
+        "98:6050",
+        "98:6044",
+        "98:6054",
+        "98:6057",
+        "98:6059",
+        "98:6053",
+        "98:6063",
+        "98:6066",
+        "98:6068",
+        "98:6062",
+        "98:6093",
+        "98:6095",
+        "98:6096",
+        "98:6097",
+        "98:6094",
+        "98:6099",
+        "98:6100",
+        "98:6101",
+        "98:6098",
+        "98:6103",
+        "98:6104",
+        "98:6105",
+        "98:6102",
+        "98:6129"
+      ],
+      "changes": [
+        {
+          "id": "98:4535",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4567",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4598",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4630",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4661",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4693",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "135:9090",
+          "label": "图片高级选项",
+          "width": 120
+        },
+        {
+          "id": "98:4741",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "135:9092",
+          "label": "图片高级选项",
+          "width": 120
+        },
+        {
+          "id": "98:4790",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4821",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:4853",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5149",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5172",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5204",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5237",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5269",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5302",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5332",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5363",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5430",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "98:5453",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "99:6155",
+          "label": "取消",
+          "width": 96
+        },
+        {
+          "id": "99:6164",
+          "label": "取消",
+          "width": 96
+        },
+        {
+          "id": "99:6173",
+          "label": "取消",
+          "width": 96
+        },
+        {
+          "id": "100:7199",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7226",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7253",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7282",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "107:8985",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7311",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7344",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7375",
+          "label": "取消",
+          "width": 80
+        },
+        {
+          "id": "100:7389",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "100:7400",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "100:7411",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "109:11817",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "109:11828",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "109:11839",
+          "label": "关闭",
+          "width": 80
+        },
+        {
+          "id": "99:5575",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "I99:5590;107:8301",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "I99:5599;107:8301",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "99:5613",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "99:5645",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "99:5829",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "99:5849",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "101:7557",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "I101:7636;107:8312",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "I101:7637;107:8312",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "101:7643",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "101:7706",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "101:7761",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "101:7959",
+          "label": "恢复默认",
+          "width": 96
+        },
+        {
+          "id": "107:8301",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "107:8312",
+          "label": "跟随主题",
+          "width": 104
+        },
+        {
+          "id": "95:2736",
+          "label": "关闭",
+          "width": 56
+        },
+        {
+          "id": "95:2742",
+          "label": "关闭",
+          "width": 56
+        },
+        {
+          "id": "95:2748",
+          "label": "关闭",
+          "width": 56
+        },
+        {
+          "id": "95:2754",
+          "label": "重试",
+          "width": 56
+        }
+      ],
+      "highlight": {
+        "w": 232,
+        "h": 232
+      },
+      "codeBlocks": [
+        {
+          "id": "98:6044",
+          "w": 640,
+          "h": 136
+        },
+        {
+          "id": "98:6053",
+          "w": 640,
+          "h": 136
+        },
+        {
+          "id": "98:6062",
+          "w": 640,
+          "h": 164
+        }
+      ]
+    },
+    {
+      "mutatedNodeIds": [
+        "100:7384",
+        "100:7395",
+        "100:7406",
+        "109:11813",
+        "109:11824",
+        "109:11835",
+        "95:2462",
+        "99:5336",
+        "95:2461",
+        "95:2472",
+        "99:5337",
+        "95:2471",
+        "95:2479",
+        "99:5338",
+        "95:2478",
+        "95:2485",
+        "99:5339",
+        "95:2484",
+        "107:8300",
+        "95:2493",
+        "99:5340",
+        "95:2492",
+        "101:7439",
+        "101:7442",
+        "101:7438",
+        "101:7450",
+        "101:7454",
+        "101:7449",
+        "101:7458",
+        "101:7461",
+        "101:7457",
+        "101:7465",
+        "101:7468",
+        "101:7464",
+        "107:8311",
+        "101:7474",
+        "101:7477",
+        "101:7473",
+        "99:5528",
+        "99:5530",
+        "99:5541",
+        "99:5552",
+        "99:5563",
+        "99:5577",
+        "99:5579",
+        "99:5590",
+        "99:5599",
+        "99:5615",
+        "99:5617",
+        "99:5625",
+        "99:5632",
+        "99:5647",
+        "99:5649",
+        "99:5657",
+        "99:5831",
+        "99:5833",
+        "101:7547",
+        "101:7549",
+        "101:7550",
+        "101:7551",
+        "101:7552",
+        "101:7633",
+        "101:7635",
+        "101:7636",
+        "101:7637",
+        "101:7697",
+        "101:7699",
+        "101:7700",
+        "101:7701",
+        "101:7750",
+        "101:7752",
+        "101:7753",
+        "101:7951",
+        "101:7953",
+        "101:8135",
+        "101:8144",
+        "101:8153",
+        "101:8164",
+        "101:8173",
+        "101:8182",
+        "101:8193",
+        "101:8202",
+        "101:8211",
+        "99:5470"
+      ],
+      "settingRows": {
+        "95:2461": 64,
+        "95:2471": 64,
+        "95:2478": 64,
+        "95:2484": 64,
+        "95:2492": 64,
+        "101:7438": 90,
+        "101:7449": 90,
+        "101:7457": 90,
+        "101:7464": 90,
+        "101:7473": 90
+      },
+      "settings": [
+        {
+          "id": "99:5528",
+          "h": 449
+        },
+        {
+          "id": "99:5577",
+          "h": 405
+        },
+        {
+          "id": "99:5615",
+          "h": 373
+        },
+        {
+          "id": "99:5647",
+          "h": 1197
+        },
+        {
+          "id": "99:5831",
+          "h": 255
+        },
+        {
+          "id": "101:7547",
+          "h": 503
+        },
+        {
+          "id": "101:7633",
+          "h": 467
+        },
+        {
+          "id": "101:7697",
+          "h": 401
+        },
+        {
+          "id": "101:7750",
+          "h": 1199
+        },
+        {
+          "id": "101:7951",
+          "h": 265
+        }
+      ],
+      "embedded": [
+        {
+          "id": "101:8135",
+          "h": 94
+        },
+        {
+          "id": "101:8144",
+          "h": 96
+        },
+        {
+          "id": "101:8153",
+          "h": 142
+        },
+        {
+          "id": "101:8164",
+          "h": 94
+        },
+        {
+          "id": "101:8173",
+          "h": 96
+        },
+        {
+          "id": "101:8182",
+          "h": 142
+        },
+        {
+          "id": "101:8193",
+          "h": 94
+        },
+        {
+          "id": "101:8202",
+          "h": 96
+        },
+        {
+          "id": "101:8211",
+          "h": 142
+        }
+      ]
+    },
+    {
+      "mutatedNodeIds": [
+        "101:7451",
+        "101:7452",
+        "99:5386",
+        "99:5387",
+        "99:5388",
+        "99:5389",
+        "99:5396",
+        "99:5403",
+        "99:5404",
+        "99:5411",
+        "99:5414",
+        "99:5415",
+        "99:5418",
+        "99:5421",
+        "99:5422",
+        "99:5429",
+        "99:5436",
+        "99:5437",
+        "99:5440",
+        "99:5443",
+        "99:5444",
+        "99:5447",
+        "99:5454",
+        "99:5455",
+        "99:5458",
+        "99:5461",
+        "99:5462",
+        "99:5465",
+        "99:5469",
+        "99:5470",
+        "99:5471",
+        "99:5472",
+        "99:5475",
+        "99:5478",
+        "99:5479",
+        "99:5482",
+        "99:5485",
+        "99:5486",
+        "99:5489",
+        "99:5492",
+        "99:5493",
+        "99:5496",
+        "99:5499",
+        "99:5500",
+        "99:5503",
+        "99:5506",
+        "99:5507",
+        "99:5510",
+        "99:5513",
+        "99:5514",
+        "99:5517",
+        "99:5520",
+        "99:5521",
+        "99:5524",
+        "I101:7755;99:5386",
+        "I101:7755;99:5387",
+        "I101:7755;99:5388",
+        "I101:7755;99:5389",
+        "I101:7755;99:5396",
+        "I101:7755;99:5403",
+        "I101:7755;99:5404",
+        "I101:7755;99:5411",
+        "I101:7755;99:5414",
+        "I101:7755;99:5415",
+        "I101:7755;99:5418",
+        "I101:7755;99:5421",
+        "I101:7755;99:5422",
+        "I101:7755;99:5429",
+        "I101:7755;99:5436",
+        "I101:7755;99:5437",
+        "I101:7755;99:5440",
+        "I101:7755;99:5443",
+        "I101:7755;99:5444",
+        "I101:7755;99:5447",
+        "I101:7755;99:5454",
+        "I101:7755;99:5455",
+        "I101:7755;99:5458",
+        "I101:7755;99:5461",
+        "I101:7755;99:5462",
+        "I101:7755;99:5465",
+        "101:7755",
+        "I101:7756;99:5469",
+        "I101:7756;99:5470",
+        "I101:7756;99:5471",
+        "I101:7756;99:5472",
+        "I101:7756;99:5475",
+        "I101:7756;99:5478",
+        "I101:7756;99:5479",
+        "I101:7756;99:5482",
+        "I101:7756;99:5485",
+        "I101:7756;99:5486",
+        "I101:7756;99:5489",
+        "I101:7756;99:5492",
+        "I101:7756;99:5493",
+        "I101:7756;99:5496",
+        "I101:7756;99:5499",
+        "I101:7756;99:5500",
+        "I101:7756;99:5503",
+        "I101:7756;99:5506",
+        "I101:7756;99:5507",
+        "I101:7756;99:5510",
+        "I101:7756;99:5513",
+        "I101:7756;99:5514",
+        "I101:7756;99:5517",
+        "I101:7756;99:5520",
+        "I101:7756;99:5521",
+        "I101:7756;99:5524",
+        "101:7756",
+        "115:10484",
+        "115:10489"
+      ],
+      "narrowToolbarHeight": 1199,
+      "toggleHeight": 90
+    },
+    {
+      "createdNodeIds": [
+        "199:11284"
+      ],
+      "mutatedNodeIds": [
+        "101:7754",
+        "I199:11284;95:2514"
+      ],
+      "width": 362,
+      "children": [
+        "正文",
+        "B",
+        "I",
+        "A",
+        "高亮",
+        "链接",
+        "更多"
+      ],
+      "reactions": []
+    },
+    {
+      "mutatedNodeIds": [
+        "101:7449",
+        "78:1090",
+        "94:1394",
+        "94:1396",
+        "78:1118",
+        "94:1295",
+        "98:6094",
+        "98:6098",
+        "98:6102",
+        "95:2473",
+        "95:2474",
+        "95:2480",
+        "95:2481",
+        "95:2486",
+        "95:2487",
+        "95:2494",
+        "95:2495",
+        "101:7451",
+        "101:7452",
+        "101:7459",
+        "101:7460",
+        "101:7466",
+        "101:7467",
+        "101:7475",
+        "101:7476"
+      ],
+      "toggle": {
+        "w": 376,
+        "h": 56
+      }
+    }
+  ],
+  "findingsFixed": [
+    "弹窗取消/关闭、设置恢复默认/跟随主题、通知重试统一描边次按钮；配对的短操作等宽，间距8px。",
+    "高亮8色改为2×4铺满200px内容区，横纵2px缝隙；文字10色2×5保持。",
+    "代码工具条按钮不再超出容器；代码与嵌入块高度随内容变化；工作区模式栏40px完整容纳。",
+    "设置说明与控件垂直对齐，桌面设置行64px，窄选择行90px、窄开关行56px；常规面板桌面449px、窄503px。",
+    "修复窄工具条设置两列仍固定712px导致的溢出，改为按376px可用宽度均分；预览补回勾选的A/高亮。",
+    "链接预览按钮间留8px；表格行等宽均分并添加细分隔线；设置导航HUG修正4px溢出。",
+    "导航焦点统一focus变量，色块选中态有可辨边界，禁用字段文字统一disabledText，5个无效表单的提交按钮禁用。",
+    "折叠面板箭头改用同源SVG；隐藏项目说明不再错误提到更多菜单。"
+  ],
+  "preserved": [
+    "查找下方三个选项",
+    "已确认海军蓝/冷白语言",
+    "菜单栏普通菜单项/正文内轻量动作保持其角色",
+    "原有61组、361可接入变体及功能入口",
+    "原绿稿和历史变体保留",
+    "R17状态和既有源码改动"
+  ],
+  "verification": {
+    "libraryStructural": "61 groups / 361 active variants / 5607 visible descendant visits / 0 unexpected bounds / 0 variant overlap; 7 intentional scroll viewports",
+    "screensStructural": "34 desktop + 22 narrow/short screens, 0 unexpected bounds; scroll clips reviewed as intentional",
+    "visual": "All 61 family representatives across 7 sheets; matched light/dark primitive state sheets; changed detail sheet; actual desktop/narrow settings, toolbar, short-image error dialog and dark writing inspected",
+    "notRun": [
+      "Figma prototype playback",
+      "application static checks/build/tests",
+      "Windows runtime acceptance",
+      "Impeccable CLI detector"
+    ],
+    "notRunReason": "Design-only scope; native application integration not authorized; Impeccable binary unavailable in prior context attempt.",
+    "sourceBaseline": {
+      "compared": 77,
+      "changed": []
+    }
+  },
+  "screenshotArtifacts": [
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-0.png",
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-1.png",
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-2.png",
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-3.png",
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-4.png",
+    "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference/full-review-final-5.png"
+  ]
+}

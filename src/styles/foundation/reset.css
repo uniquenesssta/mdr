@@ -1,7 +1,7 @@
 /* Responsibility: Global box sizing, document geometry, canvas defaults and native scrollbar normalization. */
 
 html {
-  --sidebar-width: 248px;
+  --sidebar-width: 240px;
 }
 
 * {

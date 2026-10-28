@@ -27,8 +27,8 @@ test('Atomic Task 2.8 loads token-only themes before every shell, layout, compon
 
   assert.equal(entrySource, expectedStyleEntry());
   assert.doesNotMatch(tokenSource, /\[data-theme/);
-  assert.match(lightSource, /^:root\s*\{/);
-  assert.match(darkSource, /^\[data-theme="dark"\]\s*\{/);
+  assert.match(lightSource.replace(/^\/\*[^]*?\*\/\s*/, ''), /^:root,\s*\[data-theme="light"\]\s*\{/);
+  assert.match(darkSource.replace(/^\/\*[^]*?\*\/\s*/, ''), /^\[data-theme="dark"\]\s*\{/);
   for (const { path, source } of styles.filter(record => !record.path.includes('/themes/'))) {
     assert.doesNotMatch(source, /\[data-theme/, path);
   }
@@ -62,15 +62,15 @@ test('theme split preserves the 2.8 values while 2.9 adds only named editor colo
   const light = collectDefinitions(lightSource);
   const dark = collectDefinitions(darkSource);
 
-  assert.equal(light.get('--color-canvas'), '#eef1f5');
-  assert.equal(light.get('--color-editor-text'), '#202530');
-  assert.equal(light.get('--shadow-floating'), '0 14px 36px rgba(15, 23, 42, 0.10)');
-  assert.equal(light.get('--code-background'), '#f5f7fb');
+  assert.equal(light.get('--color-canvas'), '#f4f7fb');
+  assert.equal(light.get('--color-editor-text'), 'var(--color-text-primary)');
+  assert.equal(light.get('--shadow-floating'), '0 4px 12px rgba(13,39,69,.12)');
+  assert.equal(light.get('--code-background'), 'var(--color-code-background)');
   assert.equal(light.get('--content-image-opacity'), '1');
-  assert.equal(dark.get('--color-canvas'), '#0c1017');
-  assert.equal(dark.get('--color-editor-text'), '#e8edf5');
-  assert.equal(dark.get('--shadow-floating'), '0 18px 42px rgba(0, 0, 0, 0.34)');
-  assert.equal(dark.get('--code-background'), '#0b0f15');
+  assert.equal(dark.get('--color-canvas'), '#101722');
+  assert.equal(dark.get('--color-editor-text'), 'var(--color-text-primary)');
+  assert.equal(dark.get('--shadow-floating'), '0 4px 12px rgba(13,39,69,.12)');
+  assert.equal(dark.get('--code-background'), 'var(--color-code-background)');
   assert.equal(dark.get('--content-image-opacity'), '0.95');
   assert.equal(light.get('--color-preset-text-blue'), '#2563eb');
   assert.equal(light.get('--color-preset-highlight-yellow'), '#fff3a3');

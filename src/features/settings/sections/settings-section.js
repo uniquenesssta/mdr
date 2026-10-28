@@ -7,7 +7,7 @@
 import { SETTING_SECTIONS, getSettingDefinition } from '../domain/settings-schema.js';
 
 const SECTION_IDS = Object.freeze(Object.values(SETTING_SECTIONS));
-const FIELD_SURFACES = Object.freeze(['settings-dialog', 'external']);
+const FIELD_SURFACES = Object.freeze(['settings-dialog', 'external', 'retired']);
 const CONTROL_VALIDATION_KINDS = Object.freeze({
   select: Object.freeze(['enum', 'integer-enum']),
   toggle: Object.freeze(['boolean']),
@@ -41,6 +41,7 @@ function defineField(sectionId, field) {
     throw new Error(`Control ${control} is incompatible with ${settingId} validation ${definition.validation.kind}.`);
   }
   if (!FIELD_SURFACES.includes(surface)) throw new Error(`Unknown Settings field surface ${surface}.`);
+  if (surface === 'retired' && settingId !== 'activeLineColor') throw new Error(`Setting ${settingId} has no declared retirement.`);
   return Object.freeze({ settingId, control, surface });
 }
 

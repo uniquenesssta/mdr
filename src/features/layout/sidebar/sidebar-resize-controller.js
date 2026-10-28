@@ -9,7 +9,7 @@ import { matchesNarrowInteractiveLayout } from '../shell/responsive-breakpoints.
 
 export const SIDEBAR_WIDTH_STORAGE_KEY = 'md_editor_sidebar_width';
 
-const DEFAULT_WIDTH = 248;
+const DEFAULT_WIDTH = 240;
 const MIN_WIDTH = 180;
 const MAX_WIDTH = 520;
 const MIN_DYNAMIC_MAX_WIDTH = 240;

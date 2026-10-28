@@ -5,7 +5,9 @@
  * State/side effects: Owns toolbar listeners plus heading/view menu visibility; no editor/document state.
  * Lifecycle: Explicit View with idempotent destroy(); closes owned menus and removes listeners.
  */
-import { createEventScope, mountStaticContent } from '../../../ui/dom/index.js';
+import { createEventScope, mountStaticContent, createSafeElement } from '../../../ui/dom/index.js';
+import { createSelectionToolbarView } from './selection-toolbar-view.js';
+import { canRunEditorAction } from '../domain/reading-policy.js';
 
 export function createEditorToolbarView({
   root,
@@ -13,7 +15,10 @@ export function createEditorToolbarView({
   commands,
   dialogs = {},
   tableView = null,
+  selection = null,
   getLayoutMode = () => 'both',
+  toolbarPreferences = null,
+  onCustomizeToolbar = () => {},
   formatLayoutLabel = mode => String(mode || '')
 } = {}) {
   if (!root?.ownerDocument) throw new TypeError('Editor Toolbar View requires a toolbar root.');
@@ -21,23 +26,34 @@ export function createEditorToolbarView({
   const events = createEventScope();
   const headingMenu = root.querySelector('#heading-menu');
   const viewMenu = root.querySelector('#view-menu');
+  const moreMenu = root.querySelector('#format-more-menu');
+  const formatGroup = root.querySelector('.format-group');
   const roots = [root, ...commandRoots.filter(value => value && value !== root)];
   let destroyed = false;
+  const selectionView = selection && formatGroup && moreMenu ? createSelectionToolbarView({ root, selection, preferences: toolbarPreferences, getLayoutMode, customize: onCustomizeToolbar }) : null;
 
-  const closeMenus = () => {
+  const closeMenus = (keepMore = false) => {
     headingMenu?.classList.remove('show');
     viewMenu?.classList.remove('show');
+    if (!keepMore) selectionView?.close();
   };
   const refreshLayoutLabel = mode => {
     const value = mode || getLayoutMode() || 'both';
     const label = root.querySelector('#view-dropdown > button [data-i18n="view"]');
     if (label) label.textContent = formatLayoutLabel(value) || formatLayoutLabel('both');
+    for (const button of root.querySelectorAll('.writing-modes [data-mode]')) {
+      button.classList.toggle('active', button.dataset.mode === value);
+      button.setAttribute('aria-pressed', button.dataset.mode === value ? 'true' : 'false');
+    }
+    selectionView?.refresh();
   };
   const execute = (action, payload) => commands.execute(action, payload);
   const route = (action, trigger) => {
+    if (!canRunEditorAction(getLayoutMode(), action)) return;
+    if (selectionView?.handle(action)) return;
     if (action === 'toggle-heading-menu') {
       const willOpen = !headingMenu?.classList.contains('show');
-      closeMenus();
+      closeMenus(Boolean(moreMenu?.contains(headingMenu)));
       if (willOpen) headingMenu?.classList.add('show');
       return;
     }
@@ -89,26 +105,36 @@ export function createEditorToolbarView({
     });
   }
   events.listen(root.ownerDocument, 'mousedown', event => {
-    if (event.target?.closest?.('#heading-dropdown, #view-dropdown')) return;
+    if (event.target?.closest?.('#heading-dropdown, #view-dropdown, #format-more-dropdown')) return;
     closeMenus();
+  });
+
+  const refreshSelection = () => selectionView?.refresh();
+  events.listen(root.ownerDocument, 'keydown', event => {
+    if (event.key === 'Escape') closeMenus();
+  });
+  events.listen(root, 'mousedown', event => {
+    if (event.target?.closest?.('.format-group button')) event.preventDefault();
   });
 
   refreshLayoutLabel();
   return Object.freeze({
     closeMenus,
     refreshLayoutLabel,
+    refreshSelection,
     destroy() {
       if (destroyed) return;
       destroyed = true;
       closeMenus();
+      selectionView?.destroy();
       events.destroy();
     }
   });
 }
 
-/** Construct the toolbar controlled by this View without changing its frozen markup. */
+/** Compose the writing header and a reusable selection-format surface over existing editor actions. */
 export function createEditorToolbarContentView(slots) {
-  return mountStaticContent([
+  const content = mountStaticContent([
     [slots.toolbar,[
       "\n      ",
       ["div",{"class":"format-group"},[
@@ -137,7 +163,7 @@ export function createEditorToolbarContentView(slots) {
         "\n        ",
         ["div",{"class":"dropdown color-dropdown","id":"text-color-dropdown","data-toolbar-item":"textColor"},[
           "\n          ",
-          ["button",{"type":"button","id":"text-color-button","class":"color-tool-button","data-color-menu-kind":"text","title":"文字颜色（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
+          ["button",{"type":"button","id":"text-color-button","class":"color-tool-button text-color-button","data-color-menu-kind":"text","title":"文字颜色（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
             "\n            ",
             ["span",{"class":"color-tool-glyph"},["A"]],
             ["span",{"class":"color-tool-indicator","id":"text-color-indicator"},[]],
@@ -187,7 +213,7 @@ export function createEditorToolbarContentView(slots) {
         "\n        ",
         ["div",{"class":"dropdown color-dropdown","id":"highlight-color-dropdown","data-toolbar-item":"highlight"},[
           "\n          ",
-          ["button",{"type":"button","id":"highlight-color-button","class":"color-tool-button","data-color-menu-kind":"highlight","title":"文字高亮（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
+          ["button",{"type":"button","id":"highlight-color-button","class":"color-tool-button highlight-color-button","data-color-menu-kind":"highlight","title":"文字高亮（请先选择文字）","aria-haspopup":"true","aria-expanded":"false","disabled":true},[
             "\n            ",
             ["span",{"class":"color-tool-glyph color-tool-highlight"},["A"]],
             ["span",{"class":"color-tool-indicator","id":"highlight-color-indicator"},[]],
@@ -252,7 +278,7 @@ export function createEditorToolbarContentView(slots) {
         "\n        ",
         ["span",{"class":"divider"},[]],
         "\n        ",
-        ["div",{"class":"dropdown","id":"heading-dropdown","data-toolbar-item":"heading"},[
+        ["div",{"class":"dropdown heading-dropdown","id":"heading-dropdown","data-toolbar-item":"heading"},[
           "\n          ",
           ["button",{"data-editor-action":"toggle-heading-menu","data-i18n-title":"heading","title":"标题"},[
             "H ",
@@ -399,4 +425,46 @@ export function createEditorToolbarContentView(slots) {
       "\n"
     ]],
   ]);
+  const additions = composeWritingToolbar(slots.toolbar);
+  return Object.freeze({ destroy() { content.destroy(); for (const node of additions) node.remove(); } });
+}
+
+function composeWritingToolbar(root) {
+  const doc = root.ownerDocument;
+  const node = (tag, options = {}) => createSafeElement(doc, tag, options);
+  const button = (label, action, attributes = {}) => node('button', { text: label, attributes: { type: 'button', 'data-editor-action': action, ...attributes } });
+  const format = root.querySelector('.format-group');
+  const oldActions = root.querySelector('.editor-actions');
+  oldActions.querySelector('#view-dropdown')?.classList.add('writing-mode-menu');
+  oldActions.querySelector('[data-theme-toggle]')?.classList.add('writing-theme-toggle');
+  // Live compatibility projection for existing document commands; Session owns the title.
+  const title = node('input', { id: 'filename', attributes: { type: 'hidden', value: '未命名文档.md' } });
+  const modes = node('div', { className: 'writing-modes', attributes: { role: 'group', 'aria-label': '文档视图' } });
+  const modeSlot = node('div', { className: 'writing-mode-slot' });
+  for (const [mode, label, key] of [['hybrid', '写作', 'writingMode'], ['both', '分栏', 'splitMode'], ['preview', '纯阅读', 'readingMode']]) modes.append(button(label, 'layout', { 'data-mode': mode, 'aria-pressed': 'false', 'data-i18n': key }));
+  modeSlot.append(modes);
+  const more = node('div', { id: 'format-more-dropdown', className: 'dropdown' });
+  const moreMenu = node('div', { id: 'format-more-menu', className: 'dropdown-menu writing-more-menu' });
+  more.append(button('更多', 'toggle-more'), moreMenu);
+  moreMenu.append(button('固定工具条', 'pin-toolbar', { 'aria-pressed': 'false' }), button('自定义工具条…', 'customize-toolbar'));
+  const primary = new Set(['bold', 'italic', 'underline', 'strikethrough', 'open-link']);
+  for (const child of [...format.children]) {
+    if (child.nodeType !== 1) continue;
+    if (child.classList.contains('divider')) { child.remove(); continue; }
+    if (child.matches('.color-dropdown, #heading-dropdown')) continue;
+    if (!primary.has(child.dataset.editorAction)) moreMenu.append(child);
+  }
+  const heading = format.querySelector('#heading-dropdown');
+  if (heading) { format.prepend(heading); const trigger = heading.querySelector('button'); trigger.firstChild.textContent = '正文 '; }
+  for (const child of [...oldActions.children]) moreMenu.append(child);
+  oldActions.remove();
+
+  const link = format.querySelector('[data-editor-action="open-link"]');
+  if (link) { format.append(link); link.querySelector('svg')?.remove(); }
+  const highlight = format.querySelector('#highlight-color-button .color-tool-glyph');
+  if (highlight) highlight.textContent = '高亮';
+  format.append(more);
+  format.setAttribute('role', 'toolbar'); format.setAttribute('aria-label', '选区格式');
+  root.append(title, modeSlot);
+  return [title, modeSlot];
 }

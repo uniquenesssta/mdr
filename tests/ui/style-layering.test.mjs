@@ -14,10 +14,10 @@ import {
 const expectedLayerCounts = Object.freeze({
   foundation: 5,
   themes: 2,
-  shell: 6,
+  shell: 7,
   layout: 6,
   components: 12,
-  features: 20
+  features: 23
 });
 
 const legacyShellClasses = Object.freeze([
@@ -41,7 +41,7 @@ test('Atomic Task 2.9 replaces consolidated CSS with explicit responsibility mod
 
   assert.equal(entrySource, expectedStyleEntry());
   await assert.rejects(access('src/styles/main.css'));
-  assert.equal(styles.length, 51);
+  assert.equal(styles.length, 55);
   const counts = Object.fromEntries(Object.keys(expectedLayerCounts).map(layer => [layer, 0]));
   for (const { path, source } of styles) {
     const layer = path.split('/')[2];

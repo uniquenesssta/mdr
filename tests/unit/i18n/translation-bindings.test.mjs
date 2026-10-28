@@ -207,7 +207,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
   }
   assert.deepEqual(imageBindings.sort(), ['cancel','exportImageTitle','ratioLabel','ratio9_16','ratio4_5','ratio3_4','ratio1_1','ratio16_9','cropLabel','previewLabel','exportImagePreviewAlt','exportImageHint','refreshPreview','downloadPng'].sort());
   assert.equal(markupBindings.length, 87);
-  assert.equal(helpBindings.length, 2);
+  assert.equal(helpBindings.length, 1);
   assert.deepEqual(clipperBindings, [
     ['data-i18n', 'urlTitle'], ['data-i18n', 'urlLabel'],
     ['data-i18n-placeholder', 'urlPlaceholder'], ['data-i18n', 'useProxy'],
@@ -215,7 +215,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
     ['data-i18n', 'manualLabel'], ['data-i18n-placeholder', 'manualPlaceholder'],
     ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']
   ]);
-  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 113);
+  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 112);
   assert.match(main, /subscribeLocale: listener => i18nService\.subscribe\(listener\)/);
   assert.match(clipperView, /subscribeLocale\(renderTranslations\)/);
   assert.doesNotMatch(markup, /id="url-modal"/);

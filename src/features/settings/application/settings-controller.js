@@ -25,7 +25,8 @@ export function createSettingsController({
   applyCoordinator,
   platform,
   openTrigger,
-  shortcutTarget
+  shortcutTarget,
+  autoApply = false
 } = {}) {
   assertPort(store, ['openDraft', 'updateDraft', 'cancelDraft'], 'a Settings Store.');
   assertPort(view, [
@@ -54,7 +55,22 @@ export function createSettingsController({
     assertActive();
     const draft = store.updateDraft({ [settingId]: value });
     view.setFeedback('');
+    if (autoApply) persistOpenDraft();
     return draft;
+  }
+
+  function persistOpenDraft() {
+    const validation = view.validate();
+    if (!validation.valid) { view.setFeedback(validation.message, 'error'); return false; }
+    try {
+      applyCoordinator.applyDraft();
+      store.openDraft();
+      view.setFeedback('');
+      return true;
+    } catch (error) {
+      view.setFeedback('设置保存失败：' + (error?.message || String(error)), 'error');
+      return false;
+    }
   }
 
   function navigate(page) {
@@ -139,6 +155,7 @@ export function createSettingsController({
       if (!selected) return false;
       const draft = store.updateDraft({ exportDirectory: String(selected) });
       view.setDirectoryValue(draft.exportDirectory);
+      if (autoApply) persistOpenDraft();
       return true;
     } catch (error) {
       if (!destroyed && generation === requestGeneration && store.hasDraft) {
@@ -158,6 +175,7 @@ export function createSettingsController({
     const draft = store.updateDraft({ exportDirectory: '' });
     view.setDirectoryValue(draft.exportDirectory);
     view.setFeedback('');
+    if (autoApply) persistOpenDraft();
     return true;
   }
 
@@ -187,6 +205,13 @@ export function createSettingsController({
     cancel,
     navigate,
     updateDraft,
+    resetDefaults(defaults) {
+      assertActive();
+      if (!store.hasDraft) return false;
+      const draft = store.updateDraft(defaults);
+      view.renderDraft(draft);
+      return autoApply ? persistOpenDraft() : true;
+    },
     chooseDirectory,
     clearDirectory,
     isOpen() {

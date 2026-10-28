@@ -9,6 +9,7 @@ import {
   FILES_PORT_METHODS,
   FULLSCREEN_PORT_METHODS,
   LINKS_PORT_METHODS,
+  LAUNCH_PORT_METHODS,
   LOGS_PORT_METHODS,
   PLATFORM_PORT_NAMES,
   PRINT_PORT_METHODS,
@@ -33,7 +34,8 @@ const EXPECTED_PORT_METHODS = Object.freeze({
   logs: LOGS_PORT_METHODS,
   clipboard: CLIPBOARD_PORT_METHODS,
   fullscreen: FULLSCREEN_PORT_METHODS,
-  print: PRINT_PORT_METHODS
+  print: PRINT_PORT_METHODS,
+  launch: LAUNCH_PORT_METHODS
 });
 
 function createImplementation(methods, options = {}) {
@@ -83,7 +85,8 @@ test('Atomic Task 3.1 exposes the exact business-neutral platform port surface',
     'logs',
     'clipboard',
     'fullscreen',
-    'print'
+    'print',
+    'launch'
   ]);
   assert.ok(Object.isFrozen(PLATFORM_PORT_NAMES));
 
@@ -97,6 +100,7 @@ test('Atomic Task 3.1 exposes the exact business-neutral platform port surface',
     'files-port.js',
     'fullscreen-port.js',
     'index.js',
+    'launch-port.js',
     'links-port.js',
     'logs-port.js',
     'platform-port-set.js',
@@ -272,6 +276,7 @@ test('platform port set exposes one immutable aggregate and destroys ports in re
   await platform.destroy();
 
   assert.deepEqual(order, [
+    'launch:destroy',
     'print:destroy',
     'fullscreen:unsubscribe',
     'fullscreen:destroy',

@@ -45,8 +45,41 @@ export function createFindReplaceCommand(editor) {
     return requestGeneration;
   };
   const isCurrent = generation => !destroyed && generation === requestGeneration;
+  const filtered = options => typeof options.caseSensitive === 'boolean' || options.wholeWord || options.regularExpression || options.direction === 'backward';
+  const pattern = (needle, options) => new RegExp(options.regularExpression ? needle : needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), options.caseSensitive === false ? 'giu' : 'gu');
+  const matches = (needle, options) => {
+    const text = editor.sliceText(0, editor.getTextLength());
+    const expression = pattern(needle, options);
+    const word = value => /[\p{L}\p{N}_]/u.test(value || '');
+    return { text, expression, *[Symbol.iterator]() {
+      for (const match of text.matchAll(expression)) {
+        if (!match[0].length) continue;
+        const from = match.index, to = from + match[0].length;
+        if (options.wholeWord && (word(text[from - 1]) || word(text[to]))) continue;
+        yield { from, to, match };
+      }
+    } };
+  };
 
   const search = async (needle, options, generation) => {
+    if (filtered(options)) {
+      const found = matches(needle, options);
+      const backward = options.direction === 'backward';
+      const selection = editor.getSelection();
+      const boundary = backward ? selection.start : cursor;
+      let first = null, last = null, target = null, total = 0, index = 0;
+      for (const candidate of found) {
+        total += 1;
+        first ||= { ...candidate, index: total };
+        last = { ...candidate, index: total };
+        if (backward ? candidate.from < boundary : !target && candidate.from >= boundary) target = last;
+      }
+      target ||= backward ? last : first;
+      if (!target) return null;
+      index = target.index;
+      cursor = target.to;
+      return Object.freeze({ from: target.from, to: target.to, index, total });
+    }
     let match = null;
     let nativeCompleted = false;
     if (typeof options.nativeSearch === 'function') {
@@ -89,20 +122,26 @@ export function createFindReplaceCommand(editor) {
     const start = Math.max(0, Number(selection?.start) || 0);
     const end = Math.max(start, Number(selection?.end) || start);
     const selected = editor.sliceText(start, end);
-    if (selected !== needle) {
+    const selectedMatch = filtered(options) ? [...matches(needle, options)].find(match => match.from === start && match.to === end) : null;
+    if (filtered(options) ? !selectedMatch : selected !== needle) {
       return Object.freeze({ replaced: false, match: await search(needle, options, generation) });
     }
 
-    const insert = String(replacement ?? '');
+    const insert = options.regularExpression ? selected.replace(pattern(needle, options), String(replacement ?? '')) : String(replacement ?? '');
     editor.replaceRange(insert, start, end, 'end');
     cursor = start + insert.length;
     return Object.freeze({ replaced: true, match: await search(needle, options, generation) });
   };
 
-  const replaceAll = (query, replacement) => {
+  const replaceAll = (query, replacement, options = {}) => {
     beginOperation();
     const needle = String(query ?? '');
     if (!needle) return 0;
+    if (filtered(options)) {
+      const changes = [...matches(needle, options)].map(({ from, to, match }) => ({ from, to, insert: options.regularExpression ? match[0].replace(pattern(needle, options), String(replacement ?? '')) : String(replacement ?? '') }));
+      if (changes.length) { editor.applyTransaction({ changes }); cursor = 0; }
+      return changes.length;
+    }
     const count = Math.max(0, Number(editor.replaceAllText(needle, String(replacement ?? ''))) || 0);
     if (count > 0) cursor = 0;
     return count;

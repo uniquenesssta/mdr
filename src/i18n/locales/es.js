@@ -6,6 +6,11 @@
  * Lifecycle: Import-only data module; no runtime lifecycle.
  */
 export default Object.freeze({
+  "writingMode": "Escribir",
+  "splitMode": "Dividir",
+  "readingMode": "Solo lectura",
+  "focusMode": "Enfoque",
+
   "autosaveEnabled": "Guardado automático activado",
   "boldTitle": "Negrita Ctrl+B",
   "brand": "Editor Markdown",

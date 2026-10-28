@@ -19,3 +19,4 @@ export { createLinkClient } from './desktop/link-client.js';
 export { createPerformanceLogClient } from './desktop/performance-log-client.js';
 export { createWebFetchClient } from './desktop/web-fetch-client.js';
 export { createWindowClient } from './desktop/window-client.js';
+export { defineLaunchPort, LAUNCH_PORT_METHODS } from './ports/launch-port.js';

@@ -30,14 +30,15 @@ test('R15-01 baseline evidence covers every current direct producer, native boun
     const hash=createHash('sha1').update('blob '+content.length+'\0').update(content).digest('hex');
     assert.equal(reviewed.find(row=>row.path===migration.currentPath)?.blobSha,hash,migration.currentPath+': unreviewed telemetry migration');
   }
-  // Keep all 43 frozen producers. The two projection-only migrations remain
-  // byte-exact; layout stability now has a reviewed behavioral repair whose
-  // current producer hash is checked above without rewriting its frozen baseline.
+  // Keep all 43 frozen producers. Compact-shell class migration stays byte-exact;
+  // reviewed layout behavior changes retain their original baseline and current hash.
   assert.ok(producerUpdates.some(row => row.path === 'src/features/preview/pipeline/preview-layout-stability.js'
     && row.currentPath === row.path), 'layout stability requires an explicit current producer review');
+  assert.ok(producerUpdates.some(row => row.path === 'src/features/layout/toolbar/toolbar-boundary-controller.js'
+    && row.currentPath === row.path && row.baselineBlob === 'd82d635a6b314b19681409d62446afac9e62cff2'),
+    'the user-authorized single-group header requires an exact current producer review');
   const projectionMigrations=[
-    ['src/features/layout/shell/compact-shell-controller.js',"    root.classList.toggle('compact-shell', Boolean(active));\n",''],
-    ['src/features/layout/toolbar/toolbar-boundary-controller.js',"classList.contains('hidden')","classList.contains('is-hidden')"]
+    ['src/features/layout/shell/compact-shell-controller.js',"    root.classList.toggle('compact-shell', Boolean(active));\n",'']
   ];
   for(const [path,previous,current] of projectionMigrations){
     const historical=execFileSync('git',['show',catalogue.baselineCommit+':'+path],{encoding:'utf8'});

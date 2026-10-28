@@ -24,6 +24,7 @@ export function createToolbarBoundaryController({
   toolbar,
   formatGroup,
   actions,
+  singleGroup = false,
   matchMedia = null,
   getStyle,
   createResizeObserver = null,
@@ -36,7 +37,7 @@ export function createToolbarBoundaryController({
   requireObject(toolbar, 'Toolbar Boundary toolbar');
   requireObject(toolbar.classList, 'Toolbar Boundary toolbar classList');
   requireObject(formatGroup, 'Toolbar Boundary format group');
-  requireObject(actions, 'Toolbar Boundary actions');
+  if (!singleGroup) requireObject(actions, 'Toolbar Boundary actions');
   if (matchMedia !== null) requireFunction(matchMedia, 'Toolbar Boundary matchMedia');
   requireFunction(getStyle, 'Toolbar Boundary getStyle');
   if (createResizeObserver !== null) requireFunction(createResizeObserver, 'Toolbar Boundary ResizeObserver factory');
@@ -69,7 +70,7 @@ export function createToolbarBoundaryController({
       return Object.freeze({ wrapped: false, hidden: true, reason });
     }
 
-    const mediaWrap = matchesNarrowInteractiveLayout(matchMedia);
+    const mediaWrap = !singleGroup && matchesNarrowInteractiveLayout(matchMedia);
     if (!mediaWrap) {
       toolbar.classList.remove('toolbar-boundary-wrap');
       void toolbar.offsetWidth;
@@ -81,8 +82,7 @@ export function createToolbarBoundaryController({
     const availableWidth = Math.max(0, (Number(toolbar.clientWidth) || 0) - horizontalPadding);
     const requiredWidth = Math.ceil(
       (Number(formatGroup.scrollWidth) || 0)
-      + (Number(actions.scrollWidth) || 0)
-      + columnGap
+      + (singleGroup ? 0 : (Number(actions.scrollWidth) || 0) + columnGap)
     );
     const shouldWrap = mediaWrap || requiredWidth > availableWidth;
     const previousWrapped = wrapped;

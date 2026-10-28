@@ -8,8 +8,8 @@
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 
 const THEME_DEFAULTS = Object.freeze({
-  light: Object.freeze({ text: '#1a1d23', line: '#efedfc' }),
-  dark: Object.freeze({ text: '#f0f2f7', line: '#252837' })
+  light: Object.freeze({ text: '#202c3e', line: '#eaf0fa' }),
+  dark: Object.freeze({ text: '#e4eaf4', line: '#283b5b' })
 });
 
 function resolveThemeColor(theme, kind) {
@@ -40,7 +40,8 @@ export function createColorFieldView(root, {
     text: '跟随主题',
     attributes: { type: 'button' }
   });
-  wrap.append(input, reset);
+  const colorValue = createSafeElement(documentRef, 'span', { className: 'settings-color-value' });
+  wrap.append(input, colorValue, reset);
   field.append(fieldLabel, wrap);
   root.append(field);
 
@@ -55,12 +56,14 @@ export function createColorFieldView(root, {
   function renderValue() {
     input.value = explicitValue || resolveThemeColor(theme, kind);
     input.dataset.custom = explicitValue ? 'true' : 'false';
+    colorValue.textContent = input.value.toUpperCase();
   }
 
   try {
     events.listen(input, 'input', () => {
       explicitValue = String(input.value || '').toLowerCase();
       input.dataset.custom = 'true';
+      colorValue.textContent = input.value.toUpperCase();
       onChange(explicitValue);
     });
     events.listen(reset, 'click', () => {

@@ -16,6 +16,14 @@ export function createWorkspaceContent(slots) {
       const view = factory(slots);
       lifetime.own(() => view.destroy());
     }
+    const count = slots.preview.querySelector('#word-count');
+    const format = slots.status.querySelector('.statusbar-format');
+    if (count && format) {
+      slots.status.insertBefore(count, format);
+      // The count now lives outside its original preview header. Release that
+      // transferred DOM ownership before destroying the static feature roots.
+      lifetime.own(() => count.remove());
+    }
     return Object.freeze({ destroy: () => lifetime.destroy() });
   } catch (error) {
     try { lifetime.destroy(); } catch (cleanupError) { throw new AggregateError([error, cleanupError], 'Workspace content construction failed.'); }

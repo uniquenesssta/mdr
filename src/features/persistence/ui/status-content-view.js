@@ -19,7 +19,9 @@ export function createStatusContentView(slots) {
         "\n      "
       ]],
       "\n      ",
-      ["span",{"class":"save-hint","id":"save-hint"},["✓ 已保存"]],
+      ["svg",{"class":"icon statusbar-state-icon","aria-hidden":"true"},[["use",{"href":"/assets/icons.svg#icon-save"},[]]]],
+      ["span",{"class":"save-hint","id":"save-hint"},["已保存到本地"]],
+      ["button",{"class":"statusbar-preview-retry","type":"button","id":"statusbar-preview-retry","hidden":true},["重试"]],
       "\n      ",
       ["span",{"class":"statusbar-spacer"},[]],
       "\n      ",

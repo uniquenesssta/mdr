@@ -168,3 +168,8 @@
 @keyframes folder-tree-spin {
   to { transform: rotate(360deg); }
 }
+
+.folder-tree-node { margin:0; }
+.folder-tree-row { height:36px;min-height:36px;padding:0 8px 0 calc(8px + var(--tree-depth,0)*16px);grid-template-columns:16px 16px minmax(0,1fr);gap:4px;border:0;border-radius:8px;color:var(--color-text-primary);font-size:14px;line-height:22px; }
+.folder-tree-file-row.active { border:0;background:var(--color-accent-soft);color:var(--color-accent);font-weight:400; }
+.folder-tree-kind-icon,.folder-tree-chevron,.folder-tree-chevron-spacer { width:16px;height:16px; }

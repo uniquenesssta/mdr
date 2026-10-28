@@ -29,3 +29,7 @@ body * {
   opacity: 0;
   pointer-events: none;
 }
+
+.settings-workspace :is(input,textarea,select), .c-popover :is(input,textarea), .link-preview-url { -webkit-user-select:text;user-select:text; }
+button:focus-visible, [role=button]:focus-visible, [role=menuitem]:focus-visible { outline:2px solid var(--color-focus-ring);outline-offset:2px; }
+button:disabled, [aria-disabled=true] { cursor:default; }

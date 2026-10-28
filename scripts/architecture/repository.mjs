@@ -38,8 +38,8 @@ async function walkDirectory(root, directory, output) {
   }
 }
 
-export async function listRepositoryFiles(root = process.cwd()) {
-  const git = spawnSync('git', ['ls-files', '-z'], {
+export async function listRepositoryFiles(root = process.cwd(), { includeUntracked = false } = {}) {
+  const git = spawnSync('git', ['ls-files', ...(includeUntracked ? ['--cached', '--others', '--exclude-standard'] : []), '-z'], {
     cwd: root,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe']

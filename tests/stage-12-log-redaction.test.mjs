@@ -19,7 +19,8 @@ test('R12-14 adds one recursive redaction owner at the existing JSONL persistenc
   assert.match(entry, /^mod redaction;/m);
   assert.match(writer, /let redacted = redact_value\(value\);/);
   assert.match(writer, /serde_json::to_string\(&redacted\)/);
-  assert.equal((redaction.match(/#\[test\]/g) || []).length, 14);
+  assert.equal((redaction.match(/#\[test\]/g) || []).length, 15);
+  assert.match(redaction, /fn preserves_reviewed_selection_and_runtime_event_labels_without_free_text\(/);
   assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|\bwrite_performance_logs\s*\(/);
 });
 
@@ -78,13 +79,13 @@ test('R12-14 implementation and the historical R12-S01 handoff snapshot remain r
 
 test('R12-14 shell command starts Cargo with only the intended arguments and keeps the result gate', async () => {
   const workflow = await read('.github/workflows/r12-14.yml');
-  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 14 of 14\n(?:        if: [^\n]+\n)?        run: \|\n([\s\S]*?)(?=^      - name:)/m);
+  const step = workflow.match(/^      - name: R12-14 direct recursive redaction 15 of 15\n(?:        if: [^\n]+\n)?        run: \|\n([\s\S]*?)(?=^      - name:)/m);
   assert.ok(step, 'missing direct redaction test step');
   const commands = step[1].replace(/\\\r?\n[ \t]*/g, ' ')
     .trim().split('\n').map(line => line.trim()).filter(Boolean);
   assert.deepEqual(commands, [
     'cargo test --manifest-path src-tauri/Cargo.toml --locked --bin markdown-editor performance_log::redaction::tests 2>&1 | tee "$RUNNER_TEMP/r12-14/log-redaction.log"',
-    "grep -Fq 'test result: ok. 14 passed; 0 failed' \"$RUNNER_TEMP/r12-14/log-redaction.log\""
+    "grep -Fq 'test result: ok. 15 passed; 0 failed' \"$RUNNER_TEMP/r12-14/log-redaction.log\""
   ]);
 });
 

@@ -33,7 +33,7 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
     documentRef.createTextNode(' '),
     createSafeElement(documentRef, 'span', { text: '使用帮助', attributes: { 'data-i18n': 'helpTitle' } })
   );
-  const dialogSummary = createSafeElement(documentRef, 'p');
+  const dialogSummary = createSafeElement(documentRef, 'p', { attributes: { hidden: true } });
   headingGroup.append(heading, dialogSummary);
 
   const closeButton = createSafeElement(documentRef, 'button', { attributes: { type: 'button' } });
@@ -45,14 +45,7 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
   const contentRoot = createSafeElement(documentRef, 'div', { id: 'help-body', className: 'preferences-content help-content' });
   layout.append(navigationRoot, contentRoot);
 
-  const footer = createSafeElement(documentRef, 'div', { className: 'modal-footer' });
-  const confirmButton = createSafeElement(documentRef, 'button', {
-    className: 'primary',
-    text: '知道了',
-    attributes: { type: 'button', 'data-i18n': 'helpOk' }
-  });
-  footer.append(confirmButton);
-  panel.append(header, layout, footer);
+  panel.append(header, layout);
   root.append(panel);
 
   let modal = null;
@@ -60,7 +53,6 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
     modal = new ModalShell(root, { panel });
     overlayRoot.append(root);
     events.listen(closeButton, 'click', () => onRequestClose('feature-close'));
-    events.listen(confirmButton, 'click', () => onRequestClose('feature-close'));
   } catch (error) {
     const errors = [error];
     try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
@@ -70,6 +62,7 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
     throw new AggregateError(errors, 'Failed to construct Help dialog view cleanly.');
   }
   let destroyed = false;
+  let helpDocument = null;
 
   const assertActive = () => {
     if (destroyed) throw new Error('Help dialog view has been destroyed.');
@@ -80,12 +73,14 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
     navigationRoot,
     renderDocument(document) {
       assertActive();
+      helpDocument = document;
       dialogSummary.textContent = document.dialogSummary;
       closeButton.setAttribute('aria-label', document.closeLabel);
       navigationRoot.setAttribute('aria-label', document.navigationLabel);
     },
     renderPage(page) {
       assertActive();
+      panel.dataset.page = page.id;
       const section = createSafeElement(documentRef, 'section', {
         className: 'preferences-page active',
         attributes: {
@@ -99,12 +94,26 @@ export function createHelpDialogView(overlayRoot, { onRequestClose } = {}) {
         createSafeElement(documentRef, 'p', { text: page.summary })
       );
       section.append(pageHeading);
-      if (page.introHtml) appendTrustedHtml(documentRef, section, page.introHtml);
+      let detailRoot = section;
+      if (page.id === 'start' && helpDocument?.locale === 'zh-CN') {
+        pageHeading.firstElementChild.textContent = '常用快捷键';
+        const shortcuts = createSafeElement(documentRef, 'div', { className: 'help-quick-shortcuts' });
+        for (const [label, key] of [['新建文档', 'Ctrl+N'], ['打开文件', 'Ctrl+O'], ['保存', 'Ctrl+S'], ['查找', 'Ctrl+F'], ['加粗', 'Ctrl+B'], ['插入链接', 'Ctrl+K']]) {
+          const row = createSafeElement(documentRef, 'div', { className: 'help-shortcut-row' });
+          row.append(createSafeElement(documentRef, 'span', { text: label }), createSafeElement(documentRef, 'kbd', { text: key }));
+          shortcuts.append(row);
+        }
+        section.append(shortcuts);
+        detailRoot = createSafeElement(documentRef, 'details', { className: 'help-start-details' });
+        detailRoot.append(createSafeElement(documentRef, 'summary', { text: '开始写作' }));
+        section.append(detailRoot);
+      }
+      if (page.introHtml) appendTrustedHtml(documentRef, detailRoot, page.introHtml);
       for (const topic of page.topics) {
         const card = createSafeElement(documentRef, 'div', { className: 'help-topic-card' });
         if (topic.title) card.append(createSafeElement(documentRef, 'h5', { text: topic.title }));
         appendTrustedHtml(documentRef, card, topic.bodyHtml);
-        section.append(card);
+        detailRoot.append(card);
       }
       if (page.bodyHtml) appendTrustedHtml(documentRef, section, page.bodyHtml);
       contentRoot.replaceChildren(section);

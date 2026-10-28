@@ -134,3 +134,36 @@
   font-size: var(--font-size-2xs);
   line-height: 1.2;
 }
+
+
+/* The current Figma menus use semantic groups and content-based widths. */
+.menu-dropdown-list,.dropdown-menu,.context-menu { padding:6px;border:0;outline:1px solid var(--color-border-subtle);outline-offset:-1px;border-radius:12px;background:var(--color-surface-raised);box-shadow:var(--shadow-popover);backdrop-filter:none;-webkit-backdrop-filter:none; }
+.menu-dropdown-list.show { display:flex;flex-direction:column; }
+.menu-item,.dropdown-item,.context-menu button { display:flex;align-items:center;gap:10px;min-height:32px;height:32px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:var(--color-text-primary);font-size:14px;line-height:22px;font-weight:400;white-space:nowrap; }
+.menu-item>span:first-of-type { flex:1;min-width:0; }
+.menu-item>.icon { width:16px;height:16px;flex:0 0 16px;color:var(--color-text-secondary); }
+.menu-item kbd { margin-left:auto;padding:0;border:0;background:transparent;color:var(--color-text-secondary);font:12px/20px var(--font-family-ui); }
+.menu-item.danger,.context-menu .danger { color:var(--color-danger); }
+.menu-separator,.context-separator { height:1px;min-height:1px;margin:4px 6px;background:var(--color-border-subtle); }
+.file-menu { width:288px;min-width:288px; }
+.edit-menu { width:216px;min-width:216px; }
+.app-view-menu { width:272px;min-width:272px; }
+.insert-menu { width:264px;min-width:264px; }
+.help-menu { width:160px;min-width:160px; }
+.recent-files-menu { width:248px; }
+.file-menu>.menu-separator,.edit-menu>.menu-separator { display:none; }
+.file-menu>[data-menu-command="document.new"] { order:0; }
+.file-menu>[data-menu-command="file.open"] { order:1; }
+.recent-files-menu-item { order:2; }
+.file-menu>[data-menu-command="document.save"] { order:3; }
+.file-menu>[data-menu-command="document.save-as"] { order:4; }
+.file-menu>[data-menu-command="document.rename-active"] { order:5; }
+.file-menu>[data-menu-command="import.web"] { order:6; }
+.file-menu>.menu-submenu:last-child { order:7; }
+.file-menu>[data-menu-command="settings.open"] { order:8; }
+.file-menu>[data-menu-command="document.save"],.file-menu>[data-menu-command="import.web"],.file-menu>[data-menu-command="settings.open"],.edit-menu>[data-menu-command="editor.bold"],.edit-menu>[data-menu-command="editor.find"],.edit-menu>[data-menu-command="document.clear-active"] { position:relative;margin-top:9px; }
+.file-menu>[data-menu-command="document.save"]::before,.file-menu>[data-menu-command="import.web"]::before,.file-menu>[data-menu-command="settings.open"]::before,.edit-menu>[data-menu-command="editor.bold"]::before,.edit-menu>[data-menu-command="editor.find"]::before,.edit-menu>[data-menu-command="document.clear-active"]::before { content:'';position:absolute;top:-5px;left:6px;right:6px;height:1px;background:var(--color-border-subtle); }
+.sidebar-context-menu { width:256px; }
+.outline-context-menu { width:224px; }
+.document-context-menu { width:216px;min-width:216px; }
+.context-menu button > .icon { flex:0 0 16px;width:16px;height:16px;color:var(--color-text-secondary); }

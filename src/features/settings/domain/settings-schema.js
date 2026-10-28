@@ -132,6 +132,18 @@ const DEFINITIONS = Object.freeze([
     serialization: { kind: 'json-string-array', omitWhenEmpty: true },
     impactEvent: SETTINGS_IMPACT_EVENTS.TOOLBAR
   }),
+  defineSetting('toolbarDensity', {
+    key: 'md_editor_toolbar_density', type: 'string', section: SETTING_SECTIONS.TOOLBAR,
+    validation: { kind: 'enum', values: ['compact', 'standard'] },
+    serialization: { kind: 'string', omitWhenEmpty: false },
+    impactEvent: SETTINGS_IMPACT_EVENTS.TOOLBAR
+  }),
+  defineSetting('toolbarPrimaryItems', {
+    key: 'md_editor_toolbar_primary_items', type: 'string-array', section: SETTING_SECTIONS.TOOLBAR,
+    validation: { kind: 'string-array-subset', values: TOOLBAR_ITEM_IDS },
+    serialization: { kind: 'json-string-array', omitWhenEmpty: false },
+    impactEvent: SETTINGS_IMPACT_EVENTS.TOOLBAR
+  }),
   defineSetting('previewPerformanceMode', {
     key: 'md_editor_preview_performance_mode', type: 'string', section: SETTING_SECTIONS.PERFORMANCE,
     validation: { kind: 'enum', values: PREVIEW_PERFORMANCE_MODES },

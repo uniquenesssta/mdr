@@ -35,7 +35,8 @@ try {
     view.open(); const repeatedOpen = controller.snapshot.open && view.isOpen();
     root.querySelector('[data-clipper-close]').focus();
     root.querySelector('[data-clipper-close]').dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
-    const trapped = document.activeElement.matches('[data-clipper-insert]');
+    const insertDisabled = root.querySelector('[data-clipper-insert]').disabled;
+    const trapped = document.activeElement.matches('.modal-footer [data-clipper-close]');
     locale = 'en'; localeListener(); const translated = root.querySelector('#url-modal-title span').textContent === 'en:urlTitle';
     const changedTranslations = translations();
     input('url-input', 'old'); const pending = controller.fetch();
@@ -46,10 +47,14 @@ try {
     const late = controller.snapshot.hasContent;
     root.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
     const backdrop = !view.isOpen() && !controller.snapshot.open;
-    view.open(); input('url-input', 'bad'); await controller.fetch();
+    view.open(); await frames(); input('url-input', 'bad'); await controller.fetch();
     const errorText = root.querySelector('#url-status').textContent;
     const active = Boolean(root.querySelector('#url-status img'));
     input('manual-html', '<article><h1>Title</h1><p>Body</p></article>');
+    const insertEnabled = !root.querySelector('[data-clipper-insert]').disabled;
+    root.querySelector('[data-clipper-close]').focus();
+    root.querySelector('[data-clipper-close]').dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true, bubbles: true, cancelable: true }));
+    const contentFocusTrapped = document.activeElement.matches('[data-clipper-insert]');
     root.querySelector('[data-clipper-insert]').click(); root.querySelector('[data-clipper-insert]').click();
     view.open(); input('url-input', 'destroy'); const unfinished = controller.fetch();
     view.destroy(); view.destroy();
@@ -75,14 +80,14 @@ try {
     cleanupView.destroy();
     const cleanup = cleanupError && !cleanupController.snapshot.open && !document.getElementById('url-modal');
     coordinator.destroy();
-    return { inserted, notices, duplicate, focus, repeatedOpen, trapped, translated, escaped, returnedFocus, backdrop,
+    return { inserted, notices, duplicate, focus, repeatedOpen, trapped, insertDisabled, insertEnabled, contentFocusTrapped, translated, escaped, returnedFocus, backdrop,
       late, errorText, active, removed, terminal, destroyedError, localeDisposals, successorOwned, rollback, cleanup,
       initialTranslations, changedTranslations, iconHrefs, inlineGeometry };
   })()`);
   assert.deepEqual(result.inserted, ['# Title\n\nBody']); assert.equal(result.late, false);
   assert.equal(result.errorText, '<img onerror=attack()>'); assert.equal(result.active, false);
   assert.deepEqual(result.notices, ['en:toastInsertedMd']); assert.equal(result.localeDisposals, 1);
-  assert.deepEqual(result.iconHrefs, ['/assets/icons.svg#icon-globe', '/assets/icons.svg#icon-close']);
+  assert.deepEqual(result.iconHrefs, ['/assets/icons.svg#icon-close']);
   assert.equal(result.inlineGeometry, false);
   for (const [name, locale] of [['initialTranslations', 'zh'], ['changedTranslations', 'en']]) {
     assert.deepEqual(result[name], {
@@ -91,7 +96,7 @@ try {
       closeLabel: locale + ':cancel'
     });
   }
-  for (const key of ['duplicate', 'focus', 'repeatedOpen', 'trapped', 'translated', 'escaped', 'returnedFocus', 'backdrop', 'removed', 'terminal', 'destroyedError', 'successorOwned', 'rollback', 'cleanup']) assert.equal(result[key], true, key);
+  for (const key of ['duplicate', 'focus', 'repeatedOpen', 'trapped', 'insertDisabled', 'insertEnabled', 'contentFocusTrapped', 'translated', 'escaped', 'returnedFocus', 'backdrop', 'removed', 'terminal', 'destroyedError', 'successorOwned', 'rollback', 'cleanup']) assert.equal(result[key], true, key);
   assert.deepEqual(host.errors, []);
   assert.deepEqual(browser.page.exceptions, [], 'owned clipper and dead DOM events must not raise uncaught errors');
   console.log('ok - R13.14 owned clipper DOM, focus/Escape/backdrop, translations, inert errors, late fetch isolation, single insertion, rollback and complete disposal');

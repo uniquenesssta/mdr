@@ -14,7 +14,7 @@ export function createExportImageDialogView({overlayRoot,onCommand,translate,sub
     if(options.dataset?.i18n)bindings.push({element,key:options.dataset.i18n,kind:'text'});
     if(options.dataset?.i18nAlt)bindings.push({element,key:options.dataset.i18nAlt,kind:'alt'});
     parent?.append(element);return element;};
-  const root=node(null,'div',{id:'export-image-modal',className:'modal-overlay'});
+  const root=node(null,'div',{id:'export-image-modal',className:"modal-overlay export-image-modal"});
   const panel=node(root,'div',{className:'modal c-modal c-modal--preview'}),header=node(panel,'div',{className:'modal-header'});
   const title=node(header,'h3',{id:'export-image-title'});title.append(createIcon(doc,'icon-image',{className:'icon icon-lg'}));
   node(title,'span',{text:'导出图片',dataset:{i18n:'exportImageTitle'}});
@@ -29,6 +29,7 @@ export function createExportImageDialogView({overlayRoot,onCommand,translate,sub
   node(row,'label',{text:'过长时裁剪为固定比例（默认生成长图）',attributes:{for:'image-crop-fit'},dataset:{i18n:'cropLabel'}});
   node(body,'label',{text:'预览',dataset:{i18n:'previewLabel'}});
   const wrap=node(body,'div',{id:'export-image-preview-wrap',className:'f-export-image-preview-wrap'});
+  node(wrap,'span',{className:'image-preview-empty',text:'选择比例后刷新预览。'});
   const previewImage=node(wrap,'img',{id:'export-image-preview',className:'f-export-image-preview is-hidden',attributes:{alt:'导出预览'},dataset:{i18nAlt:'exportImagePreviewAlt'}});
   node(body,'p',{className:'hint',text:'内容较长时将按内容高度生成长图，方便手机阅读。',dataset:{i18n:'exportImageHint'}});
   const footer=node(panel,'div',{className:'modal-footer'});

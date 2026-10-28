@@ -1,159 +1,31 @@
-/* Responsibility: Generic modal, form and modal navigation components. */
-
-/* 模态框 */
-.modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--color-overlay-scrim);
-      backdrop-filter: blur(4px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: var(--layer-menu);
-      padding: var(--space-2xl);
-      opacity: 0;
-      transition: opacity var(--motion-duration-moderate) ease;
-}
-
-.modal-overlay.show {
-      opacity: 1;
-}
-
-.modal {
-      background: var(--color-surface-raised);
-      color: var(--color-text-primary);
-      border-radius: var(--radius-3xl);
-      width: 100%;
-      max-width: 560px;
-      max-height: 86vh;
-      box-shadow: var(--shadow-overlay);
-      border: 1px solid var(--color-border-subtle);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transform: translateY(12px) scale(0.98);
-      opacity: 0;
-      transition: all var(--motion-duration-slow) var(--motion-ease-emphasized);
-}
-
-.modal-overlay.show .modal {
-      transform: translateY(0) scale(1);
-      opacity: 1;
-}
-
-.modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: var(--space-2xl) var(--space-3xl);
-      border-bottom: 1px solid var(--color-border-subtle);
-}
-
-.modal-header h3 { margin: 0; font-size: 17px; font-weight: 600; display: inline-flex; align-items: center; gap: var(--space-md); }
-
-.modal-header button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: transparent;
-      border: none;
-      padding: var(--space-xs);
-      border-radius: var(--radius-md);
-      color: var(--color-text-muted);
-      cursor: pointer;
-      line-height: 1;
-      transition: color var(--motion-duration-quick) ease, background var(--motion-duration-quick) ease;
-}
-
-.modal-header button:hover { color: var(--color-text-primary); background: var(--color-surface-subtle); }
-
-.modal-body {
-      padding: 18px var(--space-3xl);
-      overflow-y: auto;
-      font-size: var(--font-size-lg);
-      line-height: 1.7;
-}
-
-.modal-body p { margin: 0 0 var(--space-xl); color: var(--color-text-secondary); }
-
-.modal-body ul { margin: var(--space-md) 0 14px; padding-left: 1.6em; }
-
-.modal-body li { margin: 5px 0; }
-
-.modal-footer {
-      padding: 14px var(--space-3xl);
-      border-top: 1px solid var(--color-border-subtle);
-      display: flex;
-      justify-content: flex-end;
-      gap: var(--space-md);
-}
-
-.modal-footer button {
-      padding: var(--space-md) var(--space-2xl);
-      border: 1px solid var(--color-border-subtle);
-      border-radius: var(--radius-md);
-      background: var(--color-surface-raised);
-      color: var(--color-text-secondary);
-      font-size: var(--font-size-md);
-      font-weight: 500;
-      cursor: pointer;
-      transition: all var(--motion-duration-quick) ease;
-}
-
-.modal-footer button:hover { border-color: var(--color-accent); color: var(--color-accent); background: var(--color-surface-subtle); }
-
-.modal-footer button.primary {
-      background: var(--color-accent);
-      color: var(--color-on-accent);
-      border-color: var(--color-accent);
-}
-
-.modal-footer button.primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); color: var(--color-on-accent); }
-
-.modal-overlay {
-  background: var(--color-overlay-scrim-soft);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-}
-
-.modal {
-  border-color: var(--color-border-strong);
-  border-radius: 17px;
-  box-shadow: var(--shadow-overlay);
-}
-
-.modal-header {
-  min-height: 58px;
-  padding: 14px 18px;
-  background: color-mix(in srgb, var(--color-surface-raised) 94%, var(--color-surface-subtle));
-}
-
-.modal-header h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 720;
-}
-
-.modal-body {
-  padding: var(--space-3xl);
-}
-
-.modal-footer {
-  padding: var(--space-xl) 18px;
-  background: color-mix(in srgb, var(--color-surface-raised) 94%, var(--color-surface-subtle));
-}
-
-.modal-footer button {
-  min-height: 34px;
-  padding: 7px 14px;
-  border-radius: var(--radius-lg);
-  font-weight: 620;
-}
-
-/* Stable modal and form geometry formerly expressed as inline style attributes. */
-.c-modal--narrow { max-width: 440px; }
-
-.c-modal--medium { max-width: 520px; }
-
-.c-modal--wide { max-width: 560px; }
-
-.c-modal--preview { max-width: 640px; }
+/* Responsibility: Shared Figma dialog header/content/footer geometry and anchored panels. */
+.modal-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; padding: 16px; background: var(--color-overlay-scrim); z-index: var(--layer-modal); opacity: 0; transition: opacity var(--motion-duration-fast); }
+.modal-overlay.show { opacity: 1; }
+.modal { display: flex; flex-direction: column; width: 384px; max-width: calc(100vw - 32px); max-height: calc(100vh - 32px); overflow: hidden; border: 0; outline: 1px solid var(--color-border-subtle); outline-offset: -1px; border-radius: 12px; color: var(--color-text-primary); background: var(--color-surface-raised); box-shadow: var(--shadow-dialog); opacity: 0; transition: opacity var(--motion-duration-fast); }
+.modal-overlay.show .modal { opacity: 1; }
+.modal-header { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; min-height: 48px; padding: 14px 20px 6px; gap: 8px; }
+.modal-header h3 { display: inline-flex; align-items: center; margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; color: var(--color-text-heading); }
+.modal-header h3 > svg { display: none; }
+.modal-header > button { display: inline-flex; justify-content: center; align-items: center; flex: 0 0 28px; width: 28px; height: 28px; min-height: 28px; padding: 6px; border: 0; border-radius: 8px; background: transparent; color: var(--color-text-secondary); }
+.modal-header > button:hover { background: var(--color-surface-hover); }
+.modal-body { min-height: 0; padding: 4px 20px 16px; overflow-y: auto; font-size: 14px; line-height: 22px; }
+.modal-body p { margin: 0 0 10px; color: var(--color-text-secondary); }
+.modal-body p:last-child { margin-bottom: 0; }
+.modal-body ul { margin: 8px 0 12px; padding-left: 1.6em; }
+.modal-body li { margin: 4px 0; }
+.modal-footer { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 8px; min-height: 56px; padding: 11px 19px; border-top: 1px solid var(--color-border-subtle); background: var(--color-canvas); }
+.modal-footer button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; min-width: 80px; height: 32px; min-height: 32px; padding: 0 12px; border: 1px solid var(--color-border-subtle); border-radius: 8px; background: var(--color-surface-raised); color: var(--color-accent); font-size: 14px; font-weight: 500; white-space: nowrap; }
+.modal-footer button:hover { background: var(--color-surface-hover); }
+.modal-footer button.primary { color: var(--color-on-accent); background: var(--color-accent); border-color: var(--color-accent); }
+.modal-footer button.primary:hover { background: var(--color-accent-hover); border-color: var(--color-accent-hover); }
+.modal-footer button.primary:active { background: var(--color-accent-emphasis); }
+.modal-footer button:disabled { color: var(--color-text-disabled); background: var(--color-control-disabled); border-color: var(--color-border-subtle); }
+.c-modal--narrow { width: 384px; max-width: min(384px, calc(100vw - 32px)); }
+.c-modal--medium { width: 400px; max-width: min(400px, calc(100vw - 32px)); }
+.c-modal--wide { width: 440px; max-width: min(440px, calc(100vw - 32px)); }
+.c-modal--preview { width: 480px; max-width: min(480px, calc(100vw - 32px)); }
+.c-popover { position: fixed; z-index: var(--layer-popover); padding: 12px; max-width: calc(100vw - 16px); border: 0; outline: 1px solid var(--color-border-subtle); outline-offset: -1px; border-radius: 12px; background: var(--color-surface-raised); color: var(--color-text-primary); box-shadow: var(--shadow-popover); }
+.c-popover button:hover, .format-group button:hover { background: var(--color-surface-hover); }
+.c-panel-header { display: flex; align-items: center; justify-content: space-between; height: 32px; gap: 12px; }
+.c-panel-header h3 { margin: 0; font-size: 16px; line-height: 24px; font-weight: 500; }
+.c-panel-header button { width: 28px; height: 28px; border: 0; border-radius: 8px; background: transparent; color: var(--color-text-secondary); }

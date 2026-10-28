@@ -7,7 +7,7 @@ export function createImportContentView(slots) {
       ["div",{"class":"drop-overlay","id":"drop-overlay"},[
         "\n      ",
         ["div",{"class":"drop-message"},[
-          ["svg",{"class":"icon icon-lg"},[["use",{"href":"/assets/icons.svg#icon-upload-cloud"},[]]]],
+          ["svg",{"class":"icon icon-lg"},[["use",{"href":"/assets/icons.svg#icon-menu-file"},[]]]],
           " ",
           ["span",{"data-i18n":"dropMessage"},["释放以打开文件或插入图片"]]
         ]],

@@ -186,3 +186,24 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Figma sidebar composition: 24px between header/content,12px within content. */
+.sidebar-content { display:flex;flex:1;flex-direction:column;gap:12px;min-height:0; }
+.sidebar-header { height:28px;min-height:28px;padding:0;border:0;background:transparent; }
+.sidebar-heading strong { font-size:14px;font-weight:500;letter-spacing:0; }
+.sidebar-kicker { display:none; }
+.sidebar-header button { width:28px;height:28px;padding:6px;border:0;background:transparent;color:var(--color-text-secondary); }
+.sidebar-tabs { display:flex;flex:0 0 36px;height:36px;margin:0;padding:4px;gap:4px;border:0;border-radius:8px;background:var(--color-canvas); }
+.sidebar-tabs button { flex:1;min-width:0;height:28px;min-height:28px;padding:0;border:1px solid transparent;border-radius:8px;color:var(--color-accent);font-size:14px;font-weight:500;box-shadow:none; }
+.sidebar-tabs button .icon { display:none; }
+.sidebar-tabs button.active { border-color:var(--color-border-subtle);background:var(--color-surface-raised);color:var(--color-accent);box-shadow:none; }
+.sidebar-new-document { flex:0 0 36px;width:100%;height:36px;border:1px solid var(--color-border-subtle);border-radius:8px;background:var(--color-surface-raised);color:var(--color-accent);font-size:14px;font-weight:500;box-shadow:none; }
+.sidebar-session-label,.sidebar-session-count { margin:0;color:var(--color-text-secondary);font-size:12px;line-height:20px; }
+.sidebar-content>.sidebar-panel { flex:0 1 auto;min-height:0;margin:0;padding:0;overflow-y:auto; }
+.sidebar-footer { flex:0 0 auto;margin-top:auto;padding-top:24px;border-top:1px solid var(--color-border-subtle); }
+.sidebar-footer-action { display:flex;align-items:center;justify-content:space-between;gap:8px;flex:0 0 40px;height:40px;width:100%;padding:0 8px;border:0;border-radius:8px;background:transparent;color:var(--color-text-primary);font-size:14px;line-height:22px;font-weight:400;text-align:left; }
+.sidebar-footer-action .icon { width:16px;height:16px; }
+.sidebar-footer-action:hover { background:var(--color-surface-hover); }
+.sidebar-session-count { margin-top:12px;padding-top:12px;border-top:1px solid var(--color-border-subtle); }
+.writing-recent-panel { width:248px;padding:6px;max-height:min(480px,calc(100vh - 16px));overflow-y:auto; }
+.writing-recent-list .menu-item { height:32px;padding:0 10px;font-size:14px;line-height:22px;border-radius:6px; }

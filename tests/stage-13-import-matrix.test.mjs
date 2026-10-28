@@ -155,6 +155,11 @@ test('picker cancellation is inert; browser picker resets for selecting the same
 function imageHost(confirmLargeFile = () => true) {
   const nodes = new Map(), reads = [], inserted = [], messages = [];
   class Element extends EventTarget {
+    textContent = ""; attributes = new Map();
+    setAttribute(name,value) { this.attributes.set(name,String(value)); }
+    append(...children) { this.children ??= []; this.children.push(...children); }
+    checkValidity() { try { return ["http:","https:","data:"].includes(new URL(this.value).protocol); } catch { return false; } }
+    click() { this.dispatchEvent(new Event("click")); }
     value = ''; files = []; classList = { toggle() {} }; dataset = {};
     replaceChildren() {} querySelector(selector) { if (!nodes.has(selector)) nodes.set(selector, new Element()); return nodes.get(selector); }
     querySelectorAll() { return []; }

@@ -4,7 +4,7 @@ import { access, mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { build, createServer } from 'vite';
-import { launchChromium } from './lib/cdp-browser.mjs';
+import { getFreePort, launchChromium } from './lib/cdp-browser.mjs';
 import { createApplicationInspector } from './lib/application-inspector.mjs';
 import { verifyBuiltApplication } from './lib/built-application-check.mjs';
 import { startBuiltApplicationHost } from './lib/built-application-host.mjs';
@@ -32,7 +32,7 @@ test('R16-09 fresh Vite cache and clean production output both load real documen
   }
   const temporary = await mkdtemp(join(tmpdir(), 'mdr-r1609-clean-'));
   const cacheDir = join(temporary, 'vite-cache');
-  const server = await createServer({ cacheDir, server: { host: '127.0.0.1', port: 0, open: false, hmr: false }, logLevel: 'error' });
+  const server = await createServer({ configLoader: 'native', cacheDir, server: { host: '127.0.0.1', port: await getFreePort(), strictPort: true, open: false, hmr: false }, logLevel: 'error' });
   let browser;
   try {
     await server.listen(); browser = await launchChromium();
@@ -46,7 +46,7 @@ test('R16-09 fresh Vite cache and clean production output both load real documen
   const previousEnvironment = process.env.NODE_ENV;
   try {
     process.env.NODE_ENV = 'production';
-    await build({ cacheDir, mode: 'production', build: { outDir: distRoot, emptyOutDir: false }, logLevel: 'error',
+    await build({ configLoader: 'native', cacheDir, mode: 'production', build: { outDir: distRoot, emptyOutDir: false }, logLevel: 'error',
       plugins: [{ name: 'verify-production-clean-build', configResolved(config) {
         assert.equal(config.isProduction, true); assert.equal(config.mode, 'production');
       } }] });

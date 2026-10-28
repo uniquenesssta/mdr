@@ -56,6 +56,10 @@ function createSearchAdapter(initialText = '', initialSelection = { start: 0, en
       const count = Math.max(0, parts.length - 1);
       if (count) text = parts.join(insert);
       return count;
+    },
+    applyTransaction({ changes }) {
+      for (const change of [...changes].reverse()) text = text.slice(0, change.from) + change.insert + text.slice(change.to);
+      return true;
     }
   };
 
@@ -69,6 +73,19 @@ function createSearchAdapter(initialText = '', initialSelection = { start: 0, en
     get text() { return text; }
   };
 }
+
+test('Figma search filters support case, whole words, backwards wrap, regex groups and one bulk replacement', async () => {
+  const editor = createSearchAdapter('Cat scatter cat CAt');
+  const command = createFindReplaceCommand(editor.adapter);
+  assert.deepEqual(await command.findNext('cat', { caseSensitive: false, wholeWord: true }), { from: 0, to: 3, index: 1, total: 3 });
+  assert.deepEqual(await command.findNext('cat', { caseSensitive: false, wholeWord: true }), { from: 12, to: 15, index: 2, total: 3 });
+  editor.setSelection(12, 15);
+  assert.deepEqual(await command.findNext('cat', { caseSensitive: false, wholeWord: true, direction: 'backward' }), { from: 0, to: 3, index: 1, total: 3 });
+  assert.equal(command.replaceAll('(c)(at)', '$2-$1', { caseSensitive: false, regularExpression: true, wholeWord: true }), 3);
+  assert.equal(editor.text, 'at-C scatter at-c At-C');
+  await assert.rejects(command.findNext('[', { regularExpression: true }), SyntaxError);
+  assert.equal(command.replaceAll('(?=a)', 'x', { regularExpression: true }), 0, 'zero-length matches must not loop or change text');
+});
 
 test('find next advances and wraps through the adapter search boundary without copying the document', async () => {
   const editor = createSearchAdapter('alpha beta alpha');

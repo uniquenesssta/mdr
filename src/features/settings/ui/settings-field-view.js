@@ -11,30 +11,33 @@ import { createColorFieldView } from './color-field-view.js';
 import { createDirectoryFieldView } from './directory-field-view.js';
 
 const FIELD_COPY = Object.freeze({
-  theme: Object.freeze({ id: 'setting-theme', label: '主题', layoutGroup: 'general-grid' }),
-  language: Object.freeze({ id: 'setting-language', label: '语言', layoutGroup: 'general-grid' }),
-  layoutMode: Object.freeze({ id: 'setting-layout', label: '默认布局', hint: '单视图模式在同一编辑器内呈现排版效果；光标所在块与选区会显示原始 Markdown。' }),
-  sidebarVisible: Object.freeze({ id: 'setting-sidebar-visible', label: '启动时显示左侧栏', summary: '左侧栏包含当前会话文档、同目录文件树和标题大纲。' }),
+  theme: Object.freeze({ id: 'setting-theme', label: '外观', hint: '浅色或深色，适合不同光线。', layoutGroup: 'general-grid' }),
+  language: Object.freeze({ id: 'setting-language', label: '语言', hint: '选择界面显示语言。', layoutGroup: 'general-grid' }),
+  layoutMode: Object.freeze({ id: 'setting-layout', label: '编辑视图', hint: '打开文档后默认使用的视图。' }),
+  sidebarVisible: Object.freeze({ id: 'setting-sidebar-visible', label: '显示侧栏', summary: '显示文档、文件与大纲导航。' }),
   editorFontSize: Object.freeze({ id: 'setting-editor-font-size', label: '编辑器字号' }),
   editorTextColor: Object.freeze({ id: 'setting-editor-text-color', label: '源码编辑文字色', colorKind: 'text', layoutGroup: 'editor-colors' }),
   activeLineColor: Object.freeze({ id: 'setting-active-line-color', label: '光标所在行底色', colorKind: 'line', layoutGroup: 'editor-colors' }),
   autoSaveEnabled: Object.freeze({ id: 'setting-autosave-enabled', label: '启用自动保存', summary: '关闭后仅在手动保存、切换文档或导出时写入当前内容。' }),
   autoSaveDelay: Object.freeze({ id: 'setting-autosave-delay', label: '自动保存间隔' }),
   exportDirectory: Object.freeze({ id: 'setting-export-directory', label: '默认导出路径' }),
-  toolbarVisible: Object.freeze({ id: 'setting-toolbar-visible', label: '显示格式工具栏', summary: '撤销、重做、视图和主题按钮始终保留。' }),
-  toolbarHiddenItems: Object.freeze({ id: 'setting-toolbar-items', label: '工具栏项目' }),
+  toolbarVisible: Object.freeze({ id: 'setting-toolbar-visible', label: '显示选区格式工具条', summary: '选中文字后显示；其他操作可从应用菜单使用。' }),
+  toolbarDensity: Object.freeze({ id: 'setting-toolbar-density', label: '工具条尺寸', hint: '紧凑适合小窗口；标准提供更大的点击区域。' }),
+  toolbarPrimaryItems: Object.freeze({ id: 'setting-toolbar-primary-items', label: '常驻项目', hint: '在此勾选常驻项目；其余命令可从菜单栏使用。' }),
+  toolbarHiddenItems: Object.freeze({ id: 'setting-toolbar-items', label: '隐藏项目', hint: '勾选后，不在选词工具条显示；菜单栏仍可使用。' }),
   previewPerformanceMode: Object.freeze({ id: 'setting-preview-performance-mode', label: '超大文档预览策略' })
 });
 
 const OPTION_LABELS = Object.freeze({
   theme: Object.freeze({ light: '浅色', dark: '深色' }),
   language: Object.freeze({ 'zh-CN': '简体中文', 'zh-TW': '繁體中文', en: 'English', ja: '日本語', ko: '한국어', es: 'Español', fr: 'Français', de: 'Deutsch', ru: 'Русский', pt: 'Português' }),
-  layoutMode: Object.freeze({ both: '编辑 + 预览', hybrid: '单视图混合编辑', edit: '仅编辑', preview: '仅预览' }),
+  layoutMode: Object.freeze({ both: '分栏', hybrid: '写作', edit: '源码', preview: '纯阅读' }),
+  toolbarDensity: Object.freeze({ compact: '紧凑', standard: '标准' }),
   editorFontSize: Object.freeze({ 14: '14 px', 15: '15 px', 16: '16 px', 18: '18 px', 20: '20 px' }),
   previewPerformanceMode: Object.freeze({ auto: '自动（推荐）', virtual: '全文虚拟预览', chapter: '仅当前章节', full: '完整预览（高负载）' })
 });
 
-const TOOLBAR_LABELS = Object.freeze({
+export const TOOLBAR_LABELS = Object.freeze({
   bold: '加粗', italic: '斜体', underline: '下划线', strikethrough: '删除线', script: '上下标', textColor: '文字颜色', highlight: '文字高亮', heading: '标题', quote: '引用', lists: '列表与任务', code: '代码', link: '链接', image: '图片', table: '表格', find: '查找', mermaid: 'Mermaid'
 });
 
@@ -120,6 +123,7 @@ function createChecklistField(root, descriptor, copy, onDraftChange) {
   const events = createEventScope();
   const definition = getSettingDefinition(descriptor.settingId);
   const ids = definition.validation.values || [];
+  const advanced = descriptor.settingId === 'toolbarHiddenItems';
   const field = createSafeElement(documentRef, 'div', { className: 'settings-field' });
   field.append(createSafeElement(documentRef, 'label', { text: copy.label }));
   const grid = createSafeElement(documentRef, 'div', { id: copy.id, className: 'toolbar-settings-grid' });
@@ -132,11 +136,12 @@ function createChecklistField(root, descriptor, copy, onDraftChange) {
     grid.append(label);
   }
   field.append(grid);
+  if (copy.hint) field.append(createSafeElement(documentRef, 'p', { className: 'hint', text: copy.hint }));
   root.append(field);
   try {
     events.listen(grid, 'change', event => {
       if (!event?.target?.dataset?.toolbarSetting) return;
-      onDraftChange(descriptor.settingId, ids.filter(id => !inputs.get(id).checked));
+      onDraftChange(descriptor.settingId, ids.filter(id => inputs.get(id).checked));
     });
   } catch (error) {
     try { events.destroy(); } catch {}
@@ -146,7 +151,7 @@ function createChecklistField(root, descriptor, copy, onDraftChange) {
   return createBaseAdapter(descriptor.settingId, descriptor.control, field, {
     render: draft => {
       const hidden = draft[descriptor.settingId] || [];
-      for (const id of ids) inputs.get(id).checked = !hidden.includes(id);
+      for (const id of ids) inputs.get(id).checked = hidden.includes(id);
     },
     destroy: () => { events.destroy(); field.remove(); }
   });

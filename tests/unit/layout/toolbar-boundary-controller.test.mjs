@@ -20,7 +20,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
-function createHarness({ width = 430, formatWidth = 300, actionsWidth = 80, narrow = false, observer = true, fontsReady = null } = {}) {
+function createHarness({ width = 430, formatWidth = 300, actionsWidth = 80, narrow = false, observer = true, fontsReady = null, singleGroup = false } = {}) {
   const classList = createClassList();
   let offsetReads = 0;
   const toolbar = {
@@ -45,7 +45,8 @@ function createHarness({ width = 430, formatWidth = 300, actionsWidth = 80, narr
   const controller = createToolbarBoundaryController({
     toolbar,
     formatGroup,
-    actions,
+    actions: singleGroup ? undefined : actions,
+    singleGroup,
     matchMedia: () => ({ matches: narrow }),
     getStyle: () => ({ paddingLeft: '10px', paddingRight: '10px', columnGap: '10px', gap: '10px' }),
     createResizeObserver: observer ? callback => {
@@ -72,6 +73,15 @@ function createHarness({ width = 430, formatWidth = 300, actionsWidth = 80, narr
     get offsetReads() { return offsetReads; }
   };
 }
+
+test('the minimal header measures its sole mode group without requiring an action row or a narrow two-row layout', () => {
+  const h = createHarness({ width: 600, formatWidth: 208, actionsWidth: 999, narrow: true, singleGroup: true });
+  h.controller.start(); h.flushFrame();
+  assert.equal(h.toolbar.classList.contains('toolbar-boundary-wrap'), false);
+  h.formatGroup.scrollWidth = 700; h.controller.refresh(); h.flushFrame();
+  assert.equal(h.toolbar.classList.contains('toolbar-boundary-wrap'), true, 'real group overflow is still detected');
+  h.controller.destroy();
+});
 
 test('Atomic 6.5 measures real content width and toggles only the double-row boundary class', () => {
   const h = createHarness();

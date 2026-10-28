@@ -1,0 +1,2892 @@
+{
+  "date": "2026-10-26",
+  "scope": "Figma overlay structural redesign; not application implementation",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "familyIds": [
+    "101:8134",
+    "98:6043",
+    "98:5457",
+    "98:4857",
+    "100:7286",
+    "100:7382",
+    "99:6177",
+    "95:2841",
+    "95:3041",
+    "95:2990",
+    "95:2731",
+    "95:2571",
+    "107:8791",
+    "95:2756",
+    "98:5130",
+    "100:7416"
+  ],
+  "boards": [
+    "175:10660",
+    "178:11729",
+    "178:12115",
+    "178:12254"
+  ],
+  "exports": {
+    "mutatedNodeIds": [
+      "175:10660",
+      "175:10663",
+      "175:10665",
+      "175:10735",
+      "175:10773",
+      "175:10664",
+      "175:10805",
+      "175:10839",
+      "175:10861",
+      "I175:10897;174:10444",
+      "I175:10897;174:10446",
+      "I175:10897;174:10448",
+      "I175:10897;174:10450",
+      "178:11729",
+      "178:11731",
+      "178:11732",
+      "178:11823",
+      "178:11873",
+      "178:11919",
+      "178:11920",
+      "178:12030",
+      "178:12058",
+      "178:12115",
+      "178:12117",
+      "178:12118",
+      "178:12141",
+      "178:12168",
+      "178:12191",
+      "178:12192",
+      "178:12228",
+      "178:12241",
+      "178:12254",
+      "178:12256",
+      "178:12257",
+      "178:12327",
+      "178:12365",
+      "178:12397",
+      "178:12398",
+      "178:12433",
+      "178:12455"
+    ],
+    "sets": [
+      {
+        "id": "78:1065",
+        "name": "MDR Blue/Button",
+        "variants": [
+          {
+            "id": "78:1035",
+            "name": "Tone=primary, State=default",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1037",
+            "name": "Tone=primary, State=hover",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1039",
+            "name": "Tone=primary, State=pressed",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1041",
+            "name": "Tone=primary, State=focus",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1043",
+            "name": "Tone=primary, State=disabled",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1045",
+            "name": "Tone=secondary, State=default",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1047",
+            "name": "Tone=secondary, State=hover",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1049",
+            "name": "Tone=secondary, State=pressed",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1051",
+            "name": "Tone=secondary, State=focus",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1053",
+            "name": "Tone=secondary, State=disabled",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1055",
+            "name": "Tone=quiet, State=default",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1057",
+            "name": "Tone=quiet, State=hover",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1059",
+            "name": "Tone=quiet, State=pressed",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1061",
+            "name": "Tone=quiet, State=focus",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "78:1063",
+            "name": "Tone=quiet, State=disabled",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "94:1053",
+            "name": "Tone=primary, State=loading",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "94:1055",
+            "name": "Tone=secondary, State=loading",
+            "width": 104,
+            "height": 36
+          },
+          {
+            "id": "94:1057",
+            "name": "Tone=quiet, State=loading",
+            "width": 104,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "78:1098",
+        "name": "MDR Blue/Navigation",
+        "variants": [
+          {
+            "id": "78:1066",
+            "name": "State=default",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "78:1074",
+            "name": "State=hover",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "78:1082",
+            "name": "State=selected",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "78:1090",
+            "name": "State=focus",
+            "width": 208,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "78:1123",
+        "name": "MDR Blue/Field",
+        "variants": [
+          {
+            "id": "78:1099",
+            "name": "State=default",
+            "width": 224,
+            "height": 36
+          },
+          {
+            "id": "78:1105",
+            "name": "State=focus",
+            "width": 224,
+            "height": 36
+          },
+          {
+            "id": "78:1111",
+            "name": "State=error",
+            "width": 224,
+            "height": 36
+          },
+          {
+            "id": "78:1117",
+            "name": "State=disabled",
+            "width": 224,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "78:1128",
+        "name": "MDR Blue/Toggle",
+        "variants": [
+          {
+            "id": "78:1124",
+            "name": "Checked=false, State=default",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "78:1126",
+            "name": "Checked=true, State=default",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1110",
+            "name": "Checked=false, State=hover",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1112",
+            "name": "Checked=false, State=focus",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1114",
+            "name": "Checked=false, State=disabled",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1116",
+            "name": "Checked=true, State=hover",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1118",
+            "name": "Checked=true, State=focus",
+            "width": 36,
+            "height": 20
+          },
+          {
+            "id": "94:1120",
+            "name": "Checked=true, State=disabled",
+            "width": 36,
+            "height": 20
+          }
+        ]
+      },
+      {
+        "id": "94:1182",
+        "name": "MDR Blue/Icon button",
+        "variants": [
+          {
+            "id": "94:1122",
+            "name": "Size=compact, State=default",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1137",
+            "name": "Size=compact, State=hover",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1142",
+            "name": "Size=compact, State=pressed",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1147",
+            "name": "Size=compact, State=focus",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1152",
+            "name": "Size=compact, State=disabled",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1157",
+            "name": "Size=standard, State=default",
+            "width": 36,
+            "height": 36
+          },
+          {
+            "id": "94:1162",
+            "name": "Size=standard, State=hover",
+            "width": 36,
+            "height": 36
+          },
+          {
+            "id": "94:1167",
+            "name": "Size=standard, State=pressed",
+            "width": 36,
+            "height": 36
+          },
+          {
+            "id": "94:1172",
+            "name": "Size=standard, State=focus",
+            "width": 36,
+            "height": 36
+          },
+          {
+            "id": "94:1177",
+            "name": "Size=standard, State=disabled",
+            "width": 36,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "94:1239",
+        "name": "MDR Blue/Checkbox",
+        "variants": [
+          {
+            "id": "94:1183",
+            "name": "Checked=false, State=default",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1186",
+            "name": "Checked=false, State=hover",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1189",
+            "name": "Checked=false, State=focus",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1192",
+            "name": "Checked=false, State=disabled",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1195",
+            "name": "Checked=true, State=default",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1202",
+            "name": "Checked=true, State=hover",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1209",
+            "name": "Checked=true, State=focus",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1216",
+            "name": "Checked=true, State=disabled",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1223",
+            "name": "Checked=mixed, State=default",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1227",
+            "name": "Checked=mixed, State=hover",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1231",
+            "name": "Checked=mixed, State=focus",
+            "width": 160,
+            "height": 32
+          },
+          {
+            "id": "94:1235",
+            "name": "Checked=mixed, State=disabled",
+            "width": 160,
+            "height": 32
+          }
+        ]
+      },
+      {
+        "id": "94:1250",
+        "name": "MDR Blue/Mode item",
+        "variants": [
+          {
+            "id": "94:1240",
+            "name": "State=default",
+            "width": 64,
+            "height": 32
+          },
+          {
+            "id": "94:1242",
+            "name": "State=hover",
+            "width": 64,
+            "height": 32
+          },
+          {
+            "id": "94:1244",
+            "name": "State=selected",
+            "width": 64,
+            "height": 32
+          },
+          {
+            "id": "94:1246",
+            "name": "State=focus",
+            "width": 64,
+            "height": 32
+          },
+          {
+            "id": "94:1248",
+            "name": "State=disabled",
+            "width": 64,
+            "height": 32
+          }
+        ]
+      },
+      {
+        "id": "94:1287",
+        "name": "MDR Blue/Sidebar action",
+        "variants": [
+          {
+            "id": "94:1251",
+            "name": "Kind=recent, State=default",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "94:1257",
+            "name": "Kind=recent, State=hover",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "94:1263",
+            "name": "Kind=recent, State=focus",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "94:1269",
+            "name": "Kind=back, State=default",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "94:1275",
+            "name": "Kind=back, State=hover",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "94:1281",
+            "name": "Kind=back, State=focus",
+            "width": 208,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "94:1296",
+        "name": "MDR Blue/Text input",
+        "variants": [
+          {
+            "id": "94:1288",
+            "name": "State=default",
+            "width": 240,
+            "height": 36
+          },
+          {
+            "id": "94:1290",
+            "name": "State=focus",
+            "width": 240,
+            "height": 36
+          },
+          {
+            "id": "94:1292",
+            "name": "State=error",
+            "width": 240,
+            "height": 36
+          },
+          {
+            "id": "94:1294",
+            "name": "State=disabled",
+            "width": 240,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "94:1357",
+        "name": "MDR Blue/Menu item",
+        "variants": [
+          {
+            "id": "94:1297",
+            "name": "State=default",
+            "width": 248,
+            "height": 32
+          },
+          {
+            "id": "94:1307",
+            "name": "State=hover",
+            "width": 248,
+            "height": 32
+          },
+          {
+            "id": "94:1317",
+            "name": "State=focus",
+            "width": 248,
+            "height": 32
+          },
+          {
+            "id": "94:1327",
+            "name": "State=selected",
+            "width": 248,
+            "height": 32
+          },
+          {
+            "id": "94:1337",
+            "name": "State=disabled",
+            "width": 248,
+            "height": 32
+          },
+          {
+            "id": "94:1347",
+            "name": "State=danger",
+            "width": 248,
+            "height": 32
+          }
+        ]
+      },
+      {
+        "id": "94:1374",
+        "name": "MDR Blue/Format item",
+        "variants": [
+          {
+            "id": "94:1358",
+            "name": "Size=compact, State=default",
+            "width": 36,
+            "height": 28
+          },
+          {
+            "id": "94:1360",
+            "name": "Size=compact, State=selected",
+            "width": 36,
+            "height": 28
+          },
+          {
+            "id": "94:1362",
+            "name": "Size=compact, State=focus",
+            "width": 36,
+            "height": 28
+          },
+          {
+            "id": "94:1364",
+            "name": "Size=compact, State=disabled",
+            "width": 36,
+            "height": 28
+          },
+          {
+            "id": "94:1366",
+            "name": "Size=standard, State=default",
+            "width": 36,
+            "height": 32
+          },
+          {
+            "id": "94:1368",
+            "name": "Size=standard, State=selected",
+            "width": 36,
+            "height": 32
+          },
+          {
+            "id": "94:1370",
+            "name": "Size=standard, State=focus",
+            "width": 36,
+            "height": 32
+          },
+          {
+            "id": "94:1372",
+            "name": "Size=standard, State=disabled",
+            "width": 36,
+            "height": 32
+          }
+        ]
+      },
+      {
+        "id": "94:1387",
+        "name": "MDR Blue/Search option",
+        "variants": [
+          {
+            "id": "94:1375",
+            "name": "Selected=false, State=default",
+            "width": 88,
+            "height": 28
+          },
+          {
+            "id": "94:1377",
+            "name": "Selected=false, State=focus",
+            "width": 88,
+            "height": 28
+          },
+          {
+            "id": "94:1379",
+            "name": "Selected=false, State=disabled",
+            "width": 88,
+            "height": 28
+          },
+          {
+            "id": "94:1381",
+            "name": "Selected=true, State=default",
+            "width": 88,
+            "height": 28
+          },
+          {
+            "id": "94:1383",
+            "name": "Selected=true, State=focus",
+            "width": 88,
+            "height": 28
+          },
+          {
+            "id": "94:1385",
+            "name": "Selected=true, State=disabled",
+            "width": 88,
+            "height": 28
+          }
+        ]
+      },
+      {
+        "id": "94:1400",
+        "name": "MDR Blue/Swatch",
+        "variants": [
+          {
+            "id": "94:1388",
+            "name": "Selected=false, State=default",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1390",
+            "name": "Selected=false, State=focus",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1392",
+            "name": "Selected=false, State=disabled",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1394",
+            "name": "Selected=true, State=default",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1396",
+            "name": "Selected=true, State=focus",
+            "width": 28,
+            "height": 28
+          },
+          {
+            "id": "94:1398",
+            "name": "Selected=true, State=disabled",
+            "width": 28,
+            "height": 28
+          }
+        ]
+      },
+      {
+        "id": "94:1403",
+        "name": "MDR Blue/Divider",
+        "variants": [
+          {
+            "id": "94:1401",
+            "name": "Orientation=horizontal",
+            "width": 160,
+            "height": 1
+          },
+          {
+            "id": "94:1402",
+            "name": "Orientation=vertical",
+            "width": 1,
+            "height": 20
+          }
+        ]
+      },
+      {
+        "id": "94:1406",
+        "name": "MDR Blue/Tooltip",
+        "variants": [
+          {
+            "id": "94:1404",
+            "name": "State=visible",
+            "width": 80,
+            "height": 28
+          }
+        ]
+      },
+      {
+        "id": "95:1963",
+        "name": "MDR Blue/Mode switch",
+        "variants": [
+          {
+            "id": "95:1927",
+            "name": "Selected=hybrid",
+            "width": 272,
+            "height": 40
+          },
+          {
+            "id": "95:1936",
+            "name": "Selected=both",
+            "width": 272,
+            "height": 40
+          },
+          {
+            "id": "95:1945",
+            "name": "Selected=edit",
+            "width": 272,
+            "height": 40
+          },
+          {
+            "id": "95:1954",
+            "name": "Selected=preview",
+            "width": 272,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "95:2036",
+        "name": "MDR Blue/Titlebar",
+        "variants": [
+          {
+            "id": "95:1964",
+            "name": "Width=desktop",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2000",
+            "name": "Width=narrow",
+            "width": 600,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "95:2102",
+        "name": "MDR Blue/Statusbar",
+        "variants": [
+          {
+            "id": "95:2037",
+            "name": "Status=saved",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2048",
+            "name": "Status=modified",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2059",
+            "name": "Status=saving",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2070",
+            "name": "Status=failed",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2081",
+            "name": "Status=loading",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "95:2092",
+            "name": "Status=reading",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "144:9108",
+            "name": "Status=previewRecovering",
+            "width": 1280,
+            "height": 40
+          },
+          {
+            "id": "144:9127",
+            "name": "Status=previewFailed",
+            "width": 1280,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "95:2124",
+        "name": "MDR Blue/Sidebar tabs",
+        "variants": [
+          {
+            "id": "95:2103",
+            "name": "Selected=documents",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "95:2110",
+            "name": "Selected=files",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "95:2117",
+            "name": "Selected=outline",
+            "width": 208,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "95:2249",
+        "name": "MDR Blue/Sidebar content",
+        "variants": [
+          {
+            "id": "95:2125",
+            "name": "View=documents",
+            "width": 208,
+            "height": 317
+          },
+          {
+            "id": "95:2162",
+            "name": "View=files",
+            "width": 208,
+            "height": 257
+          },
+          {
+            "id": "95:2199",
+            "name": "View=outline",
+            "width": 208,
+            "height": 257
+          },
+          {
+            "id": "95:2234",
+            "name": "View=empty",
+            "width": 208,
+            "height": 296
+          }
+        ]
+      },
+      {
+        "id": "95:2460",
+        "name": "MDR Blue/Settings navigation",
+        "variants": [
+          {
+            "id": "95:2250",
+            "name": "Selected=general",
+            "width": 208,
+            "height": 264
+          },
+          {
+            "id": "95:2292",
+            "name": "Selected=editor",
+            "width": 208,
+            "height": 264
+          },
+          {
+            "id": "95:2334",
+            "name": "Selected=save",
+            "width": 208,
+            "height": 264
+          },
+          {
+            "id": "95:2376",
+            "name": "Selected=toolbar",
+            "width": 208,
+            "height": 264
+          },
+          {
+            "id": "95:2418",
+            "name": "Selected=performance",
+            "width": 208,
+            "height": 264
+          }
+        ]
+      },
+      {
+        "id": "95:2500",
+        "name": "MDR Blue/Settings row",
+        "variants": [
+          {
+            "id": "95:2461",
+            "name": "Control=select, Width=desktop",
+            "width": 712,
+            "height": 72
+          },
+          {
+            "id": "95:2471",
+            "name": "Control=toggle, Width=desktop",
+            "width": 712,
+            "height": 72
+          },
+          {
+            "id": "95:2478",
+            "name": "Control=text, Width=desktop",
+            "width": 712,
+            "height": 72
+          },
+          {
+            "id": "95:2484",
+            "name": "Control=color, Width=desktop",
+            "width": 712,
+            "height": 72
+          },
+          {
+            "id": "95:2492",
+            "name": "Control=directory, Width=desktop",
+            "width": 712,
+            "height": 72
+          },
+          {
+            "id": "101:7438",
+            "name": "Control=select, Width=narrow",
+            "width": 376,
+            "height": 116
+          },
+          {
+            "id": "101:7449",
+            "name": "Control=toggle, Width=narrow",
+            "width": 376,
+            "height": 116
+          },
+          {
+            "id": "101:7457",
+            "name": "Control=text, Width=narrow",
+            "width": 376,
+            "height": 116
+          },
+          {
+            "id": "101:7464",
+            "name": "Control=color, Width=narrow",
+            "width": 376,
+            "height": 116
+          },
+          {
+            "id": "101:7473",
+            "name": "Control=directory, Width=narrow",
+            "width": 376,
+            "height": 116
+          }
+        ]
+      },
+      {
+        "id": "95:2571",
+        "name": "MDR Blue/Selection toolbar",
+        "variants": [
+          {
+            "id": "95:2501",
+            "name": "Density=compact, Pinned=false",
+            "width": 362,
+            "height": 36
+          },
+          {
+            "id": "95:2516",
+            "name": "Density=compact, Pinned=true",
+            "width": 392,
+            "height": 36
+          },
+          {
+            "id": "95:2536",
+            "name": "Density=standard, Pinned=false",
+            "width": 362,
+            "height": 40
+          },
+          {
+            "id": "95:2551",
+            "name": "Density=standard, Pinned=true",
+            "width": 392,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "95:2731",
+        "name": "MDR Blue/Find panel",
+        "variants": [
+          {
+            "id": "95:2572",
+            "name": "State=results",
+            "width": 456,
+            "height": 140
+          },
+          {
+            "id": "95:2613",
+            "name": "State=empty",
+            "width": 456,
+            "height": 140
+          },
+          {
+            "id": "95:2654",
+            "name": "State=invalid",
+            "width": 456,
+            "height": 140
+          },
+          {
+            "id": "95:2696",
+            "name": "State=reading",
+            "width": 456,
+            "height": 100
+          }
+        ]
+      },
+      {
+        "id": "95:2756",
+        "name": "MDR Blue/Notice",
+        "variants": [
+          {
+            "id": "95:2732",
+            "name": "Tone=info",
+            "width": 384,
+            "height": 70
+          },
+          {
+            "id": "95:2738",
+            "name": "Tone=success",
+            "width": 384,
+            "height": 70
+          },
+          {
+            "id": "95:2744",
+            "name": "Tone=warning",
+            "width": 384,
+            "height": 70
+          },
+          {
+            "id": "95:2750",
+            "name": "Tone=error",
+            "width": 384,
+            "height": 70
+          }
+        ]
+      },
+      {
+        "id": "95:2798",
+        "name": "MDR Blue/Empty state",
+        "variants": [
+          {
+            "id": "95:2757",
+            "name": "Kind=document",
+            "width": 440,
+            "height": 192
+          },
+          {
+            "id": "95:2768",
+            "name": "Kind=files",
+            "width": 440,
+            "height": 192
+          },
+          {
+            "id": "95:2776",
+            "name": "Kind=outline",
+            "width": 440,
+            "height": 192
+          },
+          {
+            "id": "95:2787",
+            "name": "Kind=failed",
+            "width": 440,
+            "height": 192
+          }
+        ]
+      },
+      {
+        "id": "95:2841",
+        "name": "MDR Blue/Progress",
+        "variants": [
+          {
+            "id": "95:2799",
+            "name": "Stage=preparing",
+            "width": 384,
+            "height": 160
+          },
+          {
+            "id": "95:2806",
+            "name": "Stage=rendering",
+            "width": 384,
+            "height": 160
+          },
+          {
+            "id": "95:2813",
+            "name": "Stage=writing",
+            "width": 384,
+            "height": 160
+          },
+          {
+            "id": "95:2820",
+            "name": "Stage=complete",
+            "width": 384,
+            "height": 160
+          },
+          {
+            "id": "95:2827",
+            "name": "Stage=failed",
+            "width": 384,
+            "height": 160
+          },
+          {
+            "id": "95:2834",
+            "name": "Stage=cancelled",
+            "width": 384,
+            "height": 160
+          }
+        ]
+      },
+      {
+        "id": "95:2990",
+        "name": "MDR Blue/Table picker",
+        "variants": [
+          {
+            "id": "95:2842",
+            "name": "State=default",
+            "width": 212,
+            "height": 244
+          },
+          {
+            "id": "95:2916",
+            "name": "State=selected",
+            "width": 212,
+            "height": 244
+          }
+        ]
+      },
+      {
+        "id": "95:3041",
+        "name": "MDR Blue/Color palette",
+        "variants": [
+          {
+            "id": "95:2991",
+            "name": "Kind=text",
+            "width": 232,
+            "height": 218
+          },
+          {
+            "id": "95:3016",
+            "name": "Kind=highlight",
+            "width": 232,
+            "height": 218
+          }
+        ]
+      },
+      {
+        "id": "95:3046",
+        "name": "MDR Blue/Scrollbar",
+        "variants": [
+          {
+            "id": "95:3042",
+            "name": "Orientation=vertical",
+            "width": 8,
+            "height": 120
+          },
+          {
+            "id": "95:3044",
+            "name": "Orientation=horizontal",
+            "width": 120,
+            "height": 8
+          }
+        ]
+      },
+      {
+        "id": "95:3053",
+        "name": "MDR Blue/Resize handle",
+        "variants": [
+          {
+            "id": "95:3047",
+            "name": "State=default",
+            "width": 9,
+            "height": 128
+          },
+          {
+            "id": "95:3049",
+            "name": "State=hover",
+            "width": 9,
+            "height": 128
+          },
+          {
+            "id": "95:3051",
+            "name": "State=focus",
+            "width": 9,
+            "height": 128
+          }
+        ]
+      },
+      {
+        "id": "98:4857",
+        "name": "MDR Blue/Export dialog",
+        "variants": [
+          {
+            "id": "98:4508",
+            "name": "Format=markdown, State=default",
+            "width": 420,
+            "height": 234
+          },
+          {
+            "id": "98:4539",
+            "name": "Format=markdown, State=error",
+            "width": 420,
+            "height": 264
+          },
+          {
+            "id": "98:4571",
+            "name": "Format=html, State=default",
+            "width": 420,
+            "height": 234
+          },
+          {
+            "id": "98:4602",
+            "name": "Format=html, State=error",
+            "width": 420,
+            "height": 264
+          },
+          {
+            "id": "98:4634",
+            "name": "Format=word, State=default",
+            "width": 420,
+            "height": 234
+          },
+          {
+            "id": "98:4665",
+            "name": "Format=word, State=error",
+            "width": 420,
+            "height": 264
+          },
+          {
+            "id": "98:4697",
+            "name": "Format=image, State=default",
+            "width": 420,
+            "height": 286
+          },
+          {
+            "id": "98:4745",
+            "name": "Format=image, State=error",
+            "width": 420,
+            "height": 316
+          },
+          {
+            "id": "98:4794",
+            "name": "Format=pdf, State=default",
+            "width": 420,
+            "height": 234
+          },
+          {
+            "id": "98:4825",
+            "name": "Format=pdf, State=error",
+            "width": 420,
+            "height": 264
+          }
+        ]
+      },
+      {
+        "id": "98:5130",
+        "name": "MDR Blue/Help panel",
+        "variants": [
+          {
+            "id": "98:4858",
+            "name": "Page=start, Width=desktop",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "98:4930",
+            "name": "Page=markdown, Width=desktop",
+            "width": 520,
+            "height": 292
+          },
+          {
+            "id": "98:4998",
+            "name": "Page=shortcuts, Width=desktop",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "98:5070",
+            "name": "Page=about, Width=desktop",
+            "width": 520,
+            "height": 236
+          },
+          {
+            "id": "100:6696",
+            "name": "Page=views, Width=desktop",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "100:6765",
+            "name": "Page=files, Width=desktop",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "105:13986",
+            "name": "Page=start, Width=narrow",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "105:14071",
+            "name": "Page=markdown, Width=narrow",
+            "width": 520,
+            "height": 292
+          },
+          {
+            "id": "105:14152",
+            "name": "Page=shortcuts, Width=narrow",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "105:14237",
+            "name": "Page=about, Width=narrow",
+            "width": 520,
+            "height": 236
+          },
+          {
+            "id": "105:14310",
+            "name": "Page=views, Width=narrow",
+            "width": 520,
+            "height": 320
+          },
+          {
+            "id": "105:14395",
+            "name": "Page=files, Width=narrow",
+            "width": 520,
+            "height": 320
+          }
+        ]
+      },
+      {
+        "id": "98:5457",
+        "name": "MDR Blue/Insert form",
+        "variants": [
+          {
+            "id": "98:5131",
+            "name": "Kind=link, State=default",
+            "width": 384,
+            "height": 188
+          },
+          {
+            "id": "98:5153",
+            "name": "Kind=link, State=error",
+            "width": 384,
+            "height": 218
+          },
+          {
+            "id": "98:5176",
+            "name": "Kind=imageUrl, State=default",
+            "width": 400,
+            "height": 340
+          },
+          {
+            "id": "98:5208",
+            "name": "Kind=imageUrl, State=error",
+            "width": 400,
+            "height": 370
+          },
+          {
+            "id": "98:5241",
+            "name": "Kind=imageFile, State=default",
+            "width": 400,
+            "height": 332
+          },
+          {
+            "id": "98:5273",
+            "name": "Kind=imageFile, State=error",
+            "width": 400,
+            "height": 362
+          },
+          {
+            "id": "98:5306",
+            "name": "Kind=mermaid, State=default",
+            "width": 440,
+            "height": 326
+          },
+          {
+            "id": "98:5336",
+            "name": "Kind=mermaid, State=error",
+            "width": 440,
+            "height": 356
+          },
+          {
+            "id": "98:5367",
+            "name": "Kind=import, State=default",
+            "width": 480,
+            "height": 182
+          },
+          {
+            "id": "98:5389",
+            "name": "Kind=import, State=error",
+            "width": 480,
+            "height": 214
+          },
+          {
+            "id": "98:5412",
+            "name": "Kind=rename, State=default",
+            "width": 384,
+            "height": 188
+          },
+          {
+            "id": "98:5434",
+            "name": "Kind=rename, State=error",
+            "width": 384,
+            "height": 218
+          }
+        ]
+      },
+      {
+        "id": "98:6043",
+        "name": "MDR Blue/Menu panel",
+        "variants": [
+          {
+            "id": "98:5458",
+            "name": "Menu=file",
+            "width": 288,
+            "height": 327
+          },
+          {
+            "id": "98:5550",
+            "name": "Menu=edit",
+            "width": 216,
+            "height": 263
+          },
+          {
+            "id": "98:5623",
+            "name": "Menu=view",
+            "width": 272,
+            "height": 254
+          },
+          {
+            "id": "98:5695",
+            "name": "Menu=insert",
+            "width": 264,
+            "height": 391
+          },
+          {
+            "id": "98:5786",
+            "name": "Menu=help",
+            "width": 160,
+            "height": 44
+          },
+          {
+            "id": "98:5797",
+            "name": "Menu=recent",
+            "width": 248,
+            "height": 117
+          },
+          {
+            "id": "98:5829",
+            "name": "Menu=legacyMore",
+            "width": 280,
+            "height": 360
+          },
+          {
+            "id": "98:5921",
+            "name": "Menu=headings",
+            "width": 208,
+            "height": 245
+          },
+          {
+            "id": "98:5992",
+            "name": "Menu=export",
+            "width": 192,
+            "height": 181
+          }
+        ]
+      },
+      {
+        "id": "98:6072",
+        "name": "MDR Blue/Code block",
+        "variants": [
+          {
+            "id": "98:6044",
+            "name": "State=preview",
+            "width": 640,
+            "height": 200
+          },
+          {
+            "id": "98:6053",
+            "name": "State=editing",
+            "width": 640,
+            "height": 200
+          },
+          {
+            "id": "98:6062",
+            "name": "State=error",
+            "width": 640,
+            "height": 200
+          }
+        ]
+      },
+      {
+        "id": "98:6127",
+        "name": "MDR Blue/Document block",
+        "variants": [
+          {
+            "id": "98:6073",
+            "name": "Kind=paragraph",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6075",
+            "name": "Kind=heading",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6078",
+            "name": "Kind=quote",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6080",
+            "name": "Kind=task",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6091",
+            "name": "Kind=list",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6093",
+            "name": "Kind=table",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6106",
+            "name": "Kind=image",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6115",
+            "name": "Kind=math",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6117",
+            "name": "Kind=diagram",
+            "width": 640,
+            "height": 112
+          },
+          {
+            "id": "98:6125",
+            "name": "Kind=divider",
+            "width": 640,
+            "height": 112
+          }
+        ]
+      },
+      {
+        "id": "98:6172",
+        "name": "MDR Blue/Workspace header",
+        "variants": [
+          {
+            "id": "98:6128",
+            "name": "Width=desktop",
+            "width": 1040,
+            "height": 76
+          },
+          {
+            "id": "98:6150",
+            "name": "Width=narrow",
+            "width": 600,
+            "height": 104
+          }
+        ]
+      },
+      {
+        "id": "99:5384",
+        "name": "MDR Blue/Pane header",
+        "variants": [
+          {
+            "id": "99:5364",
+            "name": "Role=editor",
+            "width": 480,
+            "height": 36
+          },
+          {
+            "id": "99:5374",
+            "name": "Role=preview",
+            "width": 480,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "99:5527",
+        "name": "MDR Blue/Toolbar checklist",
+        "variants": [
+          {
+            "id": "99:5385",
+            "name": "Kind=primary",
+            "width": 712,
+            "height": 414
+          },
+          {
+            "id": "99:5468",
+            "name": "Kind=hidden",
+            "width": 712,
+            "height": 414
+          }
+        ]
+      },
+      {
+        "id": "99:5851",
+        "name": "MDR Blue/Settings panel",
+        "variants": [
+          {
+            "id": "99:5528",
+            "name": "Section=general, Width=desktop",
+            "width": 760,
+            "height": 505
+          },
+          {
+            "id": "99:5577",
+            "name": "Section=editor, Width=desktop",
+            "width": 760,
+            "height": 453
+          },
+          {
+            "id": "99:5615",
+            "name": "Section=save, Width=desktop",
+            "width": 760,
+            "height": 417
+          },
+          {
+            "id": "99:5647",
+            "name": "Section=toolbar, Width=desktop",
+            "width": 760,
+            "height": 1241
+          },
+          {
+            "id": "99:5831",
+            "name": "Section=performance, Width=desktop",
+            "width": 760,
+            "height": 279
+          },
+          {
+            "id": "101:7547",
+            "name": "Section=general, Width=narrow",
+            "width": 408,
+            "height": 665
+          },
+          {
+            "id": "101:7633",
+            "name": "Section=editor, Width=narrow",
+            "width": 408,
+            "height": 569
+          },
+          {
+            "id": "101:7697",
+            "name": "Section=save, Width=narrow",
+            "width": 408,
+            "height": 533
+          },
+          {
+            "id": "101:7750",
+            "name": "Section=toolbar, Width=narrow",
+            "width": 408,
+            "height": 1313
+          },
+          {
+            "id": "101:7951",
+            "name": "Section=performance, Width=narrow",
+            "width": 408,
+            "height": 307
+          }
+        ]
+      },
+      {
+        "id": "99:6098",
+        "name": "MDR Blue/Sidebar shell",
+        "variants": [
+          {
+            "id": "99:5852",
+            "name": "View=documents",
+            "width": 240,
+            "height": 780
+          },
+          {
+            "id": "99:5908",
+            "name": "View=files",
+            "width": 240,
+            "height": 780
+          },
+          {
+            "id": "99:5959",
+            "name": "View=outline",
+            "width": 240,
+            "height": 780
+          },
+          {
+            "id": "99:6013",
+            "name": "View=empty",
+            "width": 240,
+            "height": 780
+          },
+          {
+            "id": "99:6047",
+            "name": "View=settings",
+            "width": 240,
+            "height": 780
+          }
+        ]
+      },
+      {
+        "id": "99:6149",
+        "name": "MDR Blue/Document surface",
+        "variants": [
+          {
+            "id": "99:6099",
+            "name": "Mode=rendered",
+            "width": 992,
+            "height": 656
+          },
+          {
+            "id": "99:6122",
+            "name": "Mode=source",
+            "width": 992,
+            "height": 656
+          },
+          {
+            "id": "99:6126",
+            "name": "Mode=reading",
+            "width": 992,
+            "height": 656
+          }
+        ]
+      },
+      {
+        "id": "99:6177",
+        "name": "MDR Blue/Confirmation",
+        "variants": [
+          {
+            "id": "99:6150",
+            "name": "Action=reset",
+            "width": 384,
+            "height": 146
+          },
+          {
+            "id": "99:6159",
+            "name": "Action=clear",
+            "width": 384,
+            "height": 146
+          },
+          {
+            "id": "99:6168",
+            "name": "Action=clearRecent",
+            "width": 384,
+            "height": 146
+          }
+        ]
+      },
+      {
+        "id": "100:7134",
+        "name": "MDR Blue/Document row",
+        "variants": [
+          {
+            "id": "100:6994",
+            "name": "State=default, Dirty=false",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7011",
+            "name": "State=default, Dirty=true",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7029",
+            "name": "State=hover, Dirty=false",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7046",
+            "name": "State=hover, Dirty=true",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7064",
+            "name": "State=selected, Dirty=false",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7081",
+            "name": "State=selected, Dirty=true",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7099",
+            "name": "State=focus, Dirty=false",
+            "width": 208,
+            "height": 40
+          },
+          {
+            "id": "100:7116",
+            "name": "State=focus, Dirty=true",
+            "width": 208,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "100:7155",
+        "name": "MDR Blue/Menu switch",
+        "variants": [
+          {
+            "id": "100:7135",
+            "name": "Checked=false, State=default",
+            "width": 264,
+            "height": 36
+          },
+          {
+            "id": "100:7140",
+            "name": "Checked=false, State=disabled",
+            "width": 264,
+            "height": 36
+          },
+          {
+            "id": "100:7145",
+            "name": "Checked=true, State=default",
+            "width": 264,
+            "height": 36
+          },
+          {
+            "id": "100:7150",
+            "name": "Checked=true, State=disabled",
+            "width": 264,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "100:7286",
+        "name": "MDR Blue/Web clipper",
+        "variants": [
+          {
+            "id": "100:7176",
+            "name": "State=ready",
+            "width": 440,
+            "height": 220
+          },
+          {
+            "id": "100:7203",
+            "name": "State=fetching",
+            "width": 440,
+            "height": 220
+          },
+          {
+            "id": "100:7230",
+            "name": "State=success",
+            "width": 440,
+            "height": 220
+          },
+          {
+            "id": "100:7257",
+            "name": "State=manual",
+            "width": 440,
+            "height": 340
+          },
+          {
+            "id": "107:8973",
+            "name": "State=proxy",
+            "width": 440,
+            "height": 304
+          }
+        ]
+      },
+      {
+        "id": "100:7382",
+        "name": "MDR Blue/Image export advanced",
+        "variants": [
+          {
+            "id": "100:7287",
+            "name": "State=empty",
+            "width": 480,
+            "height": 284
+          },
+          {
+            "id": "100:7318",
+            "name": "State=ready",
+            "width": 480,
+            "height": 406
+          },
+          {
+            "id": "100:7351",
+            "name": "State=failed",
+            "width": 480,
+            "height": 284
+          }
+        ]
+      },
+      {
+        "id": "100:7416",
+        "name": "MDR Blue/Link preview",
+        "variants": [
+          {
+            "id": "100:7383",
+            "name": "State=loading, Width=desktop",
+            "width": 400,
+            "height": 146
+          },
+          {
+            "id": "100:7394",
+            "name": "State=ready, Width=desktop",
+            "width": 720,
+            "height": 468
+          },
+          {
+            "id": "100:7405",
+            "name": "State=blocked, Width=desktop",
+            "width": 400,
+            "height": 146
+          },
+          {
+            "id": "109:11812",
+            "name": "State=loading, Width=narrow",
+            "width": 400,
+            "height": 146
+          },
+          {
+            "id": "109:11823",
+            "name": "State=ready, Width=narrow",
+            "width": 568,
+            "height": 388
+          },
+          {
+            "id": "109:11834",
+            "name": "State=blocked, Width=narrow",
+            "width": 400,
+            "height": 146
+          }
+        ]
+      },
+      {
+        "id": "100:7426",
+        "name": "MDR Blue/Drag overlay",
+        "variants": [
+          {
+            "id": "100:7417",
+            "name": "State=active",
+            "width": 360,
+            "height": 122
+          }
+        ]
+      },
+      {
+        "id": "100:7433",
+        "name": "MDR Blue/Preview recovery",
+        "variants": [
+          {
+            "id": "100:7427",
+            "name": "State=recovering",
+            "width": 96,
+            "height": 24
+          },
+          {
+            "id": "100:7430",
+            "name": "State=failed",
+            "width": 144,
+            "height": 24
+          }
+        ]
+      },
+      {
+        "id": "100:7462",
+        "name": "MDR Blue/Widget toolbar",
+        "variants": [
+          {
+            "id": "100:7434",
+            "name": "Kind=code",
+            "width": 640,
+            "height": 36
+          },
+          {
+            "id": "100:7441",
+            "name": "Kind=html",
+            "width": 640,
+            "height": 36
+          },
+          {
+            "id": "100:7448",
+            "name": "Kind=table",
+            "width": 640,
+            "height": 36
+          },
+          {
+            "id": "100:7455",
+            "name": "Kind=image",
+            "width": 640,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "101:7532",
+        "name": "MDR Blue/Document surface narrow",
+        "variants": [
+          {
+            "id": "101:7482",
+            "name": "Mode=rendered",
+            "width": 568,
+            "height": 644
+          },
+          {
+            "id": "101:7505",
+            "name": "Mode=source",
+            "width": 568,
+            "height": 644
+          },
+          {
+            "id": "101:7509",
+            "name": "Mode=reading",
+            "width": 568,
+            "height": 644
+          }
+        ]
+      },
+      {
+        "id": "101:8134",
+        "name": "MDR Blue/Context menu",
+        "variants": [
+          {
+            "id": "101:7981",
+            "name": "Target=document",
+            "width": 216,
+            "height": 254
+          },
+          {
+            "id": "101:8052",
+            "name": "Target=sidebar",
+            "width": 256,
+            "height": 149
+          },
+          {
+            "id": "101:8093",
+            "name": "Target=outline",
+            "width": 224,
+            "height": 117
+          }
+        ]
+      },
+      {
+        "id": "101:8222",
+        "name": "MDR Blue/Embedded block",
+        "variants": [
+          {
+            "id": "101:8135",
+            "name": "Kind=html, State=rendered",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8144",
+            "name": "Kind=html, State=editing",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8153",
+            "name": "Kind=html, State=error",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8164",
+            "name": "Kind=image, State=rendered",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8173",
+            "name": "Kind=image, State=editing",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8182",
+            "name": "Kind=image, State=error",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8193",
+            "name": "Kind=math, State=rendered",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8202",
+            "name": "Kind=math, State=editing",
+            "width": 640,
+            "height": 176
+          },
+          {
+            "id": "101:8211",
+            "name": "Kind=math, State=error",
+            "width": 640,
+            "height": 176
+          }
+        ]
+      },
+      {
+        "id": "107:8433",
+        "name": "MDR Blue/Duration field",
+        "variants": [
+          {
+            "id": "107:8403",
+            "name": "State=preset",
+            "width": 240,
+            "height": 36
+          },
+          {
+            "id": "107:8410",
+            "name": "State=custom",
+            "width": 240,
+            "height": 80
+          },
+          {
+            "id": "107:8421",
+            "name": "State=error",
+            "width": 240,
+            "height": 108
+          }
+        ]
+      },
+      {
+        "id": "107:8791",
+        "name": "MDR Blue/Select menu",
+        "variants": [
+          {
+            "id": "107:8464",
+            "name": "Options=language",
+            "width": 240,
+            "height": 332
+          },
+          {
+            "id": "107:8565",
+            "name": "Options=theme",
+            "width": 240,
+            "height": 76
+          },
+          {
+            "id": "107:8586",
+            "name": "Options=layout",
+            "width": 240,
+            "height": 140
+          },
+          {
+            "id": "107:8627",
+            "name": "Options=font",
+            "width": 240,
+            "height": 172
+          },
+          {
+            "id": "107:8678",
+            "name": "Options=performance",
+            "width": 240,
+            "height": 140
+          },
+          {
+            "id": "107:8719",
+            "name": "Options=density",
+            "width": 240,
+            "height": 76
+          },
+          {
+            "id": "107:8740",
+            "name": "Options=autosave",
+            "width": 240,
+            "height": 172
+          }
+        ]
+      },
+      {
+        "id": "115:8784",
+        "name": "MDR Blue/Window control",
+        "variants": [
+          {
+            "id": "115:8694",
+            "name": "Action=minimize, State=default",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8698",
+            "name": "Action=minimize, State=hover",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8702",
+            "name": "Action=minimize, State=pressed",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8706",
+            "name": "Action=minimize, State=focus",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8710",
+            "name": "Action=minimize, State=disabled",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8714",
+            "name": "Action=maximize, State=default",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8718",
+            "name": "Action=maximize, State=hover",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8722",
+            "name": "Action=maximize, State=pressed",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8726",
+            "name": "Action=maximize, State=focus",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8730",
+            "name": "Action=maximize, State=disabled",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8734",
+            "name": "Action=restore, State=default",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8739",
+            "name": "Action=restore, State=hover",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8744",
+            "name": "Action=restore, State=pressed",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8749",
+            "name": "Action=restore, State=focus",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8754",
+            "name": "Action=restore, State=disabled",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8759",
+            "name": "Action=close, State=default",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8764",
+            "name": "Action=close, State=hover",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8769",
+            "name": "Action=close, State=pressed",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8774",
+            "name": "Action=close, State=focus",
+            "width": 40,
+            "height": 40
+          },
+          {
+            "id": "115:8779",
+            "name": "Action=close, State=disabled",
+            "width": 40,
+            "height": 40
+          }
+        ]
+      },
+      {
+        "id": "115:10391",
+        "name": "MDR Blue/Tree row",
+        "variants": [
+          {
+            "id": "115:8851",
+            "name": "Type=folder, Depth=0, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:8963",
+            "name": "Type=folder, Depth=0, State=hover",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9101",
+            "name": "Type=folder, Depth=0, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9239",
+            "name": "Type=folder, Depth=0, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9403",
+            "name": "Type=folder, Depth=1, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9567",
+            "name": "Type=folder, Depth=1, State=hover",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9705",
+            "name": "Type=folder, Depth=1, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9843",
+            "name": "Type=folder, Depth=1, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:9955",
+            "name": "Type=file, Depth=0, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10016",
+            "name": "Type=file, Depth=0, State=hover",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10077",
+            "name": "Type=file, Depth=0, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10138",
+            "name": "Type=file, Depth=0, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10199",
+            "name": "Type=file, Depth=1, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10260",
+            "name": "Type=file, Depth=1, State=hover",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10321",
+            "name": "Type=file, Depth=1, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10382",
+            "name": "Type=file, Depth=1, State=focus",
+            "width": 208,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "115:10482",
+        "name": "MDR Blue/Outline row",
+        "variants": [
+          {
+            "id": "115:10392",
+            "name": "Level=1, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10397",
+            "name": "Level=1, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10402",
+            "name": "Level=1, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10407",
+            "name": "Level=2, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10412",
+            "name": "Level=2, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10417",
+            "name": "Level=2, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10422",
+            "name": "Level=3, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10427",
+            "name": "Level=3, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10432",
+            "name": "Level=3, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10437",
+            "name": "Level=4, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10442",
+            "name": "Level=4, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10447",
+            "name": "Level=4, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10452",
+            "name": "Level=5, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10457",
+            "name": "Level=5, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10462",
+            "name": "Level=5, State=focus",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10467",
+            "name": "Level=6, State=default",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10472",
+            "name": "Level=6, State=selected",
+            "width": 208,
+            "height": 36
+          },
+          {
+            "id": "115:10477",
+            "name": "Level=6, State=focus",
+            "width": 208,
+            "height": 36
+          }
+        ]
+      },
+      {
+        "id": "115:10493",
+        "name": "MDR Blue/Collapsed pane",
+        "variants": [
+          {
+            "id": "115:10483",
+            "name": "Side=editor",
+            "width": 44,
+            "height": 656
+          },
+          {
+            "id": "115:10488",
+            "name": "Side=preview",
+            "width": 44,
+            "height": 656
+          }
+        ]
+      }
+    ],
+    "textStyles": [
+      {
+        "id": "S:1e837ddebe03c358d4f869ca64f846a196a898ae,",
+        "name": "MDR Blue/Dialog title",
+        "fontName": {
+          "family": "Noto Sans SC",
+          "style": "Medium",
+          "variationSettings": {
+            "wght": 500
+          }
+        },
+        "fontSize": 16,
+        "lineHeight": {
+          "unit": "PIXELS",
+          "value": 24
+        },
+        "letterSpacing": {
+          "unit": "PERCENT",
+          "value": 0
+        }
+      }
+    ]
+  },
+  "desktop": {
+    "mutatedNodeIds": [
+      "104:3924",
+      "104:4114",
+      "104:4321",
+      "104:4929",
+      "104:5245",
+      "104:5422",
+      "111:6563",
+      "111:6724",
+      "111:7308",
+      "111:7482",
+      "111:7669",
+      "111:7843"
+    ],
+    "changed": [
+      {
+        "id": "104:3924",
+        "screen": "104:3784",
+        "x": 800,
+        "y": 124,
+        "w": 456,
+        "h": 140
+      },
+      {
+        "id": "104:4114",
+        "screen": "104:3973",
+        "x": 430,
+        "y": 287,
+        "w": 420,
+        "h": 286
+      },
+      {
+        "id": "104:4321",
+        "screen": "104:4180",
+        "x": 380,
+        "y": 270,
+        "w": 520,
+        "h": 320
+      },
+      {
+        "id": "104:4929",
+        "screen": "104:4785",
+        "x": 568,
+        "y": 726,
+        "w": 384,
+        "h": 70
+      },
+      {
+        "id": "104:5245",
+        "screen": "104:5104",
+        "x": 420,
+        "y": 260,
+        "w": 440,
+        "h": 340
+      },
+      {
+        "id": "104:5422",
+        "screen": "104:5281",
+        "x": 400,
+        "y": 227,
+        "w": 480,
+        "h": 406
+      },
+      {
+        "id": "111:6563",
+        "screen": "111:6415",
+        "x": 440,
+        "y": 357,
+        "w": 400,
+        "h": 146
+      },
+      {
+        "id": "111:6724",
+        "screen": "111:6576",
+        "x": 448,
+        "y": 350,
+        "w": 384,
+        "h": 160
+      },
+      {
+        "id": "111:7308",
+        "screen": "111:7160",
+        "x": 448,
+        "y": 336,
+        "w": 384,
+        "h": 188
+      },
+      {
+        "id": "111:7482",
+        "screen": "111:7334",
+        "x": 440,
+        "y": 264,
+        "w": 400,
+        "h": 332
+      },
+      {
+        "id": "111:7669",
+        "screen": "111:7521",
+        "x": 420,
+        "y": 252,
+        "w": 440,
+        "h": 356
+      },
+      {
+        "id": "111:7843",
+        "screen": "111:7708",
+        "x": 568,
+        "y": 726,
+        "w": 384,
+        "h": 70
+      }
+    ]
+  },
+  "narrow": {
+    "mutatedNodeIds": [
+      "105:9518",
+      "105:9636",
+      "105:9767",
+      "105:10122",
+      "111:16410",
+      "111:16507",
+      "111:16619",
+      "111:16735",
+      "111:16852"
+    ],
+    "changed": [
+      {
+        "id": "105:9518",
+        "screen": "105:9433",
+        "x": 128,
+        "y": 152,
+        "w": 456,
+        "h": 140
+      },
+      {
+        "id": "105:9636",
+        "screen": "105:9550",
+        "x": 90,
+        "y": 97,
+        "w": 420,
+        "h": 286
+      },
+      {
+        "id": "105:9767",
+        "screen": "105:9681",
+        "x": 40,
+        "y": 270,
+        "w": 520,
+        "h": 320
+      },
+      {
+        "id": "105:10122",
+        "screen": "105:10037",
+        "x": 108,
+        "y": 734,
+        "w": 384,
+        "h": 70
+      },
+      {
+        "id": "111:16410",
+        "screen": "111:16324",
+        "x": 100,
+        "y": 167,
+        "w": 400,
+        "h": 146
+      },
+      {
+        "id": "111:16507",
+        "screen": "111:16421",
+        "x": 80,
+        "y": 70,
+        "w": 440,
+        "h": 340
+      },
+      {
+        "id": "111:16619",
+        "screen": "111:16533",
+        "x": 100,
+        "y": 59,
+        "w": 400,
+        "h": 362
+      },
+      {
+        "id": "111:16735",
+        "screen": "111:16649",
+        "x": 60,
+        "y": 37,
+        "w": 480,
+        "h": 406
+      },
+      {
+        "id": "111:16852",
+        "screen": "111:16768",
+        "x": 128,
+        "y": 152,
+        "w": 456,
+        "h": 100
+      }
+    ]
+  },
+  "copyIcon": {
+    "id": "173:9745",
+    "name": "MDR Blue/Icon/copy",
+    "source": "assets/icons/duplicate.svg"
+  },
+  "references": [
+    "https://fluent2.microsoft.design/components/web/react/core/menu/usage",
+    "https://fluent2.microsoft.design/components/web/react/core/dialog/usage"
+  ],
+  "supersedes": "Prior density-only sizing; component hierarchy and current geometry take precedence",
+  "validation": {
+    "visualBoardsReviewed": 4,
+    "sceneScreenshotsReviewed": 3,
+    "prototypePlayback": false,
+    "applicationRuntime": false,
+    "impeccableBinary": false,
+    "structural": {
+      "states": 89,
+      "issues": [],
+      "intentional": [
+        "100:7340"
+      ],
+      "variantOverlaps": []
+    },
+    "sourceFilesCompared": 77,
+    "sourceMismatches": [],
+    "finalScreenshots": [
+      "C:\\Users\\uniqu\\.codex\\visualizations\\2026\\10\\25\\01a17267-3b07-7e50-9391-8e3a42253585\\blue-reference\\layout-175-10660.png",
+      "C:\\Users\\uniqu\\.codex\\visualizations\\2026\\10\\25\\01a17267-3b07-7e50-9391-8e3a42253585\\blue-reference\\layout-178-11729.png",
+      "C:\\Users\\uniqu\\.codex\\visualizations\\2026\\10\\25\\01a17267-3b07-7e50-9391-8e3a42253585\\blue-reference\\layout-178-12115.png",
+      "C:\\Users\\uniqu\\.codex\\visualizations\\2026\\10\\25\\01a17267-3b07-7e50-9391-8e3a42253585\\blue-reference\\layout-178-12254.png"
+    ]
+  },
+  "retiredBoards": [
+    "164:8461",
+    "164:8577",
+    "164:8834",
+    "164:8970",
+    "164:9190",
+    "164:9355",
+    "164:9488",
+    "164:9619",
+    "165:9553"
+  ]
+}

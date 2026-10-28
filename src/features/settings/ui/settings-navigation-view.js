@@ -6,12 +6,15 @@
  */
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 import { SETTINGS_SECTION_IDS } from '../sections/section-registry.js';
+import { createIconView } from '../../../ui/components/icon-view.js';
+
+const ICONS = Object.freeze({ general: 'icon-sun', editor: 'icon-menu-edit', save: 'icon-save', toolbar: 'icon-layout', performance: 'icon-code' });
 
 const COPY = Object.freeze({
-  general: Object.freeze({ label: '通用', summary: '主题、语言与布局' }),
+  general: Object.freeze({ label: '常规', summary: '主题、语言与布局' }),
   editor: Object.freeze({ label: '编辑器', summary: '字号与显示颜色' }),
   save: Object.freeze({ label: '保存与导出', summary: '自动保存和默认路径' }),
-  toolbar: Object.freeze({ label: '工具栏', summary: '显示与项目管理' }),
+  toolbar: Object.freeze({ label: '工具条', summary: '显示与项目管理' }),
   performance: Object.freeze({ label: '性能', summary: '超大文档预览策略' })
 });
 
@@ -43,16 +46,16 @@ export function createSettingsNavigationView(root, { onNavigate } = {}) {
 
   try {
     const fragment = documentRef.createDocumentFragment();
-    for (const id of SETTINGS_SECTION_IDS) {
+    for (const id of ['general', 'editor', 'save', 'toolbar', 'performance']) {
       const copy = COPY[id];
       const button = createSafeElement(documentRef, 'button', {
         className: 'preferences-nav-item',
-        attributes: { type: 'button', 'aria-selected': 'false' },
+        attributes: { type: 'button', 'aria-current': 'false' },
         dataset: { settingsPage: id }
       });
       button.append(
-        createSafeElement(documentRef, 'span', { text: copy.label }),
-        createSafeElement(documentRef, 'small', { text: copy.summary })
+        createIconView(documentRef, ICONS[id]),
+        createSafeElement(documentRef, 'span', { text: copy.label })
       );
       buttons.set(id, button);
       fragment.append(button);
@@ -76,8 +79,8 @@ export function createSettingsNavigationView(root, { onNavigate } = {}) {
       for (const [id, button] of buttons) {
         const active = id === activePage;
         button.classList.toggle('active', active);
-        button.setAttribute('aria-selected', active ? 'true' : 'false');
-        button.tabIndex = active ? 0 : -1;
+        button.setAttribute('aria-current', active ? 'page' : 'false');
+        button.tabIndex = 0;
       }
       return activePage;
     },

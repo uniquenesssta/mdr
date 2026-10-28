@@ -127,3 +127,10 @@ test('R15-03 aggregate duration objects are converted to numeric metrics rather 
   const f=recorder();f.api.record('fixture',{aggregate:true,durationMs:{body:'PRIVATE',valueOf:()=>7}});
   assert.equal(f.groups[0].options.durationMs,7);assert.equal(JSON.stringify(f.groups).includes('PRIVATE'),false);
 });
+
+test('selection component semantics and layout enums survive minimization without admitting arbitrary strings', () => {
+  const safe = { mappingMode: 'source-component', nextMode: 'both', previousMode: 'hybrid', mode: 'chapter', origin: 'programmatic', theme: 'dark', presentation: 'source' };
+  assert.deepEqual(plain(redactTelemetryDetails(safe)), safe);
+  const unsafe = Object.fromEntries(Object.keys(safe).map(key => [key, 'PRIVATE document text']));
+  assert.deepEqual(plain(redactTelemetryDetails(unsafe)), Object.fromEntries(Object.keys(safe).map(key => [key, '[redacted]'])));
+});

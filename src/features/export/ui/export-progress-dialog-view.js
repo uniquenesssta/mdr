@@ -20,9 +20,10 @@ export function createExportProgressDialogView({ overlayRoot, store, onCancel,
   const header = node(panel, 'div', { className: 'modal-header' });
   const title = node(header, 'h3', { id: 'export-progress-title' });
   const body = node(panel, 'div', { className: 'modal-body' });
+  const status = node(body, 'p', { id: 'export-progress-status', className: 'export-progress-status' });
   const track = node(body, 'div', { className: 'export-progress-track', attributes: { 'aria-hidden': 'true' } });
   const value = node(track, 'div', { id: 'export-progress-value', className: 'export-progress-value' });
-  const status = node(body, 'p', { id: 'export-progress-status', className: 'export-progress-status' });
+
   node(body, 'p', { className: 'hint', text: '超大文档会分批构建导出内容，编辑器不会长时间无响应。' });
   const footer = node(panel, 'div', { className: 'modal-footer' });
   const cancel = node(footer, 'button', { id: 'export-progress-cancel', attributes: { type: 'button' } });

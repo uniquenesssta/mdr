@@ -56,6 +56,10 @@ export const STYLE_IMPORTS = Object.freeze([
   'features/hybrid-math.css',
   'features/code-presentation.css',
   'features/file-tree.css',
+  'shell/writing-workspace.css',
+  'features/selection-toolbar.css',
+  'features/find-replace.css',
+  'features/document-surface.css',
 ]);
 
 export function expectedStyleEntry() {

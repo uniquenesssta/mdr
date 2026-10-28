@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-26",
+  "status": "prepared_design_asset_not_loaded_by_application",
+  "fonts": [
+    {
+      "family": "JetBrains Mono",
+      "style": "Regular",
+      "weight": 400,
+      "file": "JetBrainsMono-Regular.woff2",
+      "bytes": 92380,
+      "sha256": "f1a7a03672cdd494ce0d5543fac6e4360fe22403c6de297fdc2e55a815f7baff",
+      "source": "https://github.com/JetBrains/JetBrainsMono/blob/master/fonts/webfonts/JetBrainsMono-Regular.woff2",
+      "gitBlobSha": "66c54672c787c0756adf28d5823b4944009a8701",
+      "license": "SIL Open Font License1.1",
+      "licenseFile": "OFL.txt",
+      "licenseSource": "https://github.com/JetBrains/JetBrainsMono/blob/master/OFL.txt",
+      "licenseGitBlobSha": "5ceee0025da23d2cd5fd14b28569708a8db4db2b"
+    }
+  ],
+  "systemFont": {
+    "family": "Noto Sans SC",
+    "file": "C:/Windows/Fonts/NotoSansSC-VF.ttf",
+    "redistributed": false,
+    "note": "Installed on this Windows machine; packaging policy and fallback metrics must be validated during integration."
+  },
+  "integration": "Copy the WOFF2 into the chosen runtime font-asset directory with OFL and attribution, add @font-face to the existing typography layer, then verify loaded family in production and Tauri; no application loading or system installation performed now."
+}

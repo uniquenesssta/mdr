@@ -11,6 +11,7 @@ export { createMenuController } from './menu-controller.js';
 export { createMenuView } from './menu-view.js';
 export { createSubmenuPositioner } from './submenu-positioner.js';
 export { createRecentFilesMenuController } from './recent-files-menu-controller.js';
+export { createWorkspaceActionsView } from './ui/workspace-actions-view.js';
 export { createMenuActions } from './menu-actions.js';
 
 export { createMenuContentView } from './ui/menu-content-view.js';

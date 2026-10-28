@@ -1,0 +1,1359 @@
+{
+  "schemaVersion": 2,
+  "repository": "uniquenesssta/mdr",
+  "branch": "codex/figma-ui",
+  "baselineCommit": "ff21aade691167271ee493ae83f5aafed8c9b8bf",
+  "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+  "date": "2026-10-27",
+  "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+  "status": "implemented_runtime_verified_ui_baselines_synchronized",
+  "previousImplementationStatus": "implemented_browser_verified_native_frame_verified",
+  "referenceRedesign": {
+    "date": "2026-10-26",
+    "source": "User-supplied Mothamen component and full-page references; quiet-writing UI corrections",
+    "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+    "sessionId": "a881dec3-2d5f-4adf-b425-80c37bd4a8c4",
+    "status": "implemented_runtime_verified_ui_baselines_synchronized",
+    "pages": {
+      "library": "93:1290",
+      "screens": "93:1291",
+      "responsive": "93:1292",
+      "reference": "78:1034"
+    },
+    "screens": {
+      "writing": {
+        "id": "104:1006",
+        "title": "写作 · 1280",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:1053",
+        "header": "104:1197",
+        "canvas": "104:1237",
+        "paper": "104:1238",
+        "footer": "104:1283"
+      },
+      "split": {
+        "id": "104:1298",
+        "title": "分栏 · 编辑与预览",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:1327",
+        "header": "104:1381",
+        "canvas": "104:1407",
+        "footer": "104:1469"
+      },
+      "source": {
+        "id": "104:1480",
+        "title": "源码 · 直接编辑",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:1509",
+        "header": "104:1563",
+        "canvas": "104:1589",
+        "paper": "104:1590",
+        "footer": "104:1594"
+      },
+      "reading": {
+        "id": "104:1605",
+        "title": "纯阅读 · 只看不改",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:1634",
+        "header": "104:1688",
+        "canvas": "104:1714",
+        "paper": "104:1715",
+        "footer": "104:1738"
+      },
+      "focus": {
+        "id": "104:1751",
+        "title": "专注 · 正文优先",
+        "width": 1280,
+        "height": 860,
+        "header": "104:1781",
+        "canvas": "104:1803",
+        "paper": "104:1804",
+        "footer": "104:1827"
+      },
+      "empty": {
+        "id": "104:1838",
+        "title": "空会话 · 新建与打开",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:1867",
+        "header": "104:1928",
+        "canvas": "104:1950",
+        "footer": "104:1968"
+      },
+      "files": {
+        "id": "104:1979",
+        "title": "文件 · 本地目录树",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:2008",
+        "header": "104:2123",
+        "canvas": "104:2145",
+        "paper": "104:2146",
+        "footer": "104:2169"
+      },
+      "outline": {
+        "id": "104:2180",
+        "title": "大纲 · 标题导航",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:2209",
+        "header": "104:2333",
+        "canvas": "104:2355",
+        "paper": "104:2356",
+        "footer": "104:2379"
+      },
+      "settings-general": {
+        "id": "104:2390",
+        "title": "设置 · 常规",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:2419",
+        "canvas": "104:2554",
+        "footer": "104:2651"
+      },
+      "settings-editor": {
+        "id": "104:2662",
+        "title": "设置 · 编辑器",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:2691",
+        "canvas": "104:2743",
+        "footer": "104:2847"
+      },
+      "settings-save": {
+        "id": "104:2858",
+        "title": "设置 · 保存与导出",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:2887",
+        "canvas": "104:2939",
+        "footer": "104:3033"
+      },
+      "settings-toolbar": {
+        "id": "104:3044",
+        "title": "设置 · 工具条",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:3073",
+        "canvas": "104:3125",
+        "footer": "104:3613"
+      },
+      "settings-performance": {
+        "id": "104:3624",
+        "title": "设置 · 性能",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:3653",
+        "canvas": "104:3705",
+        "footer": "104:3773"
+      },
+      "find": {
+        "id": "104:3784",
+        "title": "查找与替换 · 紧凑浮层",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:3813",
+        "header": "104:3867",
+        "canvas": "104:3889",
+        "paper": "104:3890",
+        "footer": "104:3913"
+      },
+      "export": {
+        "id": "104:3973",
+        "title": "导出 · 格式与图片选项",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:4002",
+        "header": "104:4056",
+        "canvas": "104:4078",
+        "paper": "104:4079",
+        "footer": "104:4102"
+      },
+      "help": {
+        "id": "104:4180",
+        "title": "帮助 · 六类完整内容",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:4209",
+        "header": "104:4263",
+        "canvas": "104:4285",
+        "paper": "104:4286",
+        "footer": "104:4309"
+      },
+      "selection": {
+        "id": "104:4452",
+        "title": "选区工具条 · 常驻与更多",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:4481",
+        "header": "104:4535",
+        "canvas": "104:4557",
+        "paper": "104:4558",
+        "footer": "104:4581"
+      },
+      "save-failed": {
+        "id": "104:4785",
+        "title": "保存失败 · 保留内容与重试",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:4814",
+        "header": "104:4868",
+        "canvas": "104:4890",
+        "paper": "104:4891",
+        "footer": "104:4914"
+      },
+      "recovery": {
+        "id": "104:4936",
+        "title": "预览恢复 · 原文不受影响",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:4965",
+        "header": "104:5019",
+        "canvas": "104:5041",
+        "footer": "104:5086"
+      },
+      "import": {
+        "id": "104:5104",
+        "title": "网页导入 · 手动恢复",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:5133",
+        "header": "104:5187",
+        "canvas": "104:5209",
+        "paper": "104:5210",
+        "footer": "104:5233"
+      },
+      "advanced-export": {
+        "id": "104:5281",
+        "title": "高级图片导出 · 预览与比例",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:5310",
+        "header": "104:5364",
+        "canvas": "104:5386",
+        "paper": "104:5387",
+        "footer": "104:5410"
+      },
+      "context": {
+        "id": "104:5466",
+        "title": "文档右键 · 完整操作",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:5495",
+        "header": "104:5549",
+        "canvas": "104:5571",
+        "paper": "104:5572",
+        "footer": "104:5595"
+      },
+      "dark-writing": {
+        "id": "104:5740",
+        "title": "深色 · 写作",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "104:5769",
+        "header": "104:5823",
+        "canvas": "104:5845",
+        "paper": "104:5846",
+        "footer": "104:5869"
+      },
+      "file-menu": {
+        "id": "111:5884",
+        "title": "文件菜单 · 设置入口",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:5913",
+        "header": "111:5973",
+        "canvas": "111:5996",
+        "paper": "111:5997",
+        "footer": "111:6020"
+      },
+      "recent": {
+        "id": "111:6204",
+        "title": "最近打开 · 本地文件记录",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:6233",
+        "header": "111:6293",
+        "canvas": "111:6316",
+        "paper": "111:6317",
+        "footer": "111:6340"
+      },
+      "link-preview": {
+        "id": "111:6415",
+        "title": "链接预览 · 加载与外部打开",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:6444",
+        "header": "111:6504",
+        "canvas": "111:6527",
+        "paper": "111:6528",
+        "footer": "111:6551"
+      },
+      "export-progress": {
+        "id": "111:6576",
+        "title": "导出进度 · 写入不可取消",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:6605",
+        "header": "111:6665",
+        "canvas": "111:6688",
+        "paper": "111:6689",
+        "footer": "111:6712"
+      },
+      "color": {
+        "id": "111:6732",
+        "title": "文字颜色 · 完整预设",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:6761",
+        "header": "111:6821",
+        "canvas": "111:6844",
+        "paper": "111:6845",
+        "footer": "111:6868"
+      },
+      "table-picker": {
+        "id": "111:6939",
+        "title": "插入表格 · 8×8尺寸",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:6968",
+        "header": "111:7028",
+        "canvas": "111:7051",
+        "paper": "111:7052",
+        "footer": "111:7075"
+      },
+      "insert-link": {
+        "id": "111:7160",
+        "title": "插入链接 · 紧凑输入",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:7189",
+        "header": "111:7249",
+        "canvas": "111:7272",
+        "paper": "111:7273",
+        "footer": "111:7296"
+      },
+      "insert-image": {
+        "id": "111:7334",
+        "title": "插入图片 · 文件与描述",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:7363",
+        "header": "111:7423",
+        "canvas": "111:7446",
+        "paper": "111:7447",
+        "footer": "111:7470"
+      },
+      "insert-mermaid": {
+        "id": "111:7521",
+        "title": "Mermaid · 错误保留源码",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:7550",
+        "header": "111:7610",
+        "canvas": "111:7633",
+        "paper": "111:7634",
+        "footer": "111:7657"
+      },
+      "settings-failed": {
+        "id": "111:7708",
+        "title": "设置保存失败 · 草稿保留",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "111:7737",
+        "canvas": "111:7781",
+        "footer": "111:7832"
+      },
+      "collapsed": {
+        "id": "117:10628",
+        "title": "分栏 · 编辑区收起",
+        "width": 1280,
+        "height": 860,
+        "sidebar": "117:10657",
+        "header": "117:10717",
+        "canvas": "117:10740",
+        "footer": "117:10785"
+      }
+    },
+    "responsiveScreens": {
+      "narrow-writing": {
+        "id": "105:7991",
+        "title": "600px · 写作",
+        "width": 600,
+        "height": 860,
+        "header": "105:8019",
+        "canvas": "105:8041",
+        "paper": "105:8042",
+        "footer": "105:8065"
+      },
+      "narrow-short": {
+        "id": "105:8076",
+        "title": "600×480 · 短窗口",
+        "width": 600,
+        "height": 480,
+        "header": "105:8104",
+        "canvas": "105:8126",
+        "paper": "105:8127",
+        "footer": "105:8150"
+      },
+      "narrow-source": {
+        "id": "105:8161",
+        "title": "600px · 源码",
+        "width": 600,
+        "height": 860,
+        "header": "105:8189",
+        "canvas": "105:8211",
+        "paper": "105:8212",
+        "footer": "105:8216"
+      },
+      "narrow-reading": {
+        "id": "105:8227",
+        "title": "600px · 纯阅读",
+        "width": 600,
+        "height": 860,
+        "header": "105:8255",
+        "canvas": "105:8277",
+        "paper": "105:8278",
+        "footer": "105:8301"
+      },
+      "narrow-settings-general": {
+        "id": "105:8311",
+        "title": "600px · 设置 / general",
+        "width": 600,
+        "height": 860,
+        "sidebar": "105:8340",
+        "canvas": "105:8392",
+        "footer": "105:8443"
+      },
+      "narrow-settings-editor": {
+        "id": "105:8454",
+        "title": "600px · 设置 / editor",
+        "width": 600,
+        "height": 860,
+        "sidebar": "105:8483",
+        "canvas": "105:8535",
+        "footer": "105:8616"
+      },
+      "narrow-settings-save": {
+        "id": "105:8627",
+        "title": "600px · 设置 / save",
+        "width": 600,
+        "height": 860,
+        "sidebar": "105:8656",
+        "canvas": "105:8708",
+        "footer": "105:8783"
+      },
+      "narrow-settings-toolbar": {
+        "id": "105:8794",
+        "title": "600px · 设置 / toolbar",
+        "width": 600,
+        "height": 860,
+        "sidebar": "105:8823",
+        "canvas": "105:8875",
+        "footer": "105:9100"
+      },
+      "narrow-settings-performance": {
+        "id": "105:9111",
+        "title": "600px · 设置 / performance",
+        "width": 600,
+        "height": 860,
+        "sidebar": "105:9140",
+        "canvas": "105:9192",
+        "footer": "105:9255"
+      },
+      "short-settings": {
+        "id": "105:9266",
+        "title": "600×480 · 设置可滚动",
+        "width": 600,
+        "height": 480,
+        "sidebar": "105:9295",
+        "canvas": "105:9347",
+        "footer": "105:9422"
+      },
+      "narrow-find": {
+        "id": "105:9433",
+        "title": "600px · 查找替换",
+        "width": 600,
+        "height": 860,
+        "header": "105:9461",
+        "canvas": "105:9483",
+        "paper": "105:9484",
+        "footer": "105:9507"
+      },
+      "short-export": {
+        "id": "105:9550",
+        "title": "600×480 · 紧凑导出",
+        "width": 600,
+        "height": 480,
+        "header": "105:9578",
+        "canvas": "105:9600",
+        "paper": "105:9601",
+        "footer": "105:9624"
+      },
+      "narrow-help": {
+        "id": "105:9681",
+        "title": "600px · 帮助",
+        "width": 600,
+        "height": 860,
+        "header": "105:9709",
+        "canvas": "105:9731",
+        "paper": "105:9732",
+        "footer": "105:9755"
+      },
+      "narrow-selection": {
+        "id": "105:9852",
+        "title": "600px · 紧凑工具条",
+        "width": 600,
+        "height": 860,
+        "header": "105:9880",
+        "canvas": "105:9902",
+        "paper": "105:9903",
+        "footer": "105:9926"
+      },
+      "narrow-dark": {
+        "id": "105:9952",
+        "title": "600px · 深色",
+        "width": 600,
+        "height": 860,
+        "header": "105:9980",
+        "canvas": "105:10002",
+        "paper": "105:10003",
+        "footer": "105:10026"
+      },
+      "narrow-error": {
+        "id": "105:10037",
+        "title": "600px · 保存失败",
+        "width": 600,
+        "height": 860,
+        "header": "105:10065",
+        "canvas": "105:10087",
+        "paper": "105:10088",
+        "footer": "105:10111"
+      },
+      "short-link": {
+        "id": "111:16324",
+        "title": "600×480 · 链接预览",
+        "width": 600,
+        "height": 480,
+        "header": "111:16352",
+        "canvas": "111:16374",
+        "paper": "111:16375",
+        "footer": "111:16398"
+      },
+      "short-import": {
+        "id": "111:16421",
+        "title": "600×480 · 网页导入恢复",
+        "width": 600,
+        "height": 480,
+        "header": "111:16449",
+        "canvas": "111:16471",
+        "paper": "111:16472",
+        "footer": "111:16495"
+      },
+      "short-image": {
+        "id": "111:16533",
+        "title": "600×480 · 图片表单",
+        "width": 600,
+        "height": 480,
+        "header": "111:16561",
+        "canvas": "111:16583",
+        "paper": "111:16584",
+        "footer": "111:16607"
+      },
+      "short-advanced-export": {
+        "id": "111:16649",
+        "title": "600×480 · 高级图片预览",
+        "width": 600,
+        "height": 480,
+        "header": "111:16677",
+        "canvas": "111:16699",
+        "paper": "111:16700",
+        "footer": "111:16723"
+      },
+      "narrow-find-reading": {
+        "id": "111:16768",
+        "title": "600px · 纯阅读查找",
+        "width": 600,
+        "height": 860,
+        "header": "111:16796",
+        "canvas": "111:16818",
+        "paper": "111:16819",
+        "footer": "111:16842"
+      },
+      "narrow-split": {
+        "id": "117:4113",
+        "title": "600px · 分栏",
+        "width": 600,
+        "height": 860,
+        "header": "117:4141",
+        "canvas": "117:4163",
+        "paper": "117:4164",
+        "footer": "117:4187"
+      }
+    },
+    "counts": {
+      "componentSets": 61,
+      "totalVariants": 364,
+      "activeVariants": 361,
+      "retainedSupersededVariants": 3,
+      "svgIconComponents": 35,
+      "desktopScreens": 34,
+      "responsiveScreens": 22,
+      "totalScreens": 56,
+      "semanticColors": 53,
+      "primitiveColors": 75,
+      "dimensions": 29,
+      "textStyles": 9,
+      "effectStyles": 3,
+      "themes": 2
+    },
+    "components": "docs/design/blue-component-map.json",
+    "tokens": "docs/design/blue-tokens.json",
+    "handoff": "docs/design/blue-preintegration.md",
+    "preparedFont": "docs/design/assets/fonts/manifest.json",
+    "latestMenuBoundary": {
+      "component": "95:2036",
+      "height": 40,
+      "bottomBorder": 1,
+      "semanticColor": "VariableID:78:1017",
+      "lightDarkAndAllScreens": true
+    },
+    "verification": {
+      "structure": "Latest:61 sets,364 total/361 active variants,35 SVG icons;56 chrome/routes checked; zero visible legacy More menus and content recovery overlays; component text style/size audit passes.",
+      "textStyles": "All nonempty component text has shared style",
+      "roleContrast": "22 role/theme pairs >=4.5:1, min4.558",
+      "visual": "10 component galleries and desktop/600x860/600x480 compositions reviewed; final representative screenshots saved",
+      "prototype": "Connections configured and destinations read back; actual playback NOT RUN due to IAB tab creation timeout",
+      "implementation": "Not started for new blue direction",
+      "runtimeTests": "Not run for blue direction; existing green implementation results are historical",
+      "userAcceptance": "Overall direction accepted; components prepared for review, not a claim of final product acceptance",
+      "handoffFiles": "passed:28 integrity and recorded-Figma checks including6 feedback-specific geometry/navigation checks;77 source paths,17 actual setting IDs,font header/size/SHA256/OFL,10 baseline PNG and8 latest feedback PNG files; git diff --check and README record passed",
+      "latestScreenshots": [
+        "blue-reference/feedback-settings-failed.png",
+        "blue-reference/feedback-image.png",
+        "blue-reference/feedback-table.png",
+        "blue-reference/feedback-recovery.png",
+        "blue-reference/feedback-toolbar.png",
+        "blue-reference/feedback-short-image.png",
+        "blue-reference/feedback-toolbar-settings.png",
+        "blue-reference/feedback-narrow-toolbar.png"
+      ],
+      "latestDensity": "21families/103states inventoried;100active states boundary/style checks passed;18families/87states resized;9boards plus6compositions visually reviewed. Not runtime or automatic aesthetic certification."
+    },
+    "evidenceRoot": "C:/Users/uniqu/.codex/visualizations/2026/10/25/01a17267-3b07-7e50-9391-8e3a42253585/blue-reference",
+    "excludedLegacyVariants": [
+      "98:5367",
+      "98:5389",
+      "98:5829"
+    ],
+    "codeConnect": false,
+    "newProductionDependencies": [],
+    "fontsLoadedByApplication": false,
+    "latestFeedback": {
+      "date": "2026-10-26",
+      "file": "feedback-screen-audit.json",
+      "geometry": "feedback-final-geometry.json",
+      "moreTargets": {
+        "desktop": "104:3044",
+        "responsive": "105:8794"
+      },
+      "statusVariants": {
+        "recovering": "144:9108",
+        "failed": "144:9127"
+      },
+      "scope": "Figma and handoff only; not implemented"
+    },
+    "latestDensityReview": {
+      "date": "2026-10-26",
+      "report": "docs/design/overlay-density-review.json",
+      "inventory": {
+        "families": 21,
+        "totalStates": 103,
+        "activeStates": 100,
+        "retainedExcludedStates": 3,
+        "changedFamilies": 18,
+        "changedStates": 87
+      },
+      "reviewBoards": [
+        {
+          "id": "164:8461",
+          "name": "MDR Blue/浮层紧凑审阅/01 · 右键与短菜单",
+          "w": 1500,
+          "h": 529
+        },
+        {
+          "id": "164:8577",
+          "name": "MDR Blue/浮层紧凑审阅/02 · 主菜单与快捷键",
+          "w": 1500,
+          "h": 817
+        },
+        {
+          "id": "164:8834",
+          "name": "MDR Blue/浮层紧凑审阅/03 · 选项、提示与查找",
+          "w": 1500,
+          "h": 662
+        },
+        {
+          "id": "164:8970",
+          "name": "MDR Blue/浮层紧凑审阅/04 · 表单、调色与插入",
+          "w": 1500,
+          "h": 854
+        },
+        {
+          "id": "164:9190",
+          "name": "MDR Blue/浮层紧凑审阅/05 · 导入与导出状态",
+          "w": 1500,
+          "h": 830
+        },
+        {
+          "id": "164:9355",
+          "name": "MDR Blue/浮层紧凑审阅/06 · 帮助与网页预览",
+          "w": 1500,
+          "h": 1000
+        },
+        {
+          "id": "164:9488",
+          "name": "MDR Blue/浮层紧凑审阅/07 · 图片预览与拖放",
+          "w": 1500,
+          "h": 694
+        },
+        {
+          "id": "164:9619",
+          "name": "MDR Blue/浮层紧凑审阅/08 · 内联组件边界",
+          "w": 1500,
+          "h": 610
+        },
+        {
+          "id": "165:9553",
+          "name": "MDR Blue/浮层紧凑审阅/09 · 深色状态",
+          "w": 1500,
+          "h": 854
+        }
+      ],
+      "screenshots": [
+        "blue-reference/compact-review-0.png",
+        "blue-reference/compact-review-1.png",
+        "blue-reference/compact-review-2.png",
+        "blue-reference/compact-review-3.png",
+        "blue-reference/compact-review-4.png",
+        "blue-reference/compact-review-5.png",
+        "blue-reference/compact-review-6.png",
+        "blue-reference/compact-review-7.png",
+        "blue-reference/compact-review-dark.png",
+        "blue-reference/compact-context-screen.png",
+        "blue-reference/compact-short-export.png",
+        "blue-reference/compact-short-import.png",
+        "blue-reference/compact-short-link.png",
+        "blue-reference/compact-narrow-help.png",
+        "blue-reference/compact-desktop-help.png"
+      ],
+      "checks": {
+        "checked": 100,
+        "issues": [],
+        "intentional": [
+          {
+            "family": "MDR Blue/Image export advanced",
+            "variant": "100:7318",
+            "node": "100:7340",
+            "parent": "100:7339",
+            "rectangle": [
+              8,
+              8,
+              432,
+              300
+            ],
+            "parentSize": [
+              448,
+              160
+            ]
+          }
+        ],
+        "noStyle": [],
+        "zeroText": [],
+        "raster": 0
+      },
+      "implementation": "not started",
+      "prototype": "actual playback not verified",
+      "integrity": "passed:10 artifact checks;77 existing source owner hashes unchanged;git diff format andREADME record passed. Not runtime acceptance."
+    },
+    "latestLayoutRedesign": {
+      "report": "docs/design/component-layout-redesign.md",
+      "inventory": "docs/design/component-layout-redesign.json",
+      "boards": [
+        "175:10660",
+        "178:11729",
+        "178:12115",
+        "178:12254"
+      ],
+      "status": "awaiting_user_visual_acceptance",
+      "icons": 36,
+      "textStyles": 10,
+      "scope": "Figma and handoff only"
+    },
+    "latestAlignment": {
+      "date": "2026-10-27",
+      "report": "docs/design/find-color-alignment.json",
+      "board": "188:10070",
+      "status": "figma_checked_not_implemented",
+      "replacementButtons": "outlined secondary; comparison uses results in both themes; invalid regex sample retained"
+    },
+    "latestFullReview": {
+      "date": "2026-10-27",
+      "reference": "docs/design/full-component-review.json",
+      "reviewedFamilies": 61,
+      "activeVariants": 361,
+      "changedFamilies": 21,
+      "screens": 56,
+      "unexpectedBounds": 0,
+      "variantOverlaps": 0,
+      "prototypePlayback": false,
+      "runtimeVerified": false,
+      "reviewBoards": [
+        "194:10201",
+        "194:10529",
+        "194:10876",
+        "194:11015",
+        "194:11130",
+        "194:11254",
+        "194:11326"
+      ],
+      "stateBoards": [
+        "200:11286",
+        "200:11548",
+        "200:11810"
+      ]
+    },
+    "designPreparationStatus": "figma_revised_awaiting_visual_acceptance_not_implemented",
+    "runtimeRecord": "docs/design/blue-integration.json"
+  },
+  "pages": {
+    "library": "93:1290",
+    "screens": "93:1291",
+    "responsive": "93:1292",
+    "reference": "78:1034"
+  },
+  "verification": {
+    "targetedNode": {
+      "status": "passed",
+      "tests": 928,
+      "evidence": "ui-behavior/node-accepted.log"
+    },
+    "productionBuild": {
+      "status": "passed",
+      "directory": "ui-behavior/build-accepted",
+      "bundleBudgetsUnchanged": true,
+      "accepted": true,
+      "sourceSha256": "058b6f9bc152aa55bf35c3fd2000783ae5d8b237b626758ad2e3871d9fea6242",
+      "sourceFiles": 479,
+      "outputFiles": 136
+    },
+    "architecture": {
+      "status": "passed"
+    },
+    "legacyRuntime": {
+      "status": "passed"
+    },
+    "generatedFiles": {
+      "status": "passed"
+    },
+    "readmeRecord": {
+      "status": "passed"
+    },
+    "diffFormat": {
+      "status": "passed"
+    },
+    "finalBrowserRegression": {
+      "status": "passed",
+      "tests": 96,
+      "evidence": "ui-behavior/browser-accepted.log"
+    },
+    "figmaUi": {
+      "status": "passed",
+      "checks": 61,
+      "evidence": "ui-behavior/ui-accepted/figma-ui-results.json",
+      "environment": {
+        "protocolVersion": "1.3",
+        "product": "Edg/155.0.4283.62",
+        "revision": "@aa3a7406ba8c53a83536df539f07124d73c899bd",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "jsVersion": "15.5.9.7"
+      },
+      "png": {
+        "width": 1080,
+        "height": 4666,
+        "pixel": [
+          27,
+          33,
+          30,
+          255
+        ]
+      },
+      "lightPngPixel": [
+        255,
+        255,
+        255,
+        255
+      ]
+    },
+    "finalVisualReview": {
+      "status": "passed",
+      "evidenceDirectory": "ui-behavior/ui-accepted",
+      "viewports": [
+        {
+          "width": 840,
+          "height": 900,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 600,
+          "height": 700,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 900,
+          "height": 480,
+          "deviceScaleFactor": 1.25
+        },
+        {
+          "width": 1440,
+          "height": 960,
+          "deviceScaleFactor": 1.5
+        }
+      ],
+      "nativeScreenshots": [
+        "ui-behavior/native-refined/native-600-860.png",
+        "ui-behavior/native-refined/native-600-480.png"
+      ],
+      "scope": "Real Windows/WebView2 at 96 DPI; browser device scales remain simulations."
+    },
+    "nativeTauriAcceptance": {
+      "status": "partial",
+      "frameAndWindowCommands": "passed",
+      "narrowWindows": [
+        {
+          "width": 600,
+          "height": 860,
+          "controls": {
+            "left": 503,
+            "right": 591
+          },
+          "quotes": [
+            {
+              "padding": 60,
+              "lastBar": 51
+            },
+            {
+              "padding": 60,
+              "lastBar": 51
+            },
+            {
+              "padding": 88,
+              "lastBar": 79
+            }
+          ]
+        },
+        {
+          "width": 600,
+          "height": 480,
+          "controls": {
+            "left": 503,
+            "right": 591
+          },
+          "quotes": [
+            {
+              "padding": 60,
+              "lastBar": 51
+            },
+            {
+              "padding": 60,
+              "lastBar": 51
+            },
+            {
+              "padding": 88,
+              "lastBar": 79
+            }
+          ]
+        }
+      ],
+      "dpi": 96,
+      "evidence": "ui-behavior/native-refined/native-frame.json",
+      "scope": "Real normal frame, maximize/restore and 600px/480px UI. Isolated test identifier uses current dev source; production build checked separately in Edge.",
+      "pending": [
+        "Physical high-DPI",
+        "OS file dialogs",
+        "Full native acceptance/manual IME"
+      ]
+    },
+    "R17Acceptance": {
+      "status": "not_applicable",
+      "reason": "Separate UI implementation; inherited R17 changes and acceptance state retained."
+    },
+    "latestLayoutRedesign": {
+      "visualBoardsReviewed": 4,
+      "sceneScreenshotsReviewed": 3,
+      "prototypePlayback": false,
+      "applicationRuntime": false,
+      "impeccableBinary": false,
+      "structural": {
+        "states": 89,
+        "issues": [],
+        "intentional": [
+          "100:7340"
+        ],
+        "variantOverlaps": []
+      }
+    }
+  },
+  "codeConnect": false,
+  "newProductionDependencies": [],
+  "fontAssetsAdded": false,
+  "preserveInheritedR17Changes": true,
+  "evidenceRoot": "C:\\Users\\uniqu\\.codex\\visualizations\\2026\\10\\25\\01a17267-3b07-7e50-9391-8e3a42253585",
+  "inheritedStagedPatchSha256": "f9403640c94652b379cb5278c8f0820b9902cff221fac2dd1ee558a45aecc569",
+  "previousDeliveryVerification": {
+    "targetedNode": {
+      "status": "passed",
+      "tests": 927,
+      "evidence": "ui-node-delivery.log"
+    },
+    "productionBuild": {
+      "status": "passed",
+      "directory": "ui-build-verified",
+      "bundleBudgetsUnchanged": true,
+      "accepted": true,
+      "sourceSha256": "25ae01b429ee8328099d7d5978444b066a57d0927ae504b014b6f09c8feea537",
+      "sourceFiles": 477,
+      "outputFiles": 136
+    },
+    "architecture": {
+      "status": "passed"
+    },
+    "legacyRuntime": {
+      "status": "passed"
+    },
+    "generatedFiles": {
+      "status": "passed"
+    },
+    "readmeRecord": {
+      "status": "passed"
+    },
+    "diffFormat": {
+      "status": "passed"
+    },
+    "finalBrowserRegression": {
+      "status": "passed",
+      "tests": 96,
+      "evidence": "ui-browser-delivery.log"
+    },
+    "figmaUi": {
+      "status": "passed",
+      "checks": 33,
+      "evidence": "figma-ui-delivery/figma-ui-results.json",
+      "environment": {
+        "protocolVersion": "1.3",
+        "product": "Edg/155.0.4283.62",
+        "revision": "@aa3a7406ba8c53a83536df539f07124d73c899bd",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "jsVersion": "15.5.9.7"
+      },
+      "png": {
+        "width": 1080,
+        "height": 4698,
+        "pixel": [
+          27,
+          33,
+          30,
+          255
+        ]
+      },
+      "lightPngPixel": [
+        255,
+        255,
+        255,
+        255
+      ]
+    },
+    "finalVisualReview": {
+      "status": "passed",
+      "evidenceDirectory": "figma-ui-delivery",
+      "viewports": [
+        {
+          "width": 840,
+          "height": 900,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 600,
+          "height": 700,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 900,
+          "height": 480,
+          "deviceScaleFactor": 1.25
+        },
+        {
+          "width": 1440,
+          "height": 960,
+          "deviceScaleFactor": 1.5
+        }
+      ],
+      "scope": "Windows Edge screenshots and simulated device scales; not physical Windows DPI."
+    },
+    "nativeTauriAcceptance": {
+      "status": "not_run",
+      "reason": "No native desktop window, OS dialogs, physical DPI or real Windows IME acceptance was performed in this UI pass."
+    },
+    "R17Acceptance": {
+      "status": "not_applicable",
+      "reason": "Separate UI implementation; inherited R17 changes and acceptance state retained."
+    }
+  },
+  "currentReference": {
+    "writing": "104:1006",
+    "settings": "104:2390",
+    "narrow": "105:7991",
+    "components": "93:1290",
+    "responsive": "93:1292"
+  },
+  "previousFrameVerification": {
+    "targetedNode": {
+      "status": "passed",
+      "tests": 95,
+      "evidence": "frame-polish/layout-node-final.log",
+      "scope": "UI, layout and theme regression after frame/spacing changes"
+    },
+    "productionBuild": {
+      "status": "passed",
+      "directory": "frame-polish/build-final",
+      "bundleBudgetsUnchanged": true,
+      "accepted": true,
+      "sourceSha256": "64f683bffd173bc42d616d20cf272f3271fa77ffb132c0991eb80641f8168db5",
+      "sourceFiles": 477,
+      "outputFiles": 136
+    },
+    "architecture": {
+      "status": "passed"
+    },
+    "legacyRuntime": {
+      "status": "passed"
+    },
+    "generatedFiles": {
+      "status": "passed"
+    },
+    "readmeRecord": {
+      "status": "passed"
+    },
+    "diffFormat": {
+      "status": "passed"
+    },
+    "finalBrowserRegression": {
+      "status": "passed",
+      "tests": 96,
+      "evidence": "frame-polish/browser-final.log"
+    },
+    "figmaUi": {
+      "status": "passed",
+      "checks": 39,
+      "evidence": "frame-polish/ui-final/figma-ui-results.json",
+      "environment": {
+        "protocolVersion": "1.3",
+        "product": "Edg/155.0.4283.62",
+        "revision": "@aa3a7406ba8c53a83536df539f07124d73c899bd",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/155.0.0.0 Safari/537.36 Edg/155.0.0.0",
+        "jsVersion": "15.5.9.7"
+      },
+      "png": {
+        "width": 1080,
+        "height": 4666,
+        "pixel": [
+          27,
+          33,
+          30,
+          255
+        ]
+      },
+      "lightPngPixel": [
+        255,
+        255,
+        255,
+        255
+      ]
+    },
+    "finalVisualReview": {
+      "status": "passed",
+      "evidenceDirectory": "frame-polish/ui-final",
+      "viewports": [
+        {
+          "width": 840,
+          "height": 900,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 600,
+          "height": 700,
+          "deviceScaleFactor": 1
+        },
+        {
+          "width": 900,
+          "height": 480,
+          "deviceScaleFactor": 1.25
+        },
+        {
+          "width": 1440,
+          "height": 960,
+          "deviceScaleFactor": 1.5
+        }
+      ],
+      "nativeScreenshot": "frame-polish/native-after/native-window-final.png",
+      "scope": "Native window 96 DPI; Windows Edge viewport/device scale simulations do not replace physical high-DPI acceptance."
+    },
+    "nativeTauriAcceptance": {
+      "status": "partial",
+      "frameAndWindowCommands": "passed",
+      "scope": "Real Windows/WebView2 normal frame, footer geometry, maximize and restore; separately identified isolated test binary.",
+      "dpi": 96,
+      "normalNonclient": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "bottom": 0
+      },
+      "applicationBorder": [
+        "1px",
+        "1px",
+        "1px",
+        "1px"
+      ],
+      "footer": {
+        "native": true,
+        "statusHeight": 40,
+        "markdown": {
+          "right": 25,
+          "bottom": 11,
+          "top": 10,
+          "height": 20,
+          "border": "0px"
+        },
+        "border": [
+          "1px",
+          "1px",
+          "1px",
+          "1px"
+        ],
+        "devicePixelRatio": 1,
+        "controlsVisible": true
+      },
+      "standardDebugBuildRestored": true,
+      "evidence": "frame-polish/native-after/native-frame.json",
+      "pending": [
+        "Physical 125%/150% DPI",
+        "OS file dialogs",
+        "Manual Windows IME and full native acceptance"
+      ]
+    },
+    "R17Acceptance": {
+      "status": "not_applicable",
+      "reason": "Separate UI implementation; inherited R17 changes and acceptance state retained."
+    }
+  },
+  "previousReferenceProposal": {
+    "date": "2026-10-26",
+    "source": "User-supplied Mothamen Behance component images and complete 1400x19488 page reference",
+    "fullReferenceCorrection": "Actual application pages use pale backgrounds and white panels; blue presentation surrounds are not application chrome. Sidebars corrected to white with pale-blue selection, restrained primary blue and fine borders.",
+    "latestScreenshots": [
+      "blue-reference/full-writing.png",
+      "blue-reference/full-settings.png",
+      "blue-reference/boundary-narrow.png"
+    ],
+    "bottomBoundary": {
+      "viewportNode": "89:1202",
+      "narrowGutter": 16,
+      "statusTopBorder": 1,
+      "statusHeight": 40,
+      "scope": "Figma only; all three status bars updated, narrow screenshot reviewed; scrolling configured but interactive playback not performed"
+    },
+    "authorization": "User supplied reference images and requested this color and layout style; Figma direction proposal first",
+    "sessionId": "a881dec3-2d5f-4adf-b425-80c37bd4a8c4",
+    "status": "figma_proposal_visually_reviewed_awaiting_user_feedback",
+    "page": "78:1034",
+    "screens": {
+      "writing": "79:1034",
+      "settings": "79:1204",
+      "narrow": "81:1176"
+    },
+    "components": {
+      "button": "78:1065",
+      "navigation": "78:1098",
+      "field": "78:1123",
+      "toggle": "78:1128"
+    },
+    "collection": "VariableCollectionId:78:1006",
+    "componentVariants": 25,
+    "font": "Noto Sans SC",
+    "evidenceDirectory": "blue-reference",
+    "verification": {
+      "editableStructure": "passed: 421 descendants across 3 screens, zero image-filled nodes",
+      "screenshots": "reviewed writing 1280x860, settings 1280x860, narrow 600x860",
+      "returnPosition": "matched: 208x40, 14px, identical sidebar-relative position",
+      "prototype": "settings and return navigation edges configured and read back; interactive playback not performed",
+      "implementation": "not started",
+      "userAcceptance": "User accepted overall direction with bottom-boundary correction; corrected result awaiting review"
+    },
+    "historicalPages": [
+      "0:1",
+      "3:2",
+      "3:3"
+    ],
+    "notes": "Prior green direction is archived in Figma, not an approved target for further restyling. Existing software and previous verification evidence remain unchanged. Screen document and status data are illustrative."
+  },
+  "previousAuthorization": "User approved the quiet-writing design and requested implementation; separate UI branch authorized.",
+  "historicalGreenPages": {
+    "screens": "0:1",
+    "components": "3:2",
+    "patterns": "3:3"
+  },
+  "historicalGreenReference": {
+    "narrow": "69:985",
+    "toolbarSettings": "9:899",
+    "reading": "5:696",
+    "toolbarVariants": "66:1225",
+    "checkboxVariants": "72:1101",
+    "compactControlVariable": "VariableID:66:1215"
+  },
+  "verificationScope": "Root verification and previous*Verification are historical green implementation evidence only; new-blue preparation verification is referenceRedesign.verification.",
+  "preparedDesignFontAssetsAdded": true,
+  "runtimeIntegration": {
+    "date": "2026-10-27",
+    "status": "implemented_runtime_verified_ui_baselines_synchronized",
+    "record": "docs/design/blue-integration.json",
+    "authorization": "User: 看得我头痛，接入吧，1:1接入吧",
+    "baselineMigration": "docs/design/legacy-ui-baseline-migration.md",
+    "emptySessionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "nodeId": "104:1838",
+      "status": "implemented_and_verified"
+    },
+    "previewSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "status": "implemented_browser_and_windows_verified",
+      "readingSelection": "217:7519",
+      "splitPreviewSelection": "218:7662"
+    },
+    "sidebarSelectionCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "collapsedScreen": "223:7810",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    },
+    "minimalHeaderCorrection": {
+      "record": "docs/design/blue-integration.json",
+      "date": "2026-10-28",
+      "headerFamily": "98:6172",
+      "status": "implemented_built_browser_windows_and_repository_verified"
+    }
+  }
+}

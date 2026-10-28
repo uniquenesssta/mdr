@@ -773,13 +773,13 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       rows.push(await evaluateExport(page, `(async()=>{
         const host=applicationCapabilities,tasks=host.markdownEditorExportTaskPort,port=host.markdownEditorPreviewCommandPort;
         const editor=document.getElementById('editor'),preview=document.getElementById('preview');
-        const focus=document.querySelector('button[data-theme-toggle]');
+        const focus=document.querySelector('[data-menu-toggle="file-menu"]');
         if(!focus||focus.hidden||focus.disabled||!focus.getClientRects().length)throw new Error('Visible focus source is unavailable');
         focus.focus({preventScroll:true});
         if(document.activeElement!==focus)throw new Error('Focus source did not receive focus');
         if(!await window.__markdownEditorE2E.waitForIdle())throw new Error('Editor did not settle after focus change');
         if(document.activeElement!==focus)throw new Error('Focus source changed before PDF export');
-        const describeFocus=()=>({tag:document.activeElement?.tagName,id:document.activeElement?.id||null,themeToggle:document.activeElement===focus});
+        const describeFocus=()=>({tag:document.activeElement?.tagName,id:document.activeElement?.id||null,exportTrigger:document.activeElement===focus});
         const focusBefore=describeFocus();
         const hybrid=editor.querySelector('.cm-content');if(!hybrid?.isConnected||!hybrid.childNodes.length)throw new Error('Mounted CodeMirror content is unavailable');
         const previewNodes=Array.from(preview.childNodes),hybridNodes=Array.from(hybrid.childNodes),view=port.getViewMode(),layout=host.markdownEditorLayoutStatePort.snapshot.mode;
@@ -806,7 +806,7 @@ export async function runExportCharacterization({ page, test, loadMarkdown, arti
       })()`));
     }} finally {await evaluateExport(page, 'window.__markdownEditorE2E.setLayout("both")');}
     await writeFile(join(artifactRoot,'r14-12-isolated-print.json'),JSON.stringify(rows,null,2));
-    for(const row of rows){assert.equal(row.layout,row.mode);assert.equal(row.prints,1);assert.deepEqual(row.after,row.before);assert.equal(row.focusEvidence.before.themeToggle,true);assert.deepEqual(row.focusEvidence.afterModalFrame,row.focusEvidence.before);for(const key of ['samePreview','sameHybrid','sameView','sameLayout','focusRestored','progressClosed','removed','released','scoped'])assert.equal(row[key],true,key);
+    for(const row of rows){assert.equal(row.layout,row.mode);assert.equal(row.prints,1);assert.deepEqual(row.after,row.before);assert.equal(row.focusEvidence.before.exportTrigger,true);assert.deepEqual(row.focusEvidence.afterModalFrame,row.focusEvidence.before);for(const key of ['samePreview','sameHybrid','sameView','sameLayout','focusRestored','progressClosed','removed','released','scoped'])assert.equal(row[key],true,key);
       const out=row.printed;assert.equal(out.format,'pdf');assert.equal(out.heading,'Export baseline');assert.equal(out.math.length,2);assert.ok(out.math.every(x=>x.width>0&&x.height>0));assert.equal(out.mathml,2);assert.equal(out.diagrams,1);assert.equal(out.task,1);assert.ok(out.code>0);
       assert.equal(out.fonts.length,20);assert.ok(out.fonts.every(x=>x==='loaded'));assert.equal(out.scripts,0);assert.equal(out.privateGlobal,'undefined');assert.equal(out.color,'rgb(0, 0, 0)');assert.equal(out.paper,'rgb(255, 255, 255)');assert.equal(out.locked,true);assert.equal(out.parentUnscoped,true);}
   });

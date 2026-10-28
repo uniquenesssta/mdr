@@ -1,12 +1,12 @@
 {
-  "baselineCommit": "cd6420d99136e434e0f2de03c309fa12118de9ea",
+  "baselineCommit": "d9d3767f00cad6107187bc0a5cb37cece43e18d5",
   "schemaVersion": 1,
   "stage": "R16.11",
   "scope": "Tracked file/directory names, actual production discoveries, production modules, build scripts and reusable test hosts. No file mutation or semantic equivalence claim.",
-  "trackedPaths": 1380,
-  "productionFiles": 532,
-  "moduleCandidates": 598,
-  "inputSha256": "0cdaa3f2d6bb7dcabb89c209384b767fd08fc1a60d169f57a8c54e5fd8d9515f",
+  "trackedPaths": 1459,
+  "productionFiles": 559,
+  "moduleCandidates": 636,
+  "inputSha256": "e2160b29107ce8ed315965059ae0a42a2f22dd53362ec15beef7e4aea63d2c8c",
   "nameFindings": [
     {
       "path": "docs/audit/windows-validation-final.json",
@@ -233,6 +233,7 @@
     {
       "name": "mod.rs",
       "paths": [
+        "src-tauri/src/app_launch/mod.rs",
         "src-tauri/src/document_store/chunks/mod.rs",
         "src-tauri/src/document_store/commands/mod.rs",
         "src-tauri/src/document_store/index/mod.rs",
@@ -247,6 +248,11 @@
       "decision": "legitimate",
       "reason": "Conventional directory public entry/module declaration; relative imports and enclosing module scope distinguish ownership.",
       "owners": [
+        {
+          "path": "src-tauri/src/app_launch/mod.rs",
+          "responsibility": "Expose the native launch coordination boundary.",
+          "stateOwner": "native coordinator"
+        },
         {
           "path": "src-tauri/src/document_store/chunks/mod.rs",
           "responsibility": "Public boundary for chunk reads and snapshot upload sessions.",

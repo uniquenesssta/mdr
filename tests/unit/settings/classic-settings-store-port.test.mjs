@@ -88,6 +88,6 @@ test('Atomic 4.8 retires the Repository compatibility bridge while Atomic 4.10 a
   );
   assert.deepEqual(
     (await readdir(resolve(ROOT, 'src/features/settings/application'))).sort(),
-    ['settings-apply-coordinator.js', 'settings-controller.js']
+    ['launch-policy-controller.js', 'settings-apply-coordinator.js', 'settings-controller.js']
   );
 });

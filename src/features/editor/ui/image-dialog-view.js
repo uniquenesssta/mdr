@@ -5,7 +5,7 @@
  * State/side effects: Owns pending upload data URL and DOM listeners only; never owns editor text.
  * Lifecycle: Explicit View with idempotent destroy(); clears pending upload state, closes modal and removes listeners.
  */
-import { createEventScope } from '../../../ui/dom/index.js';
+import { createEventScope, createSafeElement } from '../../../ui/dom/index.js';
 import { ModalShell } from '../../../ui/components/modal-shell.js';
 import { isImageImportCancelled } from '../../import/index.js';
 export function createImageDialogView({
@@ -39,6 +39,16 @@ export function createImageDialogView({
   let activeTab = 'url';
   let destroyed = false, generation = 0;
   const q = selector => root.querySelector(selector);
+  const feedback = createSafeElement(root.ownerDocument, 'p', { className: 'c-form-status is-error', attributes: { role: 'status', 'aria-live': 'polite' } });
+  q('.modal-body').append(feedback);
+  const choose = createSafeElement(root.ownerDocument, 'button', { className: 'image-choose-file', text: '选择图片', attributes: { type: 'button' } });
+  q('#image-upload-area').append(choose);
+  const projectAvailability = () => {
+    const input = q('#image-url-input');
+    const available = activeTab === 'upload' ? Boolean(pendingDataUrl) : Boolean(input.value.trim()) && input.checkValidity();
+    q('[data-image-action="confirm"]').disabled = !available;
+  };
+  const showError = message => { feedback.textContent = message; q('[data-image-action="confirm"]').disabled = true; };
   const clearUpload = () => {
     generation++; imageController.cancel(); pendingDataUrl = '';
     q('#image-upload-preview')?.replaceChildren?.();
@@ -49,6 +59,8 @@ export function createImageDialogView({
     activeTab = tab === 'upload' ? 'upload' : 'url';
     root.querySelectorAll('.image-tab').forEach(button => button.classList.toggle('active', button.dataset.tab === activeTab));
     root.querySelectorAll('.image-tab-panel').forEach(panel => panel.classList.toggle('active', panel.id === `image-tab-${activeTab}`));
+    feedback.textContent = '';
+    projectAvailability();
   };
   const close = () => { clearUpload(); pendingSelection = null; shell.close('feature-close'); };
   const open = () => {
@@ -82,7 +94,7 @@ export function createImageDialogView({
       switchTab('upload');
     } catch (error) {
       if (destroyed || id !== generation || isImageImportCancelled(error)) return;
-      notify(error?.code === 'IMAGE_IMPORT_TOO_LARGE' ? text.tooLarge
+      showError(error?.code === 'IMAGE_IMPORT_TOO_LARGE' ? text.tooLarge
         : error?.code === 'IMAGE_IMPORT_UNSUPPORTED' ? text.selectFile : text.readFailed);
     }
   };
@@ -90,9 +102,9 @@ export function createImageDialogView({
     if (destroyed) return false;
     const url = activeTab === 'upload' ? pendingDataUrl : String(q('#image-url-input')?.value || '').trim();
     const alt = String((activeTab === 'upload' ? q('#image-upload-alt') : q('#image-url-alt'))?.value || '').trim() || fallbackAlt;
-    if (!url) { notify(activeTab === 'upload' ? text.selectFirst : text.enterUrl); return false; }
+    if (!url || (activeTab === 'url' && !q('#image-url-input').checkValidity())) { showError(activeTab === 'upload' ? text.selectFirst : text.enterUrl); return false; }
     const request = imageController.createInsertion(url, { alt, fallbackAlt, selection: pendingSelection || selection.snapshot() });
-    if (!request) return false;
+    if (!request) { showError('地址或文件无效，请检查后重试。'); return false; }
     insertImage(request.url, request.options);
     close();
     return true;
@@ -105,6 +117,10 @@ export function createImageDialogView({
     if (action === 'confirm') { event.preventDefault?.(); confirm(); }
   });
   events.listen(q('#image-file-input'), 'change', event => readFile(event.target));
+  events.listen(choose, 'click', () => q('#image-file-input').click());
+  events.listen(q('#image-url-input'), 'input', () => { feedback.textContent = ''; projectAvailability(); });
+  events.listen(q('#image-upload-area'), 'dragover', event => { event.preventDefault(); event.stopPropagation(); });
+  events.listen(q('#image-upload-area'), 'drop', event => { event.preventDefault(); event.stopPropagation(); void readFile({ files: event.dataTransfer?.files || [] }); });
   return Object.freeze({ open, close, switchTab, confirm, destroy() { if (destroyed) return; destroyed = true; const errors = []; for (const action of [() => close(), () => events.destroy(), () => shell.destroy(), () => imageController.destroy()]) try { action(); } catch (error) { errors.push(error); } if (errors.length) throw new AggregateError(errors, 'Editor dialog cleanup failed.'); } });
   } catch (error) {
     const errors = [error];

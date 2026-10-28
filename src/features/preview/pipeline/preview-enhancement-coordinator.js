@@ -128,15 +128,17 @@ export function createPreviewEnhancementCoordinator(options = {}) {
     }
 
     if (!capabilities.isConnected(job.root)) return;
+    let replaced = false;
     if (job.type === 'style') {
       capabilities.styleRoots([job.root]);
       if (job.animate) capabilities.animate([job.root]);
     } else if (job.type === 'math') {
       capabilities.renderMath([job.root]);
     } else if (job.type === 'mermaid') {
-      await capabilities.renderMermaid([job.root], () => !isCurrent(job.generation, job.version) || !capabilities.isConnected(job.root));
+      const result = await capabilities.renderMermaid([job.root], () => !isCurrent(job.generation, job.version) || !capabilities.isConnected(job.root));
+      replaced = Number(result?.rendered) > 0;
     }
-    if (isCurrent(job.generation, job.version) && capabilities.isConnected(job.root)) {
+    if (isCurrent(job.generation, job.version) && (replaced || capabilities.isConnected(job.root))) {
       capabilities.onBatchComplete(job.type, job.root);
     }
   }

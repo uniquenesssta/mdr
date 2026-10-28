@@ -5,6 +5,7 @@ import test from 'node:test';
 import { createWorkspacePreferences } from '../src/features/layout/workspace-preferences.js';
 import { SETTINGS_CHANGED_EVENT, SETTING_DEFAULTS, createSettingsStore, createSettingsApplyCoordinator } from '../src/features/settings/index.js';
 import { createThemeService, createThemeToggleController } from '../src/theme/index.js';
+import { createDocumentSessionStore } from '../src/features/documents/index.js';
 
 function harness(t) {
   const listeners = new Map(), attributes = new Map(), effects = { layout: [], preferences: 0, sidebar: 0 };
@@ -36,17 +37,19 @@ function harness(t) {
   document.getElementById = () => null;
   document.querySelector = () => null;
   document.querySelectorAll = () => [];
+  const session = createDocumentSessionStore({ initialRecords: [{ id: 'settings-fixture', title: 'settings.md' }], activeId: 'settings-fixture' });
   const preferences = createWorkspacePreferences({ document, window: { matchMedia: () => ({ matches: true }) }, editor: { setPresentationMode() {}, getPresentationMode: () => 'source' }, preview: { querySelector: () => first }, documentModel: { getTextLength: () => 7 },
+    coreDocumentSessionPort: session,
     coreSettingsStorePort: store, coreEditorUiCommandPort: { has: () => false, register: () => () => {} },
     coreLayoutStatePort: { snapshot: { mode: 'both', split: { previewCollapsed: false } }, setMode(mode) { this.snapshot.mode = mode; }, setSidebar({visible}) { effects.sidebar++; effects.sidebarValue = visible; } },
-    corePreviewCommandPort: { snapshot: { lastStableResult: {} }, thresholds: { scheduling: { postprocess: { deferChars: 100000 } } }, requestLayoutRefresh() {} },
+    corePreviewCommandPort: { snapshot: { lastStableResult: {} }, thresholds: { scheduling: { postprocess: { deferChars: 100000 } } }, requestLayoutRefresh() {}, suspendForHybridMode() {}, scheduleUpdate() {} },
     compactSplitController: { reconcile() {} }, splitController: { applyMode(mode) { effects.layout.push([mode, false, false]); preview.firstElementChild = {}; } }, t: key => key, showToast() {}, updateStatusBar() {}, updateInlineColorToolAvailability() { effects.preferences++; }
   });
   const coordinator = createSettingsApplyCoordinator({ store, publish: event => document.emit(event) });
   let click;
   const trigger = { addEventListener(_type, listener) { click = listener; }, removeEventListener() { click = null; } };
   const toggle = createThemeToggleController({ trigger, readTheme: () => store.get('theme'), commitTheme: value => coordinator.commit({ theme: value }).theme });
-  t.after(() => { preferences.destroy(); toggle.destroy(); coordinator.destroy(); theme.destroy(); store.destroy(); });
+  t.after(() => { preferences.destroy(); session.destroy(); toggle.destroy(); coordinator.destroy(); theme.destroy(); store.destroy(); });
   return { effects, store, coordinator, context, root, click: () => click(), editor, model, preview, first };
 }
 

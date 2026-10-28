@@ -16,9 +16,12 @@ test('R12-17 preserves all nineteen original commands plus the R13-S01 cancellat
   const before = registry(frozen('src-tauri/src/main.rs'));
   const all = registry(await read('src-tauri/src/main.rs'));
   assert.equal(all.at(-1), 'web_fetch::command::cancel_fetch_url');
-  assert.equal(new Set(all).size, 21);
+  const launchCommands = ['read_launch_context', 'set_single_instance', 'peek_launch_request', 'ack_launch_request']
+    .map(name => 'app_launch::launch_commands::' + name);
+  assert.deepEqual(all.slice(0, 4), launchCommands);
+  assert.equal(new Set(all).size, 25);
   assert.equal(all.at(-2), 'performance_log::command::write_performance_log_batch');
-  const after = all.slice(0, -2);
+  const after = all.slice(4, -2);
   assert.equal(before.length, 19);
   assert.deepEqual(after.map(p => p.split('::').at(-1)), before.map(p => p.split('::').at(-1)));
   assert.equal(new Set(after).size, 19);

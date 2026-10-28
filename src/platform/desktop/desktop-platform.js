@@ -7,6 +7,7 @@ import { createLinkClient } from './link-client.js';
 import { createPerformanceLogClient } from './performance-log-client.js';
 import { createWebFetchClient } from './web-fetch-client.js';
 import { createWindowClient } from './window-client.js';
+import { createLaunchClient } from './launch-client.js';
 
 function isObject(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -57,6 +58,7 @@ export function createDesktopPlatform(options = {}) {
   const performanceLogClient = resolveClient(options, 'performanceLogClient', () => createPerformanceLogClient({ invoke: invokeClient.invoke }));
   const webFetchClient = resolveClient(options, 'webFetchClient', () => createWebFetchClient({ invoke: invokeClient.invoke }));
   const windowClient = resolveClient(options, 'windowClient', () => createWindowClient());
+  const launchClient = resolveClient(options, 'launchClient', () => createLaunchClient({ invoke: invokeClient.invoke }));
 
   const files = Object.freeze({
     async readText(path) {
@@ -93,6 +95,7 @@ export function createDesktopPlatform(options = {}) {
     files,
     dialogs: dialogClient,
     window: windowClient,
+    launch: launchClient,
     dragDrop: dragDropClient,
     documentStore: documentStoreClient,
     web,

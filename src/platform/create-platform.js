@@ -209,6 +209,7 @@ export function createPlatform(options = {}) {
   const desktop = resolveDesktopPlatform(options, capabilities);
 
   const implementations = {
+    launch: desktop?.launch || unsupportedPort('launch', ['readContext', 'setSingleInstance', 'peek', 'acknowledge', 'subscribe'], 'desktop.window'),
     storage: browser.storage,
     files: selectDesktopOrFallback(desktop, capabilities.desktop.fileSystem, 'files', browser.files),
     dialogs: selectDesktopOrFallback(desktop, capabilities.desktop.dialogs, 'dialogs', browser.dialogs),

@@ -101,7 +101,8 @@ test('Atomic 8.14 heading presentation preserves ATX scale class and marker repl
   });
   assert.equal(heading.level, 2);
   assert.deepEqual(replaced, [[10, 13]]);
-  assert.equal(lineStyles.get(10).get('font-size'), '155%');
+  // The Figma stylesheet owns heading metrics; the presentation retains semantics and marker ranges.
+  assert.equal(lineStyles.has(10), false);
   assert.match([...lineClasses.get(10)].join(' '), /cm-hybrid-heading-2/);
 });
 

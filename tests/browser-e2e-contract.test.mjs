@@ -23,7 +23,7 @@ test('browser E2E runner stays dependency-free and covers required interactions'
     'application Theme Service applies committed theme without rebuilding editor model or preview',
     'application mounts one App Shell with strict named slots',
     'application Help feature owns first-run visibility, navigation and scoped lifecycle',
-    'application Settings Store cancels draft without persisting changes',
+    'application settings workspace automatically saves and preserves edits on return or Escape',
     'application Settings UI validates and applies one draft without global dialog functions',
     'application language Settings commit updates I18n without legacy globals',
     'feature content releases owned nodes, rolls back invalid construction and leaves App Shell ownership intact',
@@ -93,9 +93,10 @@ test('hybrid widgets keep geometry explicit while document pointer listeners are
 test('local full-application E2E refuses stale build output', async () => {
   const runner = await readFile(new URL('./e2e/run-browser-tests.mjs', import.meta.url), 'utf8');
   const app = runner.slice(runner.indexOf('async function runAppSuite()'));
-  const admission = app.indexOf('await verifyBuiltApplication({ projectRoot })');
+  const admission = app.indexOf('await verifyBuiltApplication({ projectRoot, distRoot: builtDistRoot })');
   const launch = app.indexOf('await launchChromium(');
   assert.ok(admission >= 0 && launch >= 0 && admission < launch);
+  assert.match(app, /startBuiltApplicationHost\(builtDistRoot\)/);
   assert.match(app, /r15-12-build-fingerprint\.json/);
   // Byte-level rejection and recovery are exercised in stage-15-stale-dist.test.mjs.
   assert.doesNotMatch(app, /!externalUrl && !bridgeAvailable/);

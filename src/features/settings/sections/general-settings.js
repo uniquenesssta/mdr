@@ -11,8 +11,8 @@ import { defineSettingsSection } from './settings-section.js';
 export const GENERAL_SETTINGS_SECTION = defineSettingsSection({
   id: SETTING_SECTIONS.GENERAL,
   fields: [
-    { settingId: 'theme', control: 'select', surface: 'settings-dialog' },
     { settingId: 'language', control: 'select', surface: 'settings-dialog' },
+    { settingId: 'theme', control: 'select', surface: 'settings-dialog' },
     { settingId: 'layoutMode', control: 'select', surface: 'settings-dialog' },
     { settingId: 'sidebarVisible', control: 'toggle', surface: 'settings-dialog' }
   ]

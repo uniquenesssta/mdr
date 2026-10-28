@@ -6,6 +6,7 @@
  * Lifecycle: Explicit View with idempotent destroy(); destroy removes listeners and detaches nothing outside its own element.
  */
 import { createEventScope } from '../../../ui/dom/index.js';
+import { createIconView } from '../../../ui/components/icon-view.js';
 
 export function createDocumentListItemView(documentRef, record, {
   active = false,
@@ -22,13 +23,14 @@ export function createDocumentListItemView(documentRef, record, {
   item.className = `document-item${active ? ' active' : ''}`;
   item.dataset.documentId = String(record.id);
 
-  const summary = documentRef.createElement('div');
+  const summary = documentRef.createElement('button');
+  summary.type = 'button';
   summary.className = 'document-summary';
-  const title = documentRef.createElement('div');
+  const title = documentRef.createElement('span');
   title.className = 'document-title';
   title.textContent = String(record.title || defaultTitle);
   title.title = String(record.title || '');
-  const meta = documentRef.createElement('div');
+  const meta = documentRef.createElement('span');
   meta.className = 'document-meta';
   meta.textContent = record.updatedAt ? new Date(record.updatedAt).toLocaleString() : '';
   summary.append(title, meta);
@@ -38,8 +40,9 @@ export function createDocumentListItemView(documentRef, record, {
   close.className = 'document-close';
   close.title = closeTitle;
   close.setAttribute('aria-label', `${closeTitle} ${record.title || defaultTitle}`);
-  close.textContent = '×';
-  item.append(summary, close);
+  close.append(createIconView(documentRef, 'icon-close'));
+  if (active) summary.setAttribute('aria-current', 'page');
+  item.append(createIconView(documentRef, 'icon-menu-file', { className: 'icon document-file-icon' }), summary, close);
 
   events.listen(item, 'click', event => {
     if (event.target?.closest?.('.document-close')) return;

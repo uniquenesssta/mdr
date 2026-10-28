@@ -8,6 +8,7 @@ import { createDocumentWorkspace } from './features/documents/ui/document-worksp
 import { createApplicationEvents } from './bootstrap/application-events.js';
 import { createWorkspaceStartup } from './bootstrap/workspace-startup.js';
 import { createFindPreviewCommands } from './features/editor/application/find-preview-commands.js';
+import { canRunEditorAction } from './features/editor/index.js';
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
@@ -31,7 +32,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController, createPreviewComponentMapping } from './features/sync/index.js';
 import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './features/e2e/index.js';
 import { createFolderTreeController, createFolderTreeState, createFolderTreeView, createOutlineCollapseStore, createOutlineController, createOutlineView, createSidebarState, createSidebarTabController } from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities, configureHybridLinkPreview } from './features/hybrid-editor/index.js';
@@ -41,7 +42,7 @@ import { createCloseSavePort, createWindowCloseController, createWindowControlle
 import { createPreviewCancellation, createMarkdownPresentationApi, createPreviewController, createPreviewEnhancementCoordinator, createPreviewFocusController, createPreviewLayoutStability, createPreviewRenderCoordinator, createPreviewRenderEngine, createPreviewRendererPort, createPreviewMarkdownRenderer, createPreviewRecoveryView, createPreviewScheduler, createPreviewState, createPreviewWorkerClient, createVirtualPreviewController, PREVIEW_BEHAVIOR_THRESHOLDS, createPreviewCommands } from './features/preview/index.js';
 
 /** Construct the application from explicit feature owners. Importing has no startup side effects. */
-export async function startApplication({ platform, documentSessionStore, settingsStore, i18nService, helpController, menuController, submenuPositioner, editorCommands, documentCommands }) {
+export async function startApplication({ platform, documentStorage = window.localStorage, documentSessionStore, settingsStore, i18nService, helpController, menuController, submenuPositioner, editorCommands, documentCommands }) {
 const startupLifetime = createApplicationLifetime();
 function ownApplicationExit(release) {
   let active = true;
@@ -413,7 +414,7 @@ async function loadAppModules() {
     available: platform.capabilities.desktop.documentStore
   });
   const browserDocumentRepository = createBrowserDocumentRepository({
-    storage: window.localStorage,
+    storage: documentStorage,
     reportError(message, error) {
       console.warn(message, error);
     }
@@ -964,6 +965,7 @@ async function loadAppModules() {
     saveAsDocument: documentId => saveAsMarkdownFromUi(documentId)
   });
   const runMutation = (method, ...args) => {
+    if (currentLayoutMode() === 'preview') { notify('纯阅读模式下不可编辑，请先切回写作、分栏或源码。'); return false; }
     editorHistoryAdapter.isolate();
     const result = editorCommandService[method](...args);
     if (currentLayoutMode() !== 'hybrid') editorFocusService.focus({ preventScroll: true });
@@ -971,6 +973,7 @@ async function loadAppModules() {
     return result;
   };
   const executeEditorAction = (action, payload) => {
+    if (!canRunEditorAction(currentLayoutMode(), action)) { notify('纯阅读模式下不可编辑，请先切回写作、分栏或源码。'); return false; }
     if (action === 'close-app-menus') {
       if (editorCommands.has('closeAppMenus')) return editorCommands.invoke('closeAppMenus');
       return;
@@ -1032,6 +1035,7 @@ async function loadAppModules() {
   const mountDocumentEditorViews = () => {
     const titleView = createDocumentTitleView({
       input: requireElement('#filename', 'Document title input'),
+      windowTitle: requireElement('.writing-window-title', 'Document window title'),
       session: documentSessionStore,
       fallbackTitle: t('filenameDefault') || '未命名文档.md',
       updateTitleDraft(value) { return documentCommands.invoke('updateTitleDraft', value); }
@@ -1126,6 +1130,7 @@ async function loadAppModules() {
       root: requireElement('#find-modal', 'Find/Replace dialog'),
       selection: editorSelectionService,
       focus: editorFocusService,
+      isReadOnly: () => currentLayoutMode() === 'preview',
       labels: {
         noMatch: t('statusNoMatch'),
         found: t('statusFoundMatch'),
@@ -1140,8 +1145,8 @@ async function loadAppModules() {
       },
       commands: {
         findNext: (...args) => editorCommandService.findNext(...args),
-        replaceOne: (...args) => editorCommandService.replaceOne(...args),
-        replaceAll: (...args) => editorCommandService.replaceAll(...args)
+        replaceOne: (...args) => currentLayoutMode() === 'preview' ? undefined : editorCommandService.replaceOne(...args),
+        replaceAll: (...args) => currentLayoutMode() === 'preview' ? 0 : editorCommandService.replaceAll(...args)
       }
     });
     featureViews.push(findView);
@@ -1158,11 +1163,20 @@ async function loadAppModules() {
 
     const toolbarView = createEditorToolbarView({
       root: toolbarRoot,
+      selection: editorSelectionService,
       commandRoots: [document.querySelector('.l-menu-bar')],
       commands: { execute: executeEditorAction },
       dialogs: { link: linkView, image: imageView, find: findView, mermaid: mermaidView, math: mathView },
       tableView,
       getLayoutMode: currentLayoutMode,
+      onCustomizeToolbar: () => menuController.execute('settings.open', { page: 'toolbar' }),
+      toolbarPreferences: {
+        read: () => ({ density: settingsStore.get('toolbarDensity'), primaryItems: settingsStore.get('toolbarPrimaryItems'), hiddenItems: settingsStore.get('toolbarHiddenItems') }),
+        subscribe: listener => {
+          document.addEventListener(SETTINGS_CHANGED_EVENT, listener);
+          return () => document.removeEventListener(SETTINGS_CHANGED_EVENT, listener);
+        }
+      },
       formatLayoutLabel(mode) {
         const keys = { both: 'view', hybrid: 'viewHybrid', edit: 'viewEdit', preview: 'viewPreview' };
         return t(keys[mode] || 'view');
@@ -1176,6 +1190,7 @@ async function loadAppModules() {
       collapse: pane => splitPaneController.togglePane(pane),
       onSelectionChange() {
         inlineColorView.updateAvailability();
+        toolbarView.refreshSelection();
         if (editorCommands.has('selectionChanged')) editorCommands.invoke('selectionChanged');
       }
     });
@@ -1183,11 +1198,11 @@ async function loadAppModules() {
 
     unregisterEditorViewCommands = editorCommands.register({
       executeEditorAction,
-      openLink: () => linkView.open(),
-      openImage: () => imageView.open(),
+      openLink: () => currentLayoutMode() !== 'preview' && linkView.open(),
+      openImage: () => currentLayoutMode() !== 'preview' && imageView.open(),
       openFind: replace => findView.open(Boolean(replace)),
-      openMermaid: () => mermaidView.open(),
-      insertTable: (rows, columns) => tableView.insert(rows, columns),
+      openMermaid: () => currentLayoutMode() !== 'preview' && mermaidView.open(),
+      insertTable: (rows, columns) => currentLayoutMode() !== 'preview' && tableView.insert(rows, columns),
       insertInlineMath: () => mathView.insertInline(),
       insertBlockMath: () => mathView.insertBlock(),
       refreshToolbarLayoutLabel: mode => toolbarView.refreshLayoutLabel(mode)
@@ -1230,6 +1245,7 @@ async function loadAppModules() {
     highlightSession: selectionHighlightSession,
     retryScheduler: selectionRetryScheduler,
     selectionMapping: selectionMappingApi,
+    componentMapping: createPreviewComponentMapping(),
     scrollController,
     documentRef: document,
     requestFrame: callback => window.requestAnimationFrame(callback),
@@ -1532,8 +1548,8 @@ async function loadAppModules() {
     const toolbarElement = requireElement('[data-ui-slot="toolbar"]', 'Editor toolbar');
     toolbarBoundaryController = createToolbarBoundaryController({
       toolbar: toolbarElement,
-      formatGroup: requireElement('[data-ui-slot="toolbar"] .format-group', 'Toolbar format group'),
-      actions: requireElement('[data-ui-slot="toolbar"] .editor-actions', 'Toolbar actions'),
+      formatGroup: requireElement('[data-ui-slot="toolbar"] .writing-mode-slot', 'Workspace mode group'),
+      singleGroup: true,
       matchMedia: typeof layoutFrameHost.matchMedia === 'function'
         ? layoutFrameHost.matchMedia.bind(layoutFrameHost)
         : null,
@@ -1655,12 +1671,14 @@ async function loadAppModules() {
       coreSaveStatusStorePort: saveStatusStore,
       coreDocumentSessionPort: documentSessionStore,
       coreLayoutStatePort: layoutState,
-      coreEditorUiCommandPort: editorCommands
+      coreEditorUiCommandPort: editorCommands,
+      corePreviewStatePort: previewState
     }));
     const workspacePreferences = ownApplication(createWorkspacePreferences({
       document, window,
       editor: virtualEditor,
       preview: previewHost, documentModel,
+      coreDocumentSessionPort: documentSessionStore,
       coreSettingsStorePort: settingsStore,
       coreEditorUiCommandPort: editorCommands,
       coreLayoutStatePort: layoutState,
@@ -1674,7 +1692,7 @@ async function loadAppModules() {
       document, window,
       editor: virtualEditor, documentModel,
       filenameInput: requireElement('#filename', 'Filename'),
-      localStorage: window.localStorage,
+      localStorage: documentStorage,
       navigator: window.navigator,
       prompt: (...args) => window.prompt(...args),
       confirm: (...args) => window.confirm(...args),

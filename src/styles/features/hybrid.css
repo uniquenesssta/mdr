@@ -56,8 +56,8 @@ body.hybrid-view-mode .f-editor-pane .collapse-btn {
 }
 
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-source-active {
-  background: var(--color-editor-active-line);
-  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--color-accent) 72%, transparent);
+  background: transparent;
+  box-shadow: none;
   color: var(--color-editor-text);
   font-family: var(--font-family-editor);
   font-size: var(--editor-font-size, var(--font-size-2xl));
@@ -236,8 +236,6 @@ width: 100%;
   }
   .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line {
 --hybrid-line-inline-padding: 18px;
-padding-right: var(--hybrid-line-inline-padding);
-padding-left: var(--hybrid-line-inline-padding);
   }
 }
 
@@ -339,3 +337,12 @@ margin-left: 18px;
   color: var(--color-text-primary);
   font-family: var(--font-family-ui);
 }
+
+/* Confirmed MDR Figma component presentation. */
+body.hybrid-view-mode .f-editor-pane > .pane-header, body.preview-only-mode .f-preview-pane > .pane-header { display: none; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { max-width: calc(var(--document-measure) + 64px); width: 100%; padding-top: 40px; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line { --hybrid-line-inline-padding: 32px; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading { font-weight: 500; letter-spacing: 0; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-1 { font-size: 2em; line-height: 1.45; border: 0; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-2 { font-size: 1.34em; line-height: 1.5; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-blockquote { color: var(--color-text-primary); font-size: .78em; line-height: 22px; font-style: normal; background-color: transparent; background-image: repeating-linear-gradient(to right, var(--color-accent) 0 3px, transparent 3px var(--hybrid-quote-step)), linear-gradient(var(--color-surface-subtle), var(--color-surface-subtle)); background-size: var(--hybrid-quote-indent) 100%, calc(100% - 64px) 100%; background-position: calc(var(--hybrid-line-inline-padding) + 16px) 0, var(--hybrid-line-inline-padding) 0; }

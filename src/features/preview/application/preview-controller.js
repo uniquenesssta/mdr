@@ -112,8 +112,9 @@ export function createPreviewController(options = {}) {
     renderMath: roots => renderer.renderMath(roots),
     renderMermaid: (roots, isCancelled) => renderer.renderMermaid(roots, isCancelled),
     animate: roots => renderEngine.animateChanges(roots),
-    onBatchComplete() {
-      shell.invalidatePreviewAnchorMetrics?.();
+    onBatchComplete(type) {
+      if (type === 'mermaid') shell.invalidatePreviewAnchorStructure?.();
+      else shell.invalidatePreviewAnchorMetrics?.();
       renderEngine.scheduleVirtualMeasure();
     },
     isVersionCurrent: version => state.isCurrentVersion(version)

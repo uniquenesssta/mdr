@@ -49,3 +49,7 @@
 @import './features/hybrid-math.css';
 @import './features/code-presentation.css';
 @import './features/file-tree.css';
+@import './shell/writing-workspace.css';
+@import './features/selection-toolbar.css';
+@import './features/find-replace.css';
+@import './features/document-surface.css';

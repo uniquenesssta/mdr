@@ -161,3 +161,37 @@
 }
 
 .f-export-image-preview.is-hidden { display: none; }
+
+
+/* Current Figma format selector and per-format content. */
+.writing-export-dialog { width:420px;max-width:calc(100vw - 32px);min-height:234px; }
+.writing-export-dialog[data-format=image] { min-height:286px; }
+.writing-export-dialog .modal-body { display:flex;flex:1;flex-direction:column;gap:10px; }
+.writing-export-dialog .writing-export-name { display:flex;align-items:center;gap:8px;flex:0 0 32px;min-width:0;height:32px;margin:0;color:var(--color-text-secondary);font-size:14px;line-height:22px; }
+.writing-export-name span { overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+.writing-export-name .icon { width:16px;height:16px;flex:0 0 16px; }
+.writing-export-formats { display:flex;flex:0 0 38px;gap:2px;height:38px;padding:3px;border-radius:8px;background:var(--color-canvas); }
+.writing-export-formats button { flex:1;min-width:0;height:32px;padding:0 8px;border:0;border-radius:5px;background:transparent;color:var(--color-text-secondary);font-size:14px;font-weight:500; }
+.writing-export-formats button:first-child { min-width:91px; }
+.writing-export-formats button.active { background:var(--color-surface-raised);color:var(--color-accent);box-shadow:var(--shadow-control); }
+.writing-export-options { display:flex;flex-direction:column;gap:8px; }
+.writing-export-option { display:flex;align-items:center;justify-content:space-between;gap:16px;height:32px; }
+.writing-export-option label { margin:0;font-size:14px;font-weight:400; }
+.writing-export-dialog .writing-export-option select { width:176px;min-height:32px;height:32px;margin:0;padding:0 12px; }
+.writing-export-note { flex:0 0 20px;color:var(--color-text-secondary);font-size:14px;line-height:20px; }
+.writing-export-dialog .writing-image-advanced { min-width:120px;margin-right:auto; }
+.ratio-grid { display:flex;gap:2px;height:38px;padding:3px;margin-bottom:10px;border-radius:8px;background:var(--color-canvas); }
+.ratio-btn { flex:1;min-width:0;height:32px;padding:0;border:0;border-radius:5px;background:transparent;color:var(--color-text-secondary);font-size:14px; }
+.ratio-btn.active { background:var(--color-surface-raised);color:var(--color-accent);border:0; }
+.ratio-btn br,.ratio-btn small { display:none; }
+.export-image-modal .option-row { margin:10px 0;height:32px;font-size:14px; }
+.export-image-modal .option-row input { width:18px;height:18px;accent-color:var(--color-accent); }
+.export-image-modal .modal-body>label:not(:first-child),.export-image-modal .modal-body>p.hint { display:none; }
+.f-export-image-preview-wrap { display:block;min-height:38px;max-height:160px;padding:8px;border:0;border-radius:0;background:var(--color-canvas);overflow:auto; }
+.f-export-image-preview-wrap:has(.f-export-image-preview:not(.is-hidden)) { height:160px; }
+.image-preview-empty { display:block;color:var(--color-text-secondary);font-size:14px;line-height:22px; }
+.f-export-image-preview-wrap:has(.f-export-image-preview:not(.is-hidden)) .image-preview-empty { display:none; }
+.f-export-image-preview { display:block;width:100%;max-width:100%;height:auto;border-radius:0; }
+.export-image-modal .modal-footer button:first-child { margin-right:auto; }
+.export-image-modal .modal-footer button:nth-child(2) { min-width:96px; }
+.export-image-modal .modal-footer .primary { min-width:112px; }

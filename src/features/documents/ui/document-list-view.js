@@ -35,6 +35,8 @@ export function createDocumentListView({
     clearItems();
     const records = Array.isArray(snapshot?.records) ? snapshot.records : session.records;
     const activeId = snapshot?.activeId ?? session.activeId;
+    const count = root.ownerDocument.getElementById('sidebar-session-count');
+    if (count) count.textContent = `${records.length} 篇已打开 · 仅本次会话`;
     if (!records.length) {
       const empty = root.ownerDocument.createElement('div');
       empty.className = 'sidebar-empty';

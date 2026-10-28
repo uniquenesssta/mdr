@@ -2,6 +2,7 @@ import { createSafeElement } from '../dom/index.js';
 
 export function createToolbarShell(documentRef) {
   return createSafeElement(documentRef, 'div', {
+    id: 'writing-toolbar',
     className: 'l-toolbar-shell',
     attributes: {
       role: 'toolbar',

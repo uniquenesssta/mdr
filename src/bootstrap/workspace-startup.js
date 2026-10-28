@@ -6,6 +6,7 @@
  * Lifecycle: Explicit start and idempotent destroy with cancellation of late results.
  */
 import { createApplicationLifetime } from './application-lifetime.js';
+import { createLaunchOpenController } from '../features/documents/index.js';
 export function createWorkspaceStartup({ editor, preview, filenameInput, t, localStorage, platform, documentCommands, bootstrapSettingsStorePort, bootstrapEditorControllerPort, bootstrapLayoutStatePort, bootstrapPreviewCommandPort, bootstrapHelpPort, applyEditorPreferences, applyTableVisualEditingSetting, applyCodeVisualEditingSetting, setupDocuments, updateStatusBar, updateLargeDocumentMode, setLayoutMode, isHybridLayoutMode, refreshClassicLocalizedState }) {
   const lifetime = createApplicationLifetime();
   const LARGE_DOCUMENT_CHARS = bootstrapPreviewCommandPort.thresholds.scheduling.postprocess.deferChars;
@@ -48,9 +49,17 @@ export function createWorkspaceStartup({ editor, preview, filenameInput, t, loca
 
       bootstrapHelpPort.openFirstRun();
       refreshClassicLocalizedState();
-      const initialPath = platform.capabilities.desktop.fileSystem ? await platform.files.getInitialPath() : null;
-      if (!lifetime.alive) return false;
-      if (initialPath) await documentCommands.invoke('openImportPath', initialPath);
+      if (platform.capabilities.isDesktop) {
+        const launchOpen = createLaunchOpenController({ launch: platform.launch,
+          openPath: path => documentCommands.invoke('openImportPath', path),
+          reportError: error => { console.error('打开请求处理失败：', error); } });
+        lifetime.own(() => launchOpen.destroy());
+        await launchOpen.start();
+      } else {
+        const initialPath = platform.capabilities.desktop.fileSystem ? await platform.files.getInitialPath() : null;
+        if (!lifetime.alive) return false;
+        if (initialPath) await documentCommands.invoke('openImportPath', initialPath);
+      }
       return lifetime.alive;
     }
 

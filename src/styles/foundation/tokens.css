@@ -1,18 +1,27 @@
 :root {
   /* Typography */
-  --font-family-ui: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-family-ui: "Noto Sans SC", "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
   --font-family-body: var(--font-family-ui);
-  --font-family-editor: "SF Pro Text", "Inter", -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-family-mono: "JetBrains Mono", "SF Mono", "Fira Code", Consolas, Menlo, monospace;
+  --font-family-editor: var(--font-family-ui);
+  --font-family-mono: "JetBrains Mono", "Noto Sans SC", "SF Mono", "Fira Code", Consolas, Menlo, monospace;
   --font-size-3xs: 9px;
   --font-size-2xs: 10px;
-  --font-size-xs: 11px;
+  --font-size-xs: 12px;
   --font-size-sm: 12px;
-  --font-size-md: 13px;
+  --font-size-md: 14px;
   --font-size-lg: 14px;
   --font-size-xl: 15px;
   --font-size-2xl: 16px;
   --font-size-3xl: 18px;
+  --control-height: 36px;
+  --control-compact: 32px;
+  --settings-row-height: 64px;
+  --document-measure: 720px;
+  --settings-measure: 760px;
+  --status-bar-height: 40px;
+  --shadow-control: 0 1px 2px var(--color-shadow-faint);
+  --shadow-popover: 0 4px 12px var(--color-shadow-subtle);
+  --shadow-dialog: 0 8px 24px var(--color-shadow-dialog);
 
   /* Spacing */
   --space-2xs: 2px;

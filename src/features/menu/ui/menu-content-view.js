@@ -22,7 +22,7 @@ export function createMenuContentView(slots) {
           ["span",{"class":"menu-button-label"},["文件"]]
         ]],
         "\n        ",
-        ["div",{"class":"menu-dropdown-list","id":"file-menu"},[
+        ["div",{"class":"menu-dropdown-list file-menu","id":"file-menu"},[
           "\n          ",
           ["div",{"class":"menu-item"},[["span",{},["新建文档"]],["kbd",{},["Ctrl+N"]]]],
           "\n          ",
@@ -36,7 +36,7 @@ export function createMenuContentView(slots) {
           "\n          ",
           ["div",{"class":"menu-item","data-settings-open":true},[["span",{},["设置..."]],["kbd",{},["Ctrl+,"]]]],
           "\n          ",
-          ["div",{"class":"menu-item menu-submenu","id":"recent-files-menu-item"},[
+          ["div",{"class":"menu-item menu-submenu recent-files-menu-item","id":"recent-files-menu-item"},[
             ["span",{},["最近打开"]],
             ["span",{"class":"menu-arrow"},["›"]],
             "\n            ",
@@ -50,7 +50,7 @@ export function createMenuContentView(slots) {
           "\n          ",
           ["div",{"class":"menu-separator"},[]],
           "\n          ",
-          ["div",{"class":"menu-item menu-submenu"},[
+          ["div",{"class":"menu-item menu-submenu","data-workspace-export":""},[
             ["span",{},["导出"]],
             ["span",{"class":"menu-arrow"},["›"]],
             "\n            ",
@@ -81,7 +81,7 @@ export function createMenuContentView(slots) {
           ["span",{"class":"menu-button-label"},["编辑"]]
         ]],
         "\n        ",
-        ["div",{"class":"menu-dropdown-list","id":"edit-menu"},[
+        ["div",{"class":"menu-dropdown-list edit-menu","id":"edit-menu"},[
           "\n          ",
           ["div",{"class":"menu-item","data-editor-action":"undo"},[["span",{},["撤销"]],["kbd",{},["Ctrl+Z"]]]],
           "\n          ",
@@ -112,17 +112,18 @@ export function createMenuContentView(slots) {
           ["span",{"class":"menu-button-label"},["视图"]]
         ]],
         "\n        ",
-        ["div",{"class":"menu-dropdown-list","id":"app-view-menu"},[
+        ["div",{"class":"menu-dropdown-list app-view-menu","id":"app-view-menu"},[
           "\n          ",
           ["div",{"class":"menu-item"},[["span",{},["显示 / 隐藏侧边栏"]],["kbd",{},["Ctrl+Shift+B"]]]],
           "\n          ",
           ["div",{"class":"menu-separator"},[]],
           "\n          ",
-          ["div",{"class":"menu-item"},[["span",{},["编辑 + 预览"]]]],
+          ["div",{"class":"menu-item","id":"view-writing-item","data-editor-action":"layout","data-mode":"hybrid"},[["span",{},["写作"]]]],
+          ["div",{"class":"menu-item"},[["span",{},["分栏"]]]],
           "\n          ",
-          ["div",{"class":"menu-item"},[["span",{},["仅编辑"]]]],
+          ["div",{"class":"menu-item"},[["span",{},["源码"]]]],
           "\n          ",
-          ["div",{"class":"menu-item"},[["span",{},["仅预览"]]]],
+          ["div",{"class":"menu-item"},[["span",{},["纯阅读"]]]],
           "\n          ",
           ["div",{"class":"menu-separator"},[]],
           "\n          ",
@@ -141,7 +142,7 @@ export function createMenuContentView(slots) {
           ["span",{"class":"menu-button-label"},["插入"]]
         ]],
         "\n        ",
-        ["div",{"class":"menu-dropdown-list","id":"insert-menu"},[
+        ["div",{"class":"menu-dropdown-list insert-menu","id":"insert-menu"},[
           "\n          ",
           ["div",{"class":"menu-item menu-submenu"},[
             ["span",{},["标题"]],
@@ -165,12 +166,17 @@ export function createMenuContentView(slots) {
             "\n          "
           ]],
           "\n          ",
+          ["div",{"class":"menu-item","id":"insert-quote-item","data-editor-action":"quote"},[["span",{},["引用"]]]],
+          ["div",{"class":"menu-item menu-submenu"},[["span",{},["列表与任务"]],["span",{"class":"menu-arrow"},["›"]],["div",{"class":"menu-dropdown-list menu-submenu-list"},[["div",{"class":"menu-item","id":"insert-unordered-item","data-editor-action":"unordered"},[["span",{},["无序列表"]]]],["div",{"class":"menu-item","id":"insert-ordered-item","data-editor-action":"ordered"},[["span",{},["有序列表"]]]],["div",{"class":"menu-item","id":"insert-task-item","data-editor-action":"task"},[["span",{},["任务列表"]]]]]]]],
+          ["div",{"class":"menu-separator"},[]],
           ["div",{"class":"menu-item","data-editor-action":"open-link"},[["span",{},["链接"]],["kbd",{},["Ctrl+K"]]]],
           "\n          ",
           ["div",{"class":"menu-item","data-editor-action":"open-image"},[["span",{},["图片..."]],["kbd",{},["Ctrl+Shift+K"]]]],
           "\n          ",
           ["div",{"class":"menu-item","data-editor-action":"insert-table","data-rows":"3","data-cols":"3"},[["span",{},["表格 3 × 3"]]]],
           "\n          ",
+          ["div",{"class":"menu-item","id":"insert-code-item","data-editor-action":"code"},[["span",{},["代码块"]]]],
+          ["div",{"class":"menu-separator"},[]],
           ["div",{"class":"menu-item menu-switch-item","id":"table-visual-editing-toggle","role":"menuitemcheckbox","aria-checked":"false"},[
             "\n            ",
             ["span",{},["表格深度可视化编辑"]],
@@ -220,7 +226,7 @@ export function createMenuContentView(slots) {
           ["span",{"class":"menu-button-label"},["帮助"]]
         ]],
         "\n        ",
-        ["div",{"class":"menu-dropdown-list","id":"help-menu"},[
+        ["div",{"class":"menu-dropdown-list help-menu","id":"help-menu"},[
           "\n          ",
           ["div",{"class":"menu-item","data-help-open":true},[["span",{},["使用帮助"]]]],
           "\n        "
@@ -228,7 +234,7 @@ export function createMenuContentView(slots) {
         "\n      "
       ]],
       "\n      ",
-      ["div",{"class":"menu-bar-spacer window-drag-region"},[]],
+      ["div",{"class":"menu-bar-spacer writing-window-title window-drag-region"},["MDR"]],
       "\n      ",
       ["div",{"class":"window-controls","id":"window-controls","hidden":true,"aria-label":"窗口控制"},[
         "\n        ",

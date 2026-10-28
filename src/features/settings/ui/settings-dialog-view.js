@@ -5,18 +5,19 @@
  * State/side effects: Owns dialog DOM/listeners and the ordered field View collection; all Settings values remain caller-owned draft state.
   * Lifecycle: Explicit destroyable View; destroy releases owned field/navigation resources and DOM listeners.
  */
-import { ModalShell } from '../../../ui/components/modal-shell.js';
 import { createIconView } from '../../../ui/components/icon-view.js';
 import { createEventScope, createSafeElement, requireElementRef } from '../../../ui/dom/index.js';
 import { listSettingsSectionDefinitions } from '../sections/section-registry.js';
 import { createSettingsFieldView, getSettingsFieldLayoutGroup } from './settings-field-view.js';
 import { createSettingsNavigationView } from './settings-navigation-view.js';
+import { createToolbarPreviewView } from './toolbar-preview-view.js';
+import { createLaunchPolicyFieldView } from './launch-policy-field-view.js';
 
 const SECTION_COPY = Object.freeze({
-  general: Object.freeze({ title: '通用', summary: '控制应用外观、语言和启动后的默认工作区。' }),
-  editor: Object.freeze({ title: '编辑器', summary: '调整源码编辑区域的字号、文字色和当前行提示。' }),
+  general: Object.freeze({ title: '常规', summary: '设置界面外观、语言与默认工作方式。' }),
+  editor: Object.freeze({ title: '编辑器', summary: '调整编辑区域的字号和文字颜色。' }),
   save: Object.freeze({ title: '保存与导出', summary: '管理自动保存节奏，以及桌面版导出时默认打开的位置。' }),
-  toolbar: Object.freeze({ title: '工具栏', summary: '保留常用格式按钮，隐藏暂时不需要的项目。' }),
+  toolbar: Object.freeze({ title: '工具条', summary: '选择常驻项目和尺寸，其余命令可从菜单栏使用。' }),
   performance: Object.freeze({ title: '性能', summary: '选择超大文档的实时预览范围，平衡完整性与响应速度。' })
 });
 
@@ -50,12 +51,16 @@ function createFieldHost(documentRef, page, settingId, groups) {
 }
 
 export function createSettingsDialogView(overlayRoot, {
+  workspaceRoot = null,
   onNavigate,
   onDraftChange,
   onRequestApply,
   onRequestCancel,
   onChooseDirectory,
-  onClearDirectory
+  onClearDirectory,
+  onRequestReset = () => {},
+  onLaunchPolicyChange = () => {},
+  onOpen = () => {}
 } = {}) {
   requireElementRef(overlayRoot, 'Settings overlay root');
   for (const [name, callback] of Object.entries({ onNavigate, onDraftChange, onRequestApply, onRequestCancel, onChooseDirectory, onClearDirectory })) {
@@ -64,38 +69,58 @@ export function createSettingsDialogView(overlayRoot, {
 
   const documentRef = overlayRoot.ownerDocument;
   const events = createEventScope();
-  const root = createSafeElement(documentRef, 'div', { id: 'settings-modal', className: 'modal-overlay' });
+  const root = createSafeElement(documentRef, 'div', { id: 'settings-modal', className: 'settings-workspace' });
+  root.hidden = true;
   const panel = createSafeElement(documentRef, 'div', {
-    className: 'modal preferences-modal', attributes: { role: 'dialog', 'aria-modal': 'true', 'aria-labelledby': 'settings-title' }
+    className: 'settings-workspace-panel', attributes: { role: 'region', 'aria-labelledby': 'settings-title' }
   });
   const header = createSafeElement(documentRef, 'div', { className: 'modal-header preferences-header' });
   const headingGroup = createSafeElement(documentRef, 'div');
   headingGroup.append(
-    createSafeElement(documentRef, 'h3', { id: 'settings-title', text: '设置' }),
-    createSafeElement(documentRef, 'p', { text: '按分类调整应用、编辑器和保存行为' })
+    createSafeElement(documentRef, 'h3', { id: 'settings-title', text: '设置' })
   );
-  const closeButton = createSafeElement(documentRef, 'button', { attributes: { type: 'button', 'aria-label': '关闭设置' } });
-  closeButton.append(createIconView(documentRef, 'icon-close'));
-  header.append(headingGroup, closeButton);
+  header.append(headingGroup);
 
   const layout = createSafeElement(documentRef, 'div', { className: 'preferences-layout' });
   const navigationRoot = createSafeElement(documentRef, 'nav', { className: 'preferences-nav', attributes: { 'aria-label': '设置分类' } });
   const content = createSafeElement(documentRef, 'div', { className: 'preferences-content settings-body' });
-  layout.append(navigationRoot, content);
-  const feedback = createSafeElement(documentRef, 'div', { id: 'settings-feedback', className: 'c-form-status', attributes: { role: 'status', 'aria-live': 'polite' } });
+  const surface = createSafeElement(documentRef, 'div', { className: 'settings-surface' });
+  content.append(surface);
+  const sidebar = createSafeElement(documentRef, 'aside', { className: 'settings-sidebar' });
+  const returnButton = createSafeElement(documentRef, 'button', { className: 'sidebar-footer-action', text: '返回文档', attributes: { type: 'button' } });
+  returnButton.append(createIconView(documentRef, 'icon-chevron-left'));
+  sidebar.append(header, navigationRoot, returnButton);
+  layout.append(sidebar, content);
+  const feedback = createSafeElement(documentRef, 'div', { id: 'settings-feedback', className: "c-form-status settings-feedback", attributes: { role: 'status', 'aria-live': 'polite' } });
   feedback.hidden = true;
-  const footer = createSafeElement(documentRef, 'div', { className: 'modal-footer' });
-  const cancelButton = createSafeElement(documentRef, 'button', { text: '取消', attributes: { type: 'button' } });
-  const applyButton = createSafeElement(documentRef, 'button', { className: 'primary', text: '保存设置', attributes: { type: 'button' } });
-  footer.append(feedback, cancelButton, applyButton);
-  panel.append(header, layout, footer);
+  const footer = createSafeElement(documentRef, 'div', { className: 'settings-footer' });
+  const resetButton = createSafeElement(documentRef, 'button', { text: '恢复默认', attributes: { type: 'button' } });
+  footer.append(createSafeElement(documentRef, 'p', { className: 'hint', text: '更改会自动保存在此设备。' }), feedback, resetButton);
+  surface.append(footer);
+  panel.append(layout);
   root.append(panel);
 
   const pages = new Map();
   const fields = new Map();
   const groups = new Map();
+  const toolbarPreview = createToolbarPreviewView(documentRef);
   let navigation = null;
-  let modal = null;
+  let launchPolicy = null;
+  let opened = false;
+  let session = null;
+  let returnFocus = null;
+  let workspaceInert = false;
+  const app = workspaceRoot?.parentElement || null;
+  const closePage = (reason = 'programmatic') => {
+    if (!opened) return false;
+    opened = false;
+    root.hidden = true;
+    if (workspaceRoot) workspaceRoot.inert = workspaceInert;
+    app?.classList.remove('settings-active');
+    if (returnFocus?.isConnected) returnFocus.focus?.({ preventScroll: true });
+    session?.onClose?.(reason);
+    return true;
+  };
   let destroyed = false;
 
   const assertActive = () => {
@@ -112,7 +137,7 @@ export function createSettingsDialogView(overlayRoot, {
     for (const section of listSettingsSectionDefinitions()) {
       const page = createPage(documentRef, section.id);
       pages.set(section.id, page);
-      content.append(page);
+      surface.append(page);
       for (const descriptor of section.fields) {
         if (descriptor.surface !== 'settings-dialog') continue;
         if (fields.has(descriptor.settingId)) throw new Error(`Duplicate Settings dialog field ${descriptor.settingId}.`);
@@ -124,21 +149,28 @@ export function createSettingsDialogView(overlayRoot, {
         }));
       }
     }
-    if (fields.size !== 13) throw new Error(`Settings dialog expected 13 descriptor-backed fields, received ${fields.size}.`);
+    if (fields.size !== 14) throw new Error(`Settings dialog expected 14 descriptor-backed fields, received ${fields.size}.`);
+    launchPolicy = createLaunchPolicyFieldView(pages.get('general'), onLaunchPolicyChange);
+    pages.get('toolbar').insertBefore(toolbarPreview.root, fields.get('toolbarPrimaryItems').root);
     navigation = createSettingsNavigationView(navigationRoot, { onNavigate });
-    events.listen(closeButton, 'click', () => onRequestCancel('feature-close'));
-    events.listen(cancelButton, 'click', () => onRequestCancel('feature-close'));
-    events.listen(applyButton, 'click', () => onRequestApply());
-    modal = new ModalShell(root, { panel });
-    overlayRoot.append(root);
+    surface.append(footer);
+    events.listen(returnButton, 'click', () => onRequestApply());
+    events.listen(resetButton, 'click', () => onRequestReset());
+    events.listen(root, 'keydown', event => {
+      if (event.key === 'Escape') { event.preventDefault(); onRequestApply(); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') { event.preventDefault(); onRequestApply(); }
+      event.stopPropagation();
+    });
+    if (app) app.append(root);
+    else overlayRoot.append(root);
   } catch (error) {
     const errors = [error];
     try { events.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
     try { navigation?.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
+    try { launchPolicy?.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
     for (const field of [...fields.values()].reverse()) {
       try { field.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
     }
-    try { modal?.destroy(); } catch (cleanupError) { errors.push(cleanupError); }
     try { root.remove(); } catch (cleanupError) { errors.push(cleanupError); }
     if (errors.length === 1) throw error;
     throw new AggregateError(errors, 'Failed to construct Settings dialog view cleanly.');
@@ -147,9 +179,11 @@ export function createSettingsDialogView(overlayRoot, {
   const directoryField = fields.get('exportDirectory');
   return Object.freeze({
     root,
+    launchPolicy,
     renderDraft(draft) {
       assertActive();
       for (const field of fields.values()) field.render(draft);
+      toolbarPreview.render(draft);
     },
     setActivePage(page) {
       assertActive();
@@ -190,26 +224,43 @@ export function createSettingsDialogView(overlayRoot, {
     },
     open(options) {
       assertActive();
-      return modal.open(null, options);
+      if (opened) return true;
+      returnFocus = documentRef.activeElement;
+      session = options;
+      opened = true;
+      // Preserve layout dimensions so returning does not rebuild the editor or preview.
+      if (workspaceRoot) { workspaceInert = workspaceRoot.inert; workspaceRoot.inert = true; }
+      app?.classList.add('settings-active');
+      root.hidden = false;
+      onOpen();
+      options?.initialFocus?.focus?.({ preventScroll: true });
+      if (navigation.getActiveButton()?.dataset.settingsPage === 'toolbar') {
+        const item=fields.get('toolbarPrimaryItems').root.querySelector('input');
+        item?.focus?.({ preventScroll:true });
+        fields.get('toolbarPrimaryItems').root.scrollIntoView?.({ block:'nearest' });
+      }
+      return true;
     },
     close(reason = 'programmatic') {
       assertActive();
-      return modal.close(reason);
+      return closePage(reason);
     },
     isOpen() {
       assertActive();
-      return modal.isOpen();
+      return opened;
     },
     destroy() {
       if (destroyed) return;
       destroyed = true;
       const errors = [];
       try { events.destroy(); } catch (error) { errors.push(error); }
+      try { toolbarPreview.destroy(); } catch (error) { errors.push(error); }
+      try { launchPolicy?.destroy(); } catch (error) { errors.push(error); }
       try { navigation.destroy(); } catch (error) { errors.push(error); }
       for (const field of [...fields.values()].reverse()) {
         try { field.destroy(); } catch (error) { errors.push(error); }
       }
-      try { modal.destroy(); } catch (error) { errors.push(error); }
+      try { closePage('destroy'); } catch (error) { errors.push(error); }
       try { root.remove(); } catch (error) { errors.push(error); }
       if (errors.length) throw new AggregateError(errors, 'Failed to destroy Settings dialog view cleanly.');
     }

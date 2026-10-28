@@ -1,41 +1,6 @@
-/* Responsibility: File-drop overlay component. */
-
-/* 拖放文件提示遮罩 */
-.drop-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--color-drop-target);
-      border: 2px dashed var(--color-accent);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: var(--layer-popover);
-      pointer-events: none;
-      transition: opacity var(--motion-duration-moderate) ease;
-      opacity: 0;
-      backdrop-filter: blur(2px);
-}
-
-.drop-overlay.show {
-      display: flex;
-      opacity: 1;
-}
-
-.drop-message {
-      color: var(--color-accent);
-      font-size: var(--font-size-3xl);
-      font-weight: 600;
-      padding: var(--space-4xl) var(--space-6xl);
-      border-radius: var(--radius-3xl);
-      background: var(--color-surface-raised);
-      box-shadow: var(--shadow-overlay);
-      display: inline-flex;
-      align-items: center;
-      gap: var(--space-lg);
-}
-
-.drop-overlay {
-  inset: 10px;
-  border-radius: var(--radius-4xl);
-  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-}
+/* Responsibility: A bounded file drop target over the actual drag lifecycle. */
+.drop-overlay { position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--color-overlay-scrim);z-index:var(--layer-popover);pointer-events:none; }
+.drop-overlay.show { display:flex; }
+.drop-message { width:360px;max-width:calc(100vw - 32px);padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid var(--color-accent);border-radius:12px;background:var(--color-accent-soft);color:var(--color-accent);font-size:18px;line-height:28px;font-weight:700;text-align:center; }
+.drop-message .icon { width:24px;height:24px; }
+.drop-message::after { content:'Markdown / 文本文件 / 图片';font-size:14px;line-height:22px;font-weight:400;color:var(--color-text-secondary); }

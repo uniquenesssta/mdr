@@ -97,7 +97,7 @@ test('createUI returns the exact named App Shell refs and owns an idempotent lif
   appRoot.append(previous);
 
   const ui = createUI(appRoot);
-  assert.deepEqual(Object.keys(ui).sort(), [...REQUIRED_REFS, 'destroy'].sort());
+  assert.deepEqual(Object.keys(ui).sort(), [...REQUIRED_REFS, 'workspace', 'destroy'].sort());
   assert.equal(createUI(appRoot), ui);
   assert.equal(appRoot.hidden, false);
   assert.equal(appRoot.childNodes.length, 2);
@@ -116,12 +116,14 @@ test('createUI returns the exact named App Shell refs and owns an idempotent lif
   const app = appRoot.childNodes[0];
   assert.equal(app.className, 'l-app-shell');
   assert.equal(app.getAttribute('data-ui-shell'), 'app');
-  assert.deepEqual(app.childNodes.map(node => node.className), ['l-menu-bar', 'l-toolbar-shell', 'l-workspace', 'l-status-bar']);
-  const workspace = app.childNodes[2];
-  assert.deepEqual(workspace.childNodes.map(node => node.id || node.className), ['sidebar', 'sidebar-resizer', 'l-split-pane']);
+  assert.deepEqual(app.childNodes.map(node => node.className), ['l-menu-bar', 'l-workspace', 'l-status-bar']);
+  const workspace = app.childNodes[1];
+  assert.equal(ui.workspace, workspace);
+  assert.deepEqual(workspace.childNodes.map(node => node.id || node.className), ['sidebar', 'sidebar-resizer', 'l-workspace-main']);
   assert.equal(workspace.childNodes[1].getAttribute('aria-label'), '调整侧边栏宽度');
   assert.equal(workspace.childNodes[1].title, '拖动调整侧边栏宽度');
-  assert.deepEqual(workspace.childNodes[2].childNodes.map(node => node.id || node.className), ['l-pane f-editor-pane', 'resizer', 'l-pane f-preview-pane']);
+  assert.deepEqual(workspace.childNodes[2].childNodes.map(node => node.id || node.className), ['writing-toolbar', 'l-split-pane']);
+  assert.deepEqual(workspace.childNodes[2].childNodes[1].childNodes.map(node => node.id || node.className), ['l-pane f-editor-pane', 'resizer', 'l-pane f-preview-pane']);
 
   ui.destroy();
   ui.destroy();

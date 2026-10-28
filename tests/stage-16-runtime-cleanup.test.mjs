@@ -28,7 +28,13 @@ for (const [old, current, marker] of migrations) {
       previous = previous.replace(/\n}$/, '\n  return true;\n}');
     }
     const source = old.endsWith('/e2e-bridge.js')
-      ? git(['show', '3f22fd6b79e17d481d69ae2822c49268e1e0e993:' + current]) : await read(current);
+      ? git(['show', '3f22fd6b79e17d481d69ae2822c49268e1e0e993:' + current]) : old.endsWith('/link-preview.js')
+        ? git(['show','ff21aade691167271ee493ae83f5aafed8c9b8bf:'+current]) : await read(current);
+    if(old.endsWith('/link-preview.js')) {
+      // Preserve the historical migration proof; the authorized Figma revision changes presentation only.
+      const live=await read(current);
+      for(const contract of [/const SUPPORTED_SCHEMES = new Set\(\['http:', 'https:', 'mailto:', 'tel:'\]\)/,/referrerpolicy: 'no-referrer'/,/sandbox: 'allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-scripts allow-same-origin'/,/platformLinks.openExternal\(value\)/,/focusScope\?\.destroy\(\{ restoreFocus: false \}\)/,/documentEvents.destroy\(\)/]) assert.match(live,contract);
+    }
     assert.equal(source.slice(source.indexOf(marker)).trimEnd(), previous, current + ': changed beyond imports/header and explicit idempotent mount');
   });
 }

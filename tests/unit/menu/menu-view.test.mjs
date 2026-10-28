@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { parseAst } from 'rollup/parseAst';
 import { MENU_DECLARATION } from '../../../src/features/menu/menu-state.js';
 import { createMenuView } from '../../../src/features/menu/menu-view.js';
 import { createMenuController } from '../../../src/features/menu/menu-controller.js';
@@ -21,6 +22,9 @@ function el({ id = '', classes = [] } = {}) {
   const attrs = new Map();
   const node = {
     id, dataset: {}, hidden: false, children: [], parentElement: null, classList: classList(...classes),
+    querySelectorAll(selector) { const all=[];const visit=n=>{for(const child of n.children){if(selector==='[data-menu-command]'&&child.dataset.menuCommand)all.push(child);visit(child);}};visit(node);return all; },
+    prepend(...items) { items.forEach(item=>item.parentElement=node);node.children.unshift(...items); },
+    appendChild(item) { node.append(item);return item; },
     append(...items) { items.forEach(item => { item.parentElement = node; node.children.push(item); }); },
     setAttribute(name, value) { attrs.set(name, String(value)); },
     getAttribute(name) { return attrs.get(name) ?? null; },
@@ -65,6 +69,7 @@ function submenu(children) {
 }
 function makeRoot() {
   const root = el();
+  root.ownerDocument={ createElementNS:()=>el(), createElement:()=>el() };
   const file = el({ id: 'file-menu' });
   const recent = el({ id: 'recent-files-menu-item', classes: ['menu-item', 'menu-submenu'] });
   recent.append(el(), el({ id: 'recent-files-menu', classes: ['menu-dropdown-list', 'menu-submenu-list'] }));
@@ -72,9 +77,9 @@ function makeRoot() {
   const edit = el({ id: 'edit-menu' });
   edit.append(item(), item(), sep(), item(), item(), item(), item(), sep(), item());
   const view = el({ id: 'app-view-menu' });
-  view.append(item(), sep(), item(), item(), item(), sep(), item(), item());
+  view.append(item(), sep(), el({id:'view-writing-item',classes:['menu-item']}), item(), item(), item(), sep(), item(), item());
   const insert = el({ id: 'insert-menu' });
-  insert.append(submenu([item(), item(), item(), item(), item(), item()]), item(), item(), item(), item(), item(), submenu([item(), item()]), item());
+  insert.append(submenu([item(), item(), item(), item(), item(), item()]), el({id:'insert-quote-item',classes:['menu-item']}), submenu(['unordered','ordered','task'].map(id=>el({id:'insert-'+id+'-item',classes:['menu-item']}))), sep(), item(), item(), item(), el({id:'insert-code-item',classes:['menu-item']}), sep(), item(), item(), submenu([item(), item()]), item());
   const help = el({ id: 'help-menu' });
   help.append(item());
   root.append(file, edit, view, insert, help);
@@ -105,8 +110,11 @@ test('Atomic 6.10 MenuView binds command metadata, blocks legacy bubbling and de
 function productionMenu() {
   // The real-browser R16-08 test compares current feature Views with this exact markup.
   // This unit fixture supplies only element behavior to the actual Menu View/controller.
-  const specification = JSON.parse(readFileSync('tests/fixtures/stage-16/ui-markup-baseline.json', 'utf8')).slots.menu;
+  const source=readFileSync('src/features/menu/ui/menu-content-view.js','utf8');
+  let specification;
+  const visit=node=>{if(!node||typeof node!=='object')return;if(node.type==='CallExpression'&&node.callee?.name==='mountStaticContent'){const literal=node.arguments[0].elements[0].elements[1];specification=JSON.parse(source.slice(literal.start,literal.end));}for(const value of Object.values(node)){if(Array.isArray(value))value.forEach(visit);else if(value&&typeof value==='object')visit(value);}};visit(parseAst(source));
   const root = el(), nodes = new Map();
+  root.ownerDocument={ createElementNS:()=>el(), createElement:()=>el() };
   let sequence = 0;
   const append = (parent, specs) => {
     for (const spec of specs.filter(Array.isArray)) {

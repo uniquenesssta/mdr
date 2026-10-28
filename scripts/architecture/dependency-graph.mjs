@@ -223,7 +223,7 @@ export function findDependencyCycles(graph) {
 }
 
 export async function buildDependencyGraph({ root = process.cwd() } = {}) {
-  const [production, tracked, manifest] = await Promise.all([discoverProductionFiles(root), listRepositoryFiles(root), loadOwnershipManifest(root)]);
+  const [production, tracked, manifest] = await Promise.all([discoverProductionFiles(root), listRepositoryFiles(root, { includeUntracked:true }), loadOwnershipManifest(root)]);
   const known = new Set(production), files = new Set([...tracked, ...production]);
   const nodes = new Map(production.map(path => [path, { id: path, kind: posix.extname(path).slice(1), feature: featureName(path) }]));
   const pending = [...production], visited = new Set();
