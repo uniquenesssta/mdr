@@ -130,7 +130,7 @@ test('R9-07 PreviewSelectionReader returns immutable final boundary snapshot wit
   } finally { h.reader.destroy(); }
 });
 
-test('R9-07 PreviewSelectionReader waits through pointer selection and publishes one two-frame final snapshot on pointerup', () => {
+test('R9-07 PreviewSelectionReader waits through pointer selection and publishes the final snapshot on the next frame', () => {
   const h = previewHarness();
   const events = [];
   try {
@@ -145,13 +145,25 @@ test('R9-07 PreviewSelectionReader waits through pointer selection and publishes
     h.documentRef.emit('pointerup');
     assert.equal(h.frames.activeCount(), 1);
     h.frames.flushOne();
-    assert.equal(events.length, 0);
-    h.frames.flushOne();
     assert.equal(events.length, 1);
     assert.equal(events[0].reason, 'preview-pointerup');
     assert.equal(events[0].force, true);
     assert.equal(events[0].snapshot.text, 'final');
   } finally { h.reader.destroy(); }
+});
+
+test('preview drag and outside-editor selection never stringify native text before the final frame', () => {
+  const h=previewHarness();let reads=0;
+  try {
+    h.reader.start();
+    const selection=h.makeSelection();selection.toString=()=>{reads++;return 'selected';};h.setSelection(selection);
+    h.preview.emit('pointerdown');
+    for(let i=0;i<100;i++)h.documentRef.emit('selectionchange');
+    assert.equal(reads,0);
+    h.documentRef.emit('pointerup');h.documentRef.emit('selectionchange');h.frames.flushOne();
+    assert.equal(reads,1);
+    selection.anchorNode={};h.reader.read();assert.equal(reads,1);
+  }finally{h.reader.destroy();}
 });
 
 test('R9-07 PreviewSelectionReader coalesces stable selectionchange work and stale cancelled callbacks cannot publish', () => {

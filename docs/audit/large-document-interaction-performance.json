@@ -301,14 +301,50 @@
     "selectionAndFrameRegression": "final-native/native-frame.json",
     "developmentPrebundle": "dev-prebundle.json",
     "browser": {
-      "currentUi": { "passed": 82, "report": "ui/figma-ui-results.json", "currentFingerprintAdmitted": true },
-      "contract": { "passed": 12, "failed": 0, "log": "browser-contract.log" },
-      "genericApp": { "total": 84, "passed": 55, "failed": 29, "log": "browser.log", "accepted": false },
-      "headDiagnostic": { "total": 83, "passed": 72, "failed": 11, "log": "head-browser.log", "provenance": "head-baseline-source.json", "currentFingerprintAdmitted": false },
-      "isolatedOriginalChecks": { "passed": 5, "failed": 1, "report": "isolated-regression/results.json", "assertionsPreserved": true },
+      "currentUi": {
+        "passed": 82,
+        "report": "ui/figma-ui-results.json",
+        "currentFingerprintAdmitted": true
+      },
+      "contract": {
+        "passed": 12,
+        "failed": 0,
+        "log": "browser-contract.log"
+      },
+      "genericApp": {
+        "total": 84,
+        "passed": 55,
+        "failed": 29,
+        "log": "browser.log",
+        "accepted": false
+      },
+      "headDiagnostic": {
+        "total": 83,
+        "passed": 72,
+        "failed": 11,
+        "log": "head-browser.log",
+        "provenance": "head-baseline-source.json",
+        "currentFingerprintAdmitted": false
+      },
+      "isolatedOriginalChecks": {
+        "passed": 5,
+        "failed": 1,
+        "report": "isolated-regression/results.json",
+        "assertionsPreserved": true
+      },
       "interpretation": "The generic suite contains old shell/settings/theme assumptions and shared-page contamination. A clean page passes the original split drag/collapse/hysteresis, preview highlight, source drag, wheel sync and cross-chapter 8px stability checks. Baseline and current generic runs have different failure counts and are not claimed equivalent or green. The baseline external-server run omits the one current-build admission case."
     },
-    "fullNode": { "passed": 2961, "failed": 0, "skipped": 0, "cancelled": 0, "trackedTestFiles": 391, "groups": 17, "log": "repository-corrected.log", "inventory": "repository-corrected/repository-audit/test-inventory.json", "groupResults": "repository-corrected/repository-audit/suite-results.json" },
+    "fullNode": {
+      "passed": 2961,
+      "failed": 0,
+      "skipped": 0,
+      "cancelled": 0,
+      "trackedTestFiles": 391,
+      "groups": 17,
+      "log": "repository-corrected.log",
+      "inventory": "repository-corrected/repository-audit/test-inventory.json",
+      "groupResults": "repository-corrected/repository-audit/suite-results.json"
+    },
     "staticGates": "Architecture, no-legacy-runtime, generated-files and README-record all passed.",
     "fullRust": "Not rerun; no Rust source changes.",
     "stageAccepted": false
@@ -406,5 +442,304 @@
   "limitations": [
     "Performance values are from the recorded real Windows/WebView2 machine and original document, not a guarantee for every document or device.",
     "R17 final acceptance and remote push remain out of scope."
-  ]
+  ],
+  "selectionResponseRepair": {
+    "date": "2026-10-30",
+    "baselineCommit": "e884d0ebd57241e86556947fe729fe06dee70d56",
+    "branch": "codex/figma-ui",
+    "authorization": "Implement the diagnosed native selection and counterpart reveal latency repairs; user confirmed both delays. Performance and interaction logic only; no Figma work.",
+    "status": "implemented-windows-verified-rust-environment-limitation-retained",
+    "evidence": "O:/Project/Markdown Rust/Temp/selection-response-20261030",
+    "source": {
+      "characters": 5453875,
+      "originalReadOnly": true,
+      "sha256": "c042b1ab556d9156f22a4b81e761a6bb11861324eb762d6e2083fb98850f1032"
+    },
+    "findings": [
+      "The latest user log records reverse mapping without a processing duration; pure reading still writes and measures its hidden editor.",
+      "Editor selectionSet scheduled counterpart projection during pointer movement; preview selectionchange stringified text while dragging and pointer release waited two frames.",
+      "Source-origin drags expanded revealBlock across crossed presentation blocks. The unchanged e884d0e coordinator expands the controlled0..6 range to0..26; fixed coordinator retains0..6.",
+      "The actual Windows heading-center drag selected only the preceding paragraph: the existing62-percent gap heuristic was also applied to rows containing text. Keep exact character hits on nonempty rows; preserve empty-gap behavior.",
+      "Native logging withheld selection.reveal-latency and the new drag label as unreviewed strings. Add only these two exact labels, retaining text and unknown-label redaction."
+    ],
+    "changes": [
+      "Document/epoch/version-scoped reading bookmark; no hidden Editor selection or coordinate/scroll writes. Restore only after its editor surface is visible; cancel stale or replaced intents.",
+      "Merge pointer-movement synchronization into one exact final release mapping. Preview reads final native boundaries on the next frame, without stringifying during movement.",
+      "Use actual editor coordinates and instant nearest-edge reveal only for offscreen targets; record three stable samples, bounded timeout warnings and direction-specific release duration.",
+      "Keep only activated source blocks in source presentation during cross-block drags; postpone toolbar layout reads until release.",
+      "Bounded pointer-to-next-frame observation without text/geometry reads; measured frames are paint opportunities, not compositor-pixel timestamps.",
+      "Numeric sync processing durations and two explicitly reviewed Rust event labels; no selected text, original document mutation, new dependencies, frozen model or mapping change."
+    ],
+    "validation": {
+      "targetedNode43": true,
+      "inputNode32": true,
+      "rustRedaction": {
+        "passed": 16,
+        "failed": 0,
+        "log": "../selection-response-rust-redaction.log"
+      },
+      "fullRust": {
+        "binaryPassed": 295,
+        "binaryFailed": 1,
+        "ignored": 0,
+        "log": "../selection-response-rust.log",
+        "failure": "windows_case_sensitive_directory_preserves_distinct_spelling_bodies: fsutil setup reports Access is denied; not suppressed or waived.",
+        "integration": {
+          "passed": 12,
+          "failed": 0,
+          "log": "../selection-response-rust-integration.log"
+        }
+      },
+      "productionBuild": "0fd03639e8ca087db5a259c42a2c7aa7fe8ab5b1bc0dca0f1fbeb813a5279390",
+      "productionWindows": {
+        "passed": true,
+        "report": "production-final/selection-response.json",
+        "samples": [
+          {
+            "width": 1000,
+            "layout": "preview",
+            "editorHidden": true,
+            "hiddenEditorWrites": 0,
+            "pointerToFrameMs": 7.200000002980232,
+            "maxFrameGapMs": 7.799999997019768,
+            "releaseToStableMs": null
+          },
+          {
+            "width": 1000,
+            "layout": "both",
+            "editorHidden": true,
+            "hiddenEditorWrites": 0,
+            "pointerToFrameMs": 7.100000001490116,
+            "maxFrameGapMs": 7.5999999940395355,
+            "releaseToStableMs": null
+          },
+          {
+            "width": 600,
+            "layout": "preview",
+            "editorHidden": true,
+            "hiddenEditorWrites": 0,
+            "pointerToFrameMs": 6.700000002980232,
+            "maxFrameGapMs": 7.700000002980232,
+            "releaseToStableMs": null
+          },
+          {
+            "width": 600,
+            "layout": "both",
+            "editorHidden": true,
+            "hiddenEditorWrites": 0,
+            "pointerToFrameMs": 7.100000001490116,
+            "maxFrameGapMs": 7.300000004470348,
+            "releaseToStableMs": null
+          },
+          {
+            "width": 1600,
+            "layout": "preview",
+            "editorHidden": true,
+            "hiddenEditorWrites": 0,
+            "pointerToFrameMs": 7.0999999940395355,
+            "maxFrameGapMs": 7.5,
+            "releaseToStableMs": null
+          },
+          {
+            "width": 1600,
+            "layout": "both",
+            "editorHidden": false,
+            "hiddenEditorWrites": null,
+            "pointerToFrameMs": 6.899999998509884,
+            "maxFrameGapMs": 7.399999998509884,
+            "releaseToStableMs": 24.100000001490116
+          }
+        ],
+        "hybridCrossing": {
+          "beforeHeight": 28,
+          "heights": [
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28,
+            28
+          ],
+          "selectedText": "*源码** 内容\n\n## 跨段"
+        },
+        "largeInteractions": {
+          "report": "production-final/large-document-interactions.json",
+          "failures": [],
+          "dom": {
+            "nodes": 1604,
+            "outlineRows": 20
+          },
+          "gestures": [
+            {
+              "name": "outline-open",
+              "elapsedMs": 64,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "split-open",
+              "elapsedMs": 208,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "chapter-selection-0.343",
+              "elapsedMs": 264,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "scroll-0.343",
+              "elapsedMs": 246,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "chapter-selection-0.6",
+              "elapsedMs": 260,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "scroll-0.6",
+              "elapsedMs": 250,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "chapter-selection-0.9",
+              "elapsedMs": 270,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "scroll-0.9",
+              "elapsedMs": 243,
+              "maxTaskMs": 0
+            },
+            {
+              "name": "sidebar-drag",
+              "elapsedMs": 416,
+              "maxTaskMs": 0
+            }
+          ]
+        },
+        "resizeMatrix": {
+          "report": "production-final/sidebar-resize-selection.json",
+          "cases": 6,
+          "failures": []
+        },
+        "previewSelectionChecks": {
+          "passed": true,
+          "checks": [
+            "source selection still opens the editing toolbar",
+            "split keeps a real rendered text selection",
+            "split has a visible blue native selection",
+            "split preserves the synchronized character highlight",
+            "split never shows a formatting toolbar",
+            "split cannot pin a toolbar with Alt+F10",
+            "reading keeps a real rendered text selection",
+            "reading has a visible blue native selection",
+            "reading preserves the synchronized character highlight",
+            "reading never shows a formatting toolbar",
+            "reading cannot pin a toolbar with Alt+F10",
+            "pure reading remains readonly",
+            "hybrid has a normal cursor without an active-line strip",
+            "edit has a normal cursor without an active-line strip",
+            "large-split keeps a real rendered text selection",
+            "large-split has a visible blue native selection",
+            "large-split preserves the synchronized character highlight",
+            "large-split never shows a formatting toolbar",
+            "large-split cannot pin a toolbar with Alt+F10",
+            "large preview selection leaves the actual document intact"
+          ]
+        }
+      },
+      "ui": {
+        "passed": 94,
+        "report": "ui-final/figma-ui-results.json",
+        "usesFigmaApi": false
+      },
+      "fullNode": {
+        "coveredPassed": 2985,
+        "failedUnresolved": 0,
+        "skipped": 0,
+        "files": 395,
+        "groups": 17,
+        "initialFullRun": {
+          "passed": 2984,
+          "failed": 1,
+          "log": "../selection-response-repository-final.log",
+          "reason": "Existing Rust redaction case-count assertion expected15 after the reviewed privacy test raised the real count to16."
+        },
+        "correctedRootGroup": {
+          "passed": 1903,
+          "failed": 0,
+          "files": 151,
+          "log": "../selection-response-root-recheck.log"
+        },
+        "otherGroups": {
+          "passed": 1082,
+          "groups": 16,
+          "report": "node-final/repository-audit/suite-results.json"
+        },
+        "note": "Original failed full-run report is retained. All root cases were rerun after correcting the exact count and adding the required privacy-case-name assertion. Production source stayed0fd03639e8ca087db5a259c42a2c7aa7fe8ab5b1bc0dca0f1fbeb813a5279390."
+      },
+      "stageAccepted": false,
+      "diagnosticLog": {
+        "report": "diagnostic-verified/selection-response.json",
+        "operations": {
+          "selection.drag-frame-latency": {
+            "count": 7,
+            "finiteDurations": 7
+          },
+          "selection.reveal-latency": {
+            "count": 1,
+            "finiteDurations": 1
+          },
+          "selection.sync-result": {
+            "count": 13,
+            "finiteDurations": 13
+          }
+        },
+        "unsettled": 0
+      },
+      "staticGates": "Architecture, no-legacy-runtime, generated-files and README-record passed.",
+      "browserContract": {
+        "passed": 12,
+        "log": "../selection-response-contract-final.log"
+      },
+      "productionAdmission": {
+        "accepted": true,
+        "sourceSha256": "0fd03639e8ca087db5a259c42a2c7aa7fe8ab5b1bc0dca0f1fbeb813a5279390",
+        "sourceFiles": 507,
+        "outputFiles": 140
+      }
+    },
+    "retainedAttempts": [
+      "The first native binary lacked the isolated identifier; runner refused it before launch.",
+      "The initial reverse-selection probe tried a collapsed preview; activate the real compact pane before selecting.",
+      "Initial full Node run has3 stale current-evidence failures; source changes and refreshed inventory are retained, final full run required.",
+      "The first heading probe chose an endpoint beyond its text; corrected it and required actual visible glyph geometry plus selected heading text.",
+      "The stronger native heading-center assertion exposed real cross-line snapping; fixed nonempty-row policy rather than accepting the failed selection.",
+      "Packaged native application rejected external dev URLs at both16673 and16663. No permissions changed. Local diagnostic build is used solely for log verification.",
+      "An absolute drive-letter frontendDist was interpreted as a file URL; isolated test config now uses a relative local directory.",
+      "Instrumented log proved numeric metrics arrived but event labels were redacted; exact label admission and Rust privacy regression added.",
+      "Full Rust binary run:295 passed,1 failed on privileged Windows case-sensitive directory setup; failure remains visible.",
+      "The final full Node run covered2985 cases with one hardcoded15-versus16 Rust privacy-case count failure. Corrected the exact count and asserted the new privacy case by name, then all1903 root cases passed; the original full-run failure report is unchanged."
+    ],
+    "limitations": [
+      "Historical HTML source-EOF and generic browser findings remain open; no full generic-browser or R17 acceptance is claimed.",
+      "The original isolated13-character mapping failure in the user log was not reproduced by these scenarios; frozen mapping coverage96percent and8px position budgets remain unchanged.",
+      "One full Rust environment-dependent test cannot enable a case-sensitive directory without Windows privileges; targeted redaction tests pass.",
+      "Local diagnostic logging results are distinct from production response measurements. No remote push is authorized."
+    ]
+  }
 }

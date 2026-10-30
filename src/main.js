@@ -32,7 +32,7 @@ import { createTaskScheduler } from './shared/scheduling/task-scheduler.js';
 
 import { loadDomToImage } from './shared/vendor/capability-loader.js';
 import { createEditorScrollMapper, createPreviewScrollMapper, createScrollSyncController } from './features/sync/index.js';
-import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController, createPreviewComponentMapping } from './features/sync/index.js';
+import { createEditorSelectionReader, createPreviewSelectionReader, createSelectionFeedbackGuard, createSelectionHighlightSession, createSelectionRetryScheduler, createSelectionSyncController, createPreviewComponentMapping, createSelectionDragObserver, createPreviewSelectionTarget } from './features/sync/index.js';
 import { configureMarkdownEditorE2EPorts, installMarkdownEditorE2EBridge, destroyMarkdownEditorE2EBridge } from './features/e2e/index.js';
 import { createFolderTreeController, createFolderTreeState, createFolderTreeView, createOutlineCollapseStore, createOutlineController, createOutlineView, createSidebarState, createSidebarTabController } from './features/sidebar/index.js';
 import { configureHybridImageSourcePlatform, configureHybridSyncCapabilities, configureHybridLinkPreview } from './features/hybrid-editor/index.js';
@@ -330,6 +330,7 @@ async function loadAppModules() {
     previewElement: previewHost,
     documentRef: previewSelectionDocument,
     getSelection: () => previewSelectionView?.getSelection?.() || null,
+    now: () => performance.now(),
     requestFrame: callback => window.requestAnimationFrame(callback),
     cancelFrame: frameId => window.cancelAnimationFrame(frameId)
   });
@@ -1258,6 +1259,11 @@ async function loadAppModules() {
     cancelFrame: id => window.cancelAnimationFrame(id),
     now: () => performance.now(),
     isHybridLayout: () => layoutState.snapshot.mode === 'hybrid',
+    createPreviewSelectionTarget,
+    isEditorVisible: () => layoutState.snapshot.mode !== 'preview' && editorHost.clientHeight > 0,
+    subscribeLayoutChange: callback => layoutState.subscribe(event => {
+      if (event.changedGroup === 'mode' || event.changedGroup === 'split') callback();
+    }),
     isGeometryChanging: () => layoutState.snapshot.resize.sidebarActive || layoutState.snapshot.resize.splitActive
       || layoutState.snapshot.resize.windowBurstEvents > 0,
     updateActiveLine: line => outlineController?.updateActiveLine?.(line),
@@ -1469,6 +1475,11 @@ async function loadAppModules() {
       notifySelectionGeometry: reason => selectionController.notifyEditorGeometry(reason)
     });
     selectionController.start();
+    const selectionDragObserver = createSelectionDragObserver({ editor: editorHost, preview: previewHost, documentRef: document,
+      requestFrame: callback => window.requestAnimationFrame(callback), cancelFrame: id => window.cancelAnimationFrame(id),
+      now: () => performance.now(), record: (operation, entry) => telemetry.record?.(operation, entry) });
+    selectionDragObserver.start();
+    ownApplicationExit(() => selectionDragObserver.destroy());
     configurePerformanceRuntimeStats(() => ({
       classifyScrollTarget: target => scrollController.classifyScrollTarget(target),
       scrollSync: scrollController.getState(),

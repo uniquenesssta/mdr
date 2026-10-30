@@ -2748,6 +2748,26 @@
       false
     ],
     [
+      "src/features/sync/selection/preview-selection-target.js",
+      "esm-module",
+      "sync-selection",
+      "Document-scoped reading bookmark, visible editor target continuation and stable-frame reveal latency without mapping or focus ownership.",
+      "preview-selection-target-session",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/sync/selection/selection-drag-observer.js",
+      "esm-module",
+      "sync-selection",
+      "Bounded pointer-to-frame latency observer without selection text or geometry reads.",
+      "selection-drag-observation-session",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
       "src/i18n/i18n-service.js",
       "esm-module",
       "internationalization",

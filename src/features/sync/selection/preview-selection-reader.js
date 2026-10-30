@@ -18,7 +18,7 @@ function normalizeOffset(value) {
 }
 
 export class PreviewSelectionReader {
-  constructor({ previewElement, documentRef, getSelection, requestFrame, cancelFrame } = {}) {
+  constructor({ previewElement, documentRef, getSelection, requestFrame, cancelFrame, now = () => 0 } = {}) {
     assertEventTarget(previewElement, 'previewElement');
     assertEventTarget(documentRef, 'documentRef');
     if (typeof getSelection !== 'function') throw new TypeError('PreviewSelectionReader requires getSelection capability');
@@ -30,6 +30,7 @@ export class PreviewSelectionReader {
     this.getSelection = getSelection;
     this.requestFrame = requestFrame;
     this.cancelFrame = cancelFrame;
+    this.now = now;
     this.listeners = new Set();
     this.started = false;
     this.destroyed = false;
@@ -37,24 +38,29 @@ export class PreviewSelectionReader {
     this.selectionDirty = false;
     this.frameId = 0;
     this.frameVersion = 0;
+    this.pointerEndedAt = null;
 
     this.onPointerDown = () => {
       this.pointerActive = true;
       this.selectionDirty = false;
+      this.pointerEndedAt = null;
       this.cancelPending();
     };
     this.onPointerEnd = () => {
       if (!this.pointerActive) return;
       this.pointerActive = false;
       this.selectionDirty = false;
-      this.scheduleStable('preview-pointerup', { force: true, frames: 2, allowEmpty: true });
+      this.pointerEndedAt = this.now();
+      this.scheduleStable('preview-pointerup', { force: true, frames: 1, allowEmpty: true });
     };
     this.onSelectionChange = () => {
-      if (!this.read()) return;
       if (this.pointerActive) {
         this.selectionDirty = true;
         return;
       }
+      // Pointerup's next frame reads the final native boundaries, including a
+      // selectionchange delivered afterwards. Do not replace that release intent.
+      if (this.pointerEndedAt !== null) return;
       this.scheduleStable('document-selectionchange', { frames: 1 });
     };
   }
@@ -63,9 +69,9 @@ export class PreviewSelectionReader {
     if (this.destroyed) return null;
     const selection = this.getSelection?.();
     if (!selection || selection.isCollapsed || Number(selection.rangeCount) < 1) return null;
+    if (!this.previewElement.contains?.(selection.anchorNode) || !this.previewElement.contains?.(selection.focusNode)) return null;
     const text = String(selection.toString?.() || '');
     if (!text.trim()) return null;
-    if (!this.previewElement.contains?.(selection.anchorNode) || !this.previewElement.contains?.(selection.focusNode)) return null;
     let range;
     try {
       const current = selection.getRangeAt(0);
@@ -113,6 +119,7 @@ export class PreviewSelectionReader {
     this.started = false;
     this.pointerActive = false;
     this.selectionDirty = false;
+    this.pointerEndedAt = null;
     this.cancelPending();
     this.previewElement.removeEventListener('pointerdown', this.onPointerDown, true);
     this.documentRef.removeEventListener('pointerup', this.onPointerEnd, true);
@@ -134,7 +141,9 @@ export class PreviewSelectionReader {
       this.frameId = 0;
       const snapshot = this.read();
       if (!snapshot && !allowEmpty) return;
-      const event = Object.freeze({ reason, force: Boolean(force), snapshot });
+      const startedAt = this.pointerEndedAt;
+      this.pointerEndedAt = null;
+      const event = Object.freeze({ reason, force: Boolean(force), snapshot, startedAt });
       for (const listener of [...this.listeners]) listener(event);
     };
     this.frameId = this.requestFrame(run);

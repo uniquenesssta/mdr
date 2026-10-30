@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "345ff6fb1f1f3acdaf60bc8b9edcf7a7373d5400",
+  "baselineCommit": "e884d0ebd57241e86556947fe729fe06dee70d56",
   "schemaVersion": 1,
   "stage": "R16.12",
-  "productionFiles": 566,
-  "inputSha256": "5857aa20b0f94dc4d513100674f50ab0935d9b090380511be2acecd0d73f4201",
+  "productionFiles": 568,
+  "inputSha256": "1da1f8494078e67e9ff4cd9bb82ae873401c13a1d21e3fe7d8cf53c49665f477",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -2365,6 +2365,16 @@
     },
     {
       "id": "src/features/sync/selection/preview-selection-reader.js",
+      "kind": "js",
+      "feature": "sync"
+    },
+    {
+      "id": "src/features/sync/selection/preview-selection-target.js",
+      "kind": "js",
+      "feature": "sync"
+    },
+    {
+      "id": "src/features/sync/selection/selection-drag-observer.js",
       "kind": "js",
       "feature": "sync"
     },
@@ -6018,7 +6028,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "serde_json::json",
-      "line": 487,
+      "line": 509,
       "column": 5
     },
     {
@@ -6027,7 +6037,7 @@
       "kind": "rust-namespace",
       "domain": null,
       "specifier": "super::redact_value",
-      "line": 486,
+      "line": 508,
       "column": 5
     },
     {
@@ -12269,6 +12279,24 @@
     },
     {
       "from": "src/features/sync/index.js",
+      "to": "src/features/sync/selection/preview-selection-target.js",
+      "specifier": "./selection/preview-selection-target.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 55,
+      "column": 1
+    },
+    {
+      "from": "src/features/sync/index.js",
+      "to": "src/features/sync/selection/selection-drag-observer.js",
+      "specifier": "./selection/selection-drag-observer.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 54,
+      "column": 1
+    },
+    {
+      "from": "src/features/sync/index.js",
       "to": "src/features/sync/selection/selection-feedback-guard.js",
       "specifier": "./selection/selection-feedback-guard.js",
       "kind": "re-export",
@@ -16394,7 +16422,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "serde_json::json",
-      "line": 487,
+      "line": 509,
       "column": 5,
       "modulePrefix": "cargo:serde_json",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."
@@ -16402,7 +16430,7 @@
     {
       "from": "src-tauri/src/performance_log/redaction.rs",
       "specifier": "super::redact_value",
-      "line": 486,
+      "line": 508,
       "column": 5,
       "modulePrefix": "src-tauri/src/performance_log/mod.rs",
       "resolution": "Module/package prefix only; defining symbols, traits, cfg and macros are resolved by the mandatory Rust compiler gates."

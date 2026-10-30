@@ -2,6 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createFinalSelectionController } from './helpers/stage-09-selection-controller-harness.mjs';
 
+test('native editor drags keep expensive counterpart mapping out of pointer movement and publish the final release once',()=>{
+  const h=createFinalSelectionController();let mapped=0;
+  h.controller.syncEditorToPreview=()=>{mapped++;return {status:'exact'};};
+  try{
+    h.controller.start();h.editor.emit('pointerdown');
+    for(let i=0;i<100;i++){h.editor.emit('select');h.frames.flushAll();}
+    assert.equal(mapped,0);assert.equal(h.controller.getState().editorRequests,0);
+    h.documentRef.emit('pointerup');h.frames.flushAll();assert.equal(mapped,1);
+  }finally{h.controller.destroy();}
+});
+
 function fixture({ top = 70, height = 20, scrollTop = 0 } = {}) {
   let contentTop = top;
   const writes = [];

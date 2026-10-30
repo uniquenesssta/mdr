@@ -723,7 +723,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "sha256": "de1350a00a9b3d54f50eb65351eb3174c8cb54aa62422632eb60d49c78e6b37e"
+      "sha256": "82d61fbd1a4f78e93304776a099a162008d68f886c67d0e106995369e6191905"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -1199,11 +1199,11 @@
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js",
-      "sha256": "297564c8137da1be966687b1c2e2349ab49b3f43bf2fb91b485bacfc410f24f0"
+      "sha256": "1ff621dc15bc1713c0de81dadae3b2395f57ef4f1bfd264d09a991eb89192c5a"
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/pointer-selection-policy.js",
-      "sha256": "a0f4c1447aeed182454e3ac9e0663d059db8ceef1411ef6fb7c70a75e7aab49e"
+      "sha256": "84febf784cf0ab238ab85536aa8117347bfaa6f09c7b2c137bf2e54401727178"
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/precise-pointer-selection.js",
@@ -1251,7 +1251,7 @@
     },
     {
       "path": "src/features/editor/ui/selection-toolbar-view.js",
-      "sha256": "bd746c15184b6c17212c82a190c25875d7122d2a5b1821bd7ea4b0f81aa15ccd"
+      "sha256": "db66c99f7e4b71eba2da627ca03d1f1695d8be331fad0e5951399b65b8ace66d"
     },
     {
       "path": "src/features/editor/ui/table-dialog-view.js",
@@ -1455,7 +1455,7 @@
     },
     {
       "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
-      "sha256": "833064f926a8e640a7675d47304368e5a563ee1390e8881498c9d84ddedf810e"
+      "sha256": "f9882d3448bfa51cd9c69ae7a254150377b0aed345f20c47cf1bea04af47d67c"
     },
     {
       "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
@@ -2199,7 +2199,7 @@
     },
     {
       "path": "src/features/sync/index.js",
-      "sha256": "958624395926f29c5a34990c3101c10daa504d25ae5cfa9bdf94b1668f584585"
+      "sha256": "cd083595cb2432d3ae0edb46d7a54a5a0b86f893f2436d65a09fe881e9e527e6"
     },
     {
       "path": "src/features/sync/scroll/editor-scroll-mapper.js",
@@ -2231,7 +2231,15 @@
     },
     {
       "path": "src/features/sync/selection/preview-selection-reader.js",
-      "sha256": "a09fb81d95781840d48e82855e400139a03d7733298a6fa86c985199811c1bb2"
+      "sha256": "6fb952cb128ddb0723c37514a11d1e5be48089fdf288d29e37dc7c7670963567"
+    },
+    {
+      "path": "src/features/sync/selection/preview-selection-target.js",
+      "sha256": "c9044497067e4c968e39d8717091b367feeb3ca0998ab3febb9303750a741c4f"
+    },
+    {
+      "path": "src/features/sync/selection/selection-drag-observer.js",
+      "sha256": "7b0756df7c5132d120d876fca6bc633e3ad1e9cf4d6c2eb413b973ffc5fa5778"
     },
     {
       "path": "src/features/sync/selection/selection-feedback-guard.js",
@@ -2247,7 +2255,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "sha256": "16d78b484854d46837e3b1cabb4dba3ecaf237bf14f871ae20b744d689f844dd"
+      "sha256": "2c1232e2ccedafad9edfd5d736203159c5e8480dcb019b7ec23e23e3c8c1c0e4"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -2379,7 +2387,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "5ff318c4e554e9a1e99d5b9fcc79177e2e56b5185ef5812bb626093d51894f0b"
+      "sha256": "b20351df19dd96a74c82d171408cf242f9982bc0f2ae49e2a40ac05721e92130"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -2907,7 +2915,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "sha256": "3a9c2c7e6b5557347cd303ad7b985cd043cc4c2122908928eb3a04f7ad864b6b"
+      "sha256": "8e8731a1c9c67f3f4158c0fabe8e26755056b09f60e196b33b69abb4b5ad5ce8"
     },
     {
       "path": "tests/architecture/global-write-scanner.test.mjs",
@@ -3362,6 +3370,10 @@
       "sha256": "ef570f342306caaafb73c950f2b023ace04990a53099210407e76f9c9006802d"
     },
     {
+      "path": "tests/e2e/lib/selection-response-checks.mjs",
+      "sha256": "f6c3ca4a02b9e459e040cddc10822a7025cb3701bf893944bbf7c6d9e413b048"
+    },
+    {
       "path": "tests/e2e/lib/selection-reveal-checks.mjs",
       "sha256": "c5402149eec0390dc78b51e600ec018d24424d80724c16f278736056dd4a05d2"
     },
@@ -3515,7 +3527,7 @@
     },
     {
       "path": "tests/e2e/windows/run-native-frame-check.mjs",
-      "sha256": "9bbd266cf9acc7b3f25423b4df8fb3e0bae42dc7c666867c1786166afc062444"
+      "sha256": "6bf754241fb849ce6d884fbbd03f9d522434a00af9d1065121a1196f94e4cedf"
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
@@ -3611,7 +3623,7 @@
     },
     {
       "path": "tests/helpers/stage-09-selection-controller-harness.mjs",
-      "sha256": "2340ae29d063e79bcd6942d840ebb7dea3fd04819750f91ee8b89d036e7bbb61"
+      "sha256": "de504b9faeec0ac0c47e82ea0b7015e1fd36571f1d011f59fca1684e0322bc3e"
     },
     {
       "path": "tests/historical-workflow-routing.test.mjs",
@@ -3679,7 +3691,7 @@
     },
     {
       "path": "tests/stage-08-hybrid-editor-controller.test.mjs",
-      "sha256": "6ddf70685e52bb4b731c56b5dd7bfb0bfc51120996f58250b59f5f0010f356ee"
+      "sha256": "fb72a05fa3fc44ff4b3a4a17207cb2cfde01153265a19b616e5fb3d02f7544aa"
     },
     {
       "path": "tests/stage-08-hybrid-html.test.mjs",
@@ -3731,7 +3743,7 @@
     },
     {
       "path": "tests/stage-09-final-sync-legacy-removal.test.mjs",
-      "sha256": "850cd5dec04583773aef3ef5cd08bd3ac51942e5d2a0a759df0df528056efda4"
+      "sha256": "eab1276f8c1e67c9cd3ef6cacdea44f9df872d7821e51eadda4324c7cad3d594"
     },
     {
       "path": "tests/stage-09-frozen-selection-mapping-integration.test.mjs",
@@ -3767,7 +3779,7 @@
     },
     {
       "path": "tests/stage-09-selection-readers.test.mjs",
-      "sha256": "4fa6a019e006a4c40f4971557c47be1d645db17a5029a9d37edf9925d1d26f77"
+      "sha256": "cf6301b941f7ec9239ed198138632342ac5fdf59e88652b0572fa269f8a6278d"
     },
     {
       "path": "tests/stage-09-selection-retry-scheduler.test.mjs",
@@ -3775,7 +3787,7 @@
     },
     {
       "path": "tests/stage-09-selection-reveal.test.mjs",
-      "sha256": "eadd8e94d0dbf7e7a79e7d82707b9fd9aa4f58d708b23e8d246278caa7291289"
+      "sha256": "8b373ebeee61359686c10d93ffdac30a269943b41612d09ec7223246a9eae768"
     },
     {
       "path": "tests/stage-10-autosave-controller.test.mjs",
@@ -3871,7 +3883,7 @@
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "sha256": "148cf12cd7d5764a8151168c6a40edccdeeb79719fa9e1eb518fa44af8717021"
+      "sha256": "bf2238e312e3a0275579bf99ee0010ac577cac2c2dba75512a825ea896a78c12"
     },
     {
       "path": "tests/stage-12-log-writer.test.mjs",
@@ -4323,7 +4335,7 @@
     },
     {
       "path": "tests/unit/editor/pointer-selection.test.mjs",
-      "sha256": "022d7b7809dde6947c2fcbf7c3285b184274e5ea8a654ec02e44b0719ef01f15"
+      "sha256": "03eaa72af9cdd66f869355480007d94db5e3072b3a6ff8fc8af338640ff16e26"
     },
     {
       "path": "tests/unit/help/help-feature.test.mjs",
@@ -4770,6 +4782,14 @@
       "sha256": "c509e180c626de3cb2d33dfd70f585228d4db03599f42d2d79131374f6caa53e"
     },
     {
+      "path": "tests/unit/sync/preview-selection-target.test.mjs",
+      "sha256": "0715fae90d8ffdb69bc09b1996e6315c869ae159bd77fc7c7319591e51e32d5a"
+    },
+    {
+      "path": "tests/unit/sync/selection-drag-observer.test.mjs",
+      "sha256": "4e87e89dd3e012b0039939490586cc34bf0f3dcb23e35bf63d0f57de062c7d61"
+    },
+    {
       "path": "tests/unit/theme/theme-service.test.mjs",
       "sha256": "0d59b244336a04a5fc1996579b659438b44062dd729a77a16ee728f3aa013cf2"
     },
@@ -4814,7 +4834,7 @@
       "sha256": "aa5c2c180d92a943f2db7f866d4828b7e94ceef3af6e387674d06f786dee030c"
     }
   ],
-  "inputSha256": "0b55c0fd31293aa79b4a3cd6dbdb857cf4311bb8caf5d7feccfe8a5a1dffd151",
+  "inputSha256": "7400807b967420cd0a541940874ff39cf91109abe91a15e3edbe98f21d88c789",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -11328,7 +11348,7 @@
           "target": "src/editor/precise-pointer-selection.js",
           "surface": "tests",
           "kind": "path-literal",
-          "line": 122
+          "line": 131
         }
       ],
       "requiredProof": "Already absent from tracked checkout; historical/test mentions are retained separately."
@@ -12078,7 +12098,7 @@
           "target": "src/preview/incremental-preview.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 3271
+          "line": 3291
         },
         {
           "from": "tests/architecture/model-kernel-contract.test.mjs",
@@ -12163,7 +12183,7 @@
           "target": "src/preview/math-source.js",
           "surface": "governance",
           "kind": "path-literal",
-          "line": 3281
+          "line": 3301
         },
         {
           "from": "tests/architecture/model-kernel-contract.test.mjs",

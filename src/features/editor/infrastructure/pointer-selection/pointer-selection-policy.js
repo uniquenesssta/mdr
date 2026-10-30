@@ -23,6 +23,9 @@ export function shouldCorrectPointerPosition({
 
 export function applyDragBoundaryPolicy(current, context) {
   if (!context) return current;
+  // Native character hit testing already resolved a nonempty row. Its upper
+  // half still belongs to that text, not to the preceding paragraph's gap.
+  if (context.targetHasText) return current;
   const {
     startLineNumber,
     currentLineNumber,

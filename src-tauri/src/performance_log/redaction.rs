@@ -262,6 +262,8 @@ fn allowed_string(key: &str, value: &str, envelope: bool) -> bool {
                         | "search_document_state"
                         | "selection.sync-anomaly"
                         | "selection.sync-result"
+                        | "selection.reveal-latency"
+                        | "selection.drag-frame-latency"
                         | "setAppTheme"
                         | "setLanguage"
                         | "setLayoutMode"
@@ -458,6 +460,26 @@ pub(super) fn redact_value(value: &Value) -> Value {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn selection_latency_labels_and_numeric_metrics_survive_without_selected_text() {
+        for operation in ["selection.reveal-latency", "selection.drag-frame-latency"] {
+            let event = serde_json::json!({"operation":operation,"category":"sync.selection","durationMs":24.5,
+                "details":{"direction":"preview-to-editor","side":"preview","stableFrames":3,
+                "pointerToFrameMs":7.2,"text":"PRIVATE_SELECTION","unknownLabel":"PRIVATE_SELECTION"}});
+            let result = super::redact_value(&event);
+            assert_eq!(result["operation"], operation);
+            assert_eq!(result["durationMs"], 24.5);
+            assert_eq!(result["details"]["stableFrames"], 3);
+            assert_eq!(result["details"]["pointerToFrameMs"], 7.2);
+            assert!(!result.to_string().contains("PRIVATE_SELECTION"));
+        }
+        assert_eq!(
+            super::redact_value(&serde_json::json!({"operation":"selection.private-label"}))
+                ["operation"],
+            "[redacted]"
+        );
+    }
+
     #[test]
     fn preserves_reviewed_selection_and_runtime_event_labels_without_free_text() {
         let fields = serde_json::json!({"mappingMode":"source-component","nextMode":"both","origin":"programmatic","theme":"dark","mode":"hybrid-index-only","reason":"layout-resize-settled"});

@@ -1,6 +1,6 @@
 /**
  * Responsibility: Final Stage 9 bidirectional selection orchestration. It coordinates Readers, frozen model-kernel mapping, Highlight Session, Feedback Guard and Retry Scheduler without owning any of those specialist responsibilities.
- * Imports: No production imports; every editor/model/preview/scroll/mapping/runtime capability is injected by the composition root.
+ * Imports: No production imports; mapping, target continuation and runtime capabilities are injected by composition.
  * State/side effects: Owns selection listeners, two cancellable frames, one document-scoped Editor reveal intent, dedupe state and statistics. Chapter work stays with Preview.
  * Lifecycle: start()/stop() are idempotent; destroy() is terminal and removes every owned listener/frame/subscription while leaving injected dependencies to their owners.
  */
@@ -103,6 +103,9 @@ export class SelectionSyncController {
       cancelFrame,
       now = () => 0,
       isHybridLayout = () => false,
+      createPreviewSelectionTarget,
+      isEditorVisible = () => true,
+      subscribeLayoutChange = () => () => {},
       isGeometryChanging = () => false,
       updateActiveLine = () => {},
       record = () => {},
@@ -130,7 +133,7 @@ export class SelectionSyncController {
     if (typeof requestFrame !== 'function' || typeof cancelFrame !== 'function') {
       throw new TypeError('SelectionSyncController requires requestFrame/cancelFrame capabilities');
     }
-    for (const [name, value] of Object.entries({ now, isHybridLayout, isGeometryChanging, updateActiveLine, record, diagnostic })) {
+    for (const [name, value] of Object.entries({ createPreviewSelectionTarget, now, isHybridLayout, isGeometryChanging, updateActiveLine, record, diagnostic })) {
       if (typeof value !== 'function') throw new TypeError(`SelectionSyncController requires ${name} capability`);
     }
 
@@ -154,6 +157,15 @@ export class SelectionSyncController {
     this.requestFrame = requestFrame;
     this.cancelScheduledFrameRequest = cancelFrame;
     this.now = now;
+    this.subscribeLayoutChange = subscribeLayoutChange;
+    this.previewTarget = createPreviewSelectionTarget({ editorApi, editorMapper, scrollController,
+      isVisible: isEditorVisible,
+      getIdentity: () => `${documentModel.documentId || ''}:${documentModel.generation || 0}:${documentModel.getDocumentVersion()}`,
+      setSelection: (start, end) => {
+        const token = feedbackGuard.begin('preview');
+        try { editorApi.setSelection(start, end); }
+        finally { feedbackGuard.release(token, 96); }
+      }, requestFrame, cancelFrame, now, record });
     this.isHybridLayout = isHybridLayout;
     this.isGeometryChanging = isGeometryChanging;
     this.layoutRevision = 0;
@@ -187,7 +199,7 @@ export class SelectionSyncController {
       lastRevealDurationMs: null
     };
 
-    this.onEditorSelect = () => this.scheduleEditor(false, 'editor-select');
+    this.onEditorSelect = () => !this.editorPointerActive && this.scheduleEditor(false, 'editor-select');
     this.onEditorKeyUp = event => {
       const selection = this.editorSelectionReader.read();
       if (event?.shiftKey || (selection && !selection.isCollapsed)) {
@@ -196,6 +208,7 @@ export class SelectionSyncController {
       }
     };
     this.onEditorPointerDown = () => {
+      this.previewTarget.cancel({ forget: true });
       this.editorPointerActive = true;
       this.editorRevealStartedAt = null;
       this.editorIntent = null;
@@ -210,14 +223,22 @@ export class SelectionSyncController {
       this.editorGestureId += 1;
       this.scheduleEditor(true, 'editor-pointerup', { force: true, frames: 1 });
     };
-    this.onStablePreviewSelection = ({ reason = 'preview-selection', force = false, snapshot = null } = {}) => {
-      if (!snapshot) return;
+    this.onPreviewPointerDown = () => {
+      this.previewTarget.cancel({ forget: true });
+      this.editorIntent = null;
+      this.retryScheduler.cancel();
+      this.cancelScheduledFrame('editor');
+      this.feedbackGuard.reset();
+    };
+    this.onSelectionWheel = () => this.previewTarget.cancel();
+    this.onStablePreviewSelection = ({ reason = 'preview-selection', force = false, snapshot = null, startedAt = null } = {}) => {
+      if (!snapshot) { this.previewTarget.cancel({ forget: true }); return; }
       if (this.feedbackGuard.shouldIgnore('preview')) {
         this.stats.ignoredFeedbackEvents += 1;
         return;
       }
       this.stats.previewRequests += 1;
-      this.runPreview(reason, Boolean(force), snapshot, true);
+      this.runPreview(reason, Boolean(force), snapshot, true, startedAt);
     };
     this.onPreviewKeyUp = () => this.schedulePreview('preview-keyup', { force: true, frames: 1 });
   }
@@ -243,11 +264,14 @@ export class SelectionSyncController {
       throw error;
     }
     this.previewSelectionDisposer = disposePreviewSelection;
+    this.unsubscribeLayoutChange = this.subscribeLayoutChange(() => this.previewTarget.layoutChanged());
     this.started = true;
     this.unsubscribeEditorSelection = this.editorApi.subscribe(update => { if (update.selectionSet) this.onEditorSelect(update); });
     this.editor.addEventListener('keyup', this.onEditorKeyUp);
     this.editor.addEventListener('pointerdown', this.onEditorPointerDown, true);
     this.preview.addEventListener('keyup', this.onPreviewKeyUp);
+    this.preview.addEventListener('pointerdown', this.onPreviewPointerDown, true);
+    this.documentRef.addEventListener('wheel', this.onSelectionWheel, { capture: true, passive: true });
     this.documentRef.addEventListener('pointerup', this.onDocumentPointerUp, true);
     this.documentRef.addEventListener('pointercancel', this.onDocumentPointerUp, true);
     return this;
@@ -257,6 +281,7 @@ export class SelectionSyncController {
     if (this.destroyed) return;
     this.editorIntent = null;
     this.editorRevealStartedAt = null;
+    this.previewTarget.cancel({ forget: true });
     this.retryScheduler.cancel();
     this.cancelScheduledFrame('editor');
     this.cancelScheduledFrame('preview');
@@ -266,9 +291,13 @@ export class SelectionSyncController {
     this.editorPointerActive = false;
     this.unsubscribeEditorSelection?.();
     this.unsubscribeEditorSelection = null;
+    this.unsubscribeLayoutChange?.();
+    this.unsubscribeLayoutChange = null;
     this.editor.removeEventListener('keyup', this.onEditorKeyUp);
     this.editor.removeEventListener('pointerdown', this.onEditorPointerDown, true);
     this.preview.removeEventListener('keyup', this.onPreviewKeyUp);
+    this.preview.removeEventListener('pointerdown', this.onPreviewPointerDown, true);
+    this.documentRef.removeEventListener('wheel', this.onSelectionWheel, { capture: true });
     this.documentRef.removeEventListener('pointerup', this.onDocumentPointerUp, true);
     this.documentRef.removeEventListener('pointercancel', this.onDocumentPointerUp, true);
     this.previewSelectionReader.stop();
@@ -408,7 +437,7 @@ export class SelectionSyncController {
   }
 
   runEditor(shouldScroll, reason, force, attempt) {
-    if (this.destroyed || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return null;
+    if (this.destroyed || this.editorPointerActive || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('editor', { allowSource: true })) return null;
     if (['wheel', 'touch'].includes(this.scrollController.getState().sourceReason)) shouldScroll = false;
     const selection = this.editorSelectionReader.read();
     if (!this.isEditorIntentCurrent()) this.editorIntent = null;
@@ -416,6 +445,7 @@ export class SelectionSyncController {
     const key = this.makeEditorKey(selection);
     if (!force && key === this.lastEditorKey) return null;
     const token = this.feedbackGuard.begin('editor');
+    const processingStartedAt = this.now();
     let result;
     try {
       result = this.syncEditorToPreview(Boolean(shouldScroll), reason, selection);
@@ -423,7 +453,7 @@ export class SelectionSyncController {
     } finally {
       this.feedbackGuard.release(token, 32);
     }
-    this.recordResult('editor-to-preview', reason, result);
+    this.recordResult('editor-to-preview', reason, result, this.now() - processingStartedAt);
     if (result?.status === 'pending' && !this.editorIntent?.scopePending) {
       const scheduled = this.retryScheduler.schedule({
         version: key,
@@ -446,7 +476,7 @@ export class SelectionSyncController {
     return true;
   }
 
-  runPreview(reason, force, snapshot = null, snapshotProvided = false) {
+  runPreview(reason, force, snapshot = null, snapshotProvided = false, startedAt = null) {
     if (this.destroyed || this.isGeometryChanging() || this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) return null;
     const selection = snapshotProvided ? snapshot : this.previewSelectionReader.read();
     if (!selection) return null;
@@ -454,15 +484,16 @@ export class SelectionSyncController {
     const key = `${selection.text || ''}:${selection.anchorOffset || 0}:${selection.focusOffset || 0}:${this.feedbackGuard.getRevision()}`;
     if (!force && key === this.lastPreviewKey) return null;
     const token = this.feedbackGuard.begin('preview');
+    const processingStartedAt = this.now();
     let result;
     try {
-      result = this.syncPreviewToEditor(reason, selection);
+      result = this.syncPreviewToEditor(reason, selection, startedAt);
       if (result?.status === 'mapped') this.lastPreviewKey = key;
     } finally {
       this.feedbackGuard.release(token, 96);
     }
     if (result?.status === 'mapping-failed') this.stats.mappingFailures += 1;
-    this.recordResult('preview-to-editor', reason, result);
+    this.recordResult('preview-to-editor', reason, result, this.now() - processingStartedAt);
     return result;
   }
 
@@ -681,7 +712,7 @@ export class SelectionSyncController {
     );
   }
 
-  syncPreviewToEditor(reason = 'preview-selection', selectionSnapshot = null) {
+  syncPreviewToEditor(reason = 'preview-selection', selectionSnapshot = null, startedAt = null) {
     if (this.destroyed) return { status: 'destroyed', selectionLength: 0, matchedAnchors: 0 };
     if (this.feedbackGuard.shouldIgnore('preview', { allowSource: true })) {
       return { status: 'locked', selectionLength: 0, matchedAnchors: 0 };
@@ -715,18 +746,9 @@ export class SelectionSyncController {
     if (end <= start) {
       return { status: 'mapping-failed', selectionLength: selection.text?.length || 0, matchedAnchors: 2, mappingCoverage: coverage };
     }
-    this.editorApi.setSelection(start, end);
+    this.previewTarget.select(start, end, startedAt);
     const selectionRect = rangeViewportRect(range);
     const sourceViewportRatio = viewportRatioForRect(this.preview, selectionRect);
-    const targetIndex = start + Math.floor((end - start) / 2);
-    const editorY = this.getEditorContentYForPosition(targetIndex);
-    const behavior = /pointerup|keyup|selectionchange/.test(reason) ? 'smooth' : 'auto';
-    this.scrollController.scrollTo('editor', editorY - this.editorApi.getScrollMetrics().clientHeight * sourceViewportRatio, {
-      behavior,
-      reason: 'selection-preview-to-editor',
-      suspendMs: behavior === 'smooth' ? 520 : 180,
-      settleMs: behavior === 'smooth' ? 1000 : 700
-    });
     this.updateActiveLine(this.editorMapper.getLineNumberAtPosition(start));
     // This is still the Preview-owned operation. Re-entering editor-to-preview
     // synchronization is correctly blocked by the feedback guard and loses its highlight.
@@ -743,13 +765,14 @@ export class SelectionSyncController {
       mappingMode: exactStart.componentMapping || exactEnd.componentMapping ? 'component-source' : 'dom-source',
       mappingCoverage: coverage,
       sourceViewportRatio,
-      targetViewportRatio: sourceViewportRatio
+      targetViewportRatio: null
     };
   }
 
   notifyPreviewMounted(reason = 'preview-mounted') {
     if (this.destroyed || this.isGeometryChanging()) return;
     this.feedbackGuard.advanceRevision();
+    if (this.previewTarget.getState().hasReadingBookmark) { this.highlightSession.restore(); return; }
     // A mount notification is an internal continuation of the Editor request,
     // not a new Preview selection competing with it.
     if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
@@ -801,6 +824,7 @@ export class SelectionSyncController {
 
   clear() {
     if (this.destroyed) return;
+    this.previewTarget.cancel({ forget: true });
     this.editorIntent = null;
     this.editorRevealStartedAt = null;
     this.lastEditorKey = '';
@@ -809,7 +833,7 @@ export class SelectionSyncController {
     this.highlightSession.clear();
   }
 
-  recordResult(direction, reason, result = {}) {
+  recordResult(direction, reason, result = {}, durationMs = null) {
     const status = result?.status || 'unknown';
     if (status === 'hybrid' || status === 'cleared' || status === 'locked' || status === 'destroyed' || status === 'offscreen') return;
     const details = {
@@ -845,6 +869,7 @@ export class SelectionSyncController {
       category: 'sync.selection',
       status: 'ok',
       aggregate: true,
+      ...(Number.isFinite(durationMs) ? { durationMs: Math.max(0, durationMs) } : {}),
       details
     });
   }
@@ -856,6 +881,7 @@ export class SelectionSyncController {
       destroyed: this.destroyed,
       applyingSide: feedback.source,
       previewRevision: feedback.revision,
+      ...this.previewTarget.getState(),
       ...this.stats
     };
   }
@@ -863,6 +889,7 @@ export class SelectionSyncController {
   destroy() {
     if (this.destroyed) return;
     this.stop();
+    this.previewTarget.destroy();
     this.finalFeedbackState = this.feedbackGuard.getState();
     this.destroyed = true;
     this.retryScheduler.cancel();

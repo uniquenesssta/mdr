@@ -63,6 +63,15 @@ test('Atomic 5.7 drag-boundary policy preserves the existing downward and upward
   }), { pos: 30, assoc: -1 });
 });
 
+test('cross-line character hits on real text are never snapped back into the preceding or following paragraph',()=>{
+  const current={pos:24,assoc:1};
+  const context={targetHasText:true,startLineNumber:4,currentLineNumber:5,pointerY:108,
+    targetTop:100,targetBottom:120,rowHeight:16,previousLineEnd:19,nextLineFrom:30};
+  assert.equal(applyDragBoundaryPolicy(current,context),current);
+  assert.equal(applyDragBoundaryPolicy(current,{...context,startLineNumber:6,pointerY:116}),current);
+  assert.deepEqual(applyDragBoundaryPolicy(current,{...context,targetHasText:false}),{pos:19,assoc:1});
+});
+
 test('Atomic 5.7 click policy preserves cursor, word and whole-line selection semantics', () => {
   const state = EditorState.create({ doc: 'alpha beta\nnext' });
   const cursor = rangeForPointerClick(state, 2, 1, 1);

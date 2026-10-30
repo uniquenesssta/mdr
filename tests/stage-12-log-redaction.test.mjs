@@ -19,7 +19,8 @@ test('R12-14 adds one recursive redaction owner at the existing JSONL persistenc
   assert.match(entry, /^mod redaction;/m);
   assert.match(writer, /let redacted = redact_value\(value\);/);
   assert.match(writer, /serde_json::to_string\(&redacted\)/);
-  assert.equal((redaction.match(/#\[test\]/g) || []).length, 15);
+  assert.equal((redaction.match(/#\[test\]/g) || []).length, 16);
+  assert.match(redaction, /fn selection_latency_labels_and_numeric_metrics_survive_without_selected_text\(/);
   assert.match(redaction, /fn preserves_reviewed_selection_and_runtime_event_labels_without_free_text\(/);
   assert.doesNotMatch(redaction.split('#[cfg(test)]')[0], /std::fs|OpenOptions|env::|tauri::|Mutex|OnceLock|\bwrite_performance_logs\s*\(/);
 });

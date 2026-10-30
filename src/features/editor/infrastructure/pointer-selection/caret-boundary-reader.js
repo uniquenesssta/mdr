@@ -211,6 +211,7 @@ export function readDragBoundaryContext(view, event, start, current) {
   return {
     startLineNumber: startLine.number,
     currentLineNumber: currentLine.number,
+    targetHasText: currentLine.length > 0,
     pointerY: event.clientY,
     targetTop: rect.top,
     targetBottom: rect.bottom,

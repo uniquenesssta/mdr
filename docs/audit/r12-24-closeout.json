@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "561c955bab9bca8d1a5790710f2c4fd36e565164"
+      "blobSha": "7eedaa53583226f68e6c4ff68e9356117ff4ec18"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -199,7 +199,7 @@
     },
     {
       "path": "src-tauri/src/performance_log/redaction.rs",
-      "blobSha": "524780d440cca8650413302e5ea3934cec6bfea1"
+      "blobSha": "df236ae6b3ec16fd3f2255a512a470c0c6baa054"
     },
     {
       "path": "src-tauri/src/performance_log/writer.rs",
@@ -727,7 +727,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "blobSha": "1ce861cf3739881d239b73c5c5ecfb14269770c9"
+      "blobSha": "ee8cd430ed7f626af1eb4dd3750209704cd12b91"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -783,7 +783,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "3fa7a014d6fd5ad35ec925ef3c392d68098e6156"
+      "blobSha": "e75765df0e12604f2f867fd79dc0f09052469143"
     },
     {
       "path": "src/platform/desktop/performance-log-client.js",
@@ -871,7 +871,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "blobSha": "74f257c58442f4caa007fa3d4dc6180ae544f620"
+      "blobSha": "29e0328427fb4de1e2d10a86a3b33787ac1d5c2e"
     },
     {
       "path": "tests/architecture/helpers.mjs",
@@ -1031,7 +1031,7 @@
     },
     {
       "path": "tests/stage-12-log-redaction.test.mjs",
-      "blobSha": "11a8105ef82a83c469e70c2046e785f1fedb2d41"
+      "blobSha": "626478375d24e356b7a8ffeb2360228f9206edaa"
     },
     {
       "path": "tests/stage-12-opener.test.mjs",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "1cd129724be17fe48292f7fc892a1b8634465e89"
+      "blobSha": "6dd9ebf65ac7f599eba067a4b7e90bb117f4628b"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "5a25631f8045780bde6f7edcf8306c91acc75219"
+      "blobSha": "23c325d7f43dda00c1f9c6a4a05971caaf7559a5"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1247,11 +1247,11 @@
     },
     {
       "path": "src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js",
-      "blobSha": "f216074ce5e6bca1e1f2354bd872bf48082a1cef"
+      "blobSha": "b7eac19e3179fb2d186d3bf750087560d8ad6b3c"
     },
     {
       "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
-      "blobSha": "c8b80aba1ca4fc29cc13450b8d838f3aa0a43c89"
+      "blobSha": "aee3f0c9e33758482342295029e28ae664bca10a"
     },
     {
       "path": "src/features/hybrid-editor/application/hybrid-editor-controller.js",
@@ -1275,7 +1275,7 @@
     },
     {
       "path": "tests/stage-08-hybrid-editor-controller.test.mjs",
-      "blobSha": "4d88de3a921cc2f29cf933d8a7f3e1dc325c979c"
+      "blobSha": "539839c6035a09ce2fa69d16f41fae4e0745ec17"
     },
     {
       "path": "src/features/hybrid-editor/presentation/inline-presentation-coordinator.js",
@@ -1407,7 +1407,7 @@
     },
     {
       "path": "src/features/sync/index.js",
-      "blobSha": "3b41d450d6baeeea5066c4fbf0e9845f63ebfeb9"
+      "blobSha": "7601ee90f1940dcb0eb63b2a756515316b3c75c8"
     },
     {
       "path": "src/features/preview/pipeline/preview-enhancement-coordinator.js",
@@ -1415,7 +1415,7 @@
     },
     {
       "path": "src/features/editor/ui/selection-toolbar-view.js",
-      "blobSha": "c9bb05b471f7e646feba3e4e0a81e9ae4d0daace"
+      "blobSha": "2e50ab354997eefa80b526685ba1c58b80596f96"
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
@@ -1516,6 +1516,14 @@
     {
       "path": "src/styles/index.css",
       "blobSha": "5d987ecec272434afbb7644a388d0c3be7929a0a"
+    },
+    {
+      "path": "src/features/sync/selection/preview-selection-target.js",
+      "blobSha": "7ce8f19fc2494bf8f0612a4a8453d46c71522273"
+    },
+    {
+      "path": "src/features/sync/selection/selection-drag-observer.js",
+      "blobSha": "3122a27077d2115132686bf49def15ca959c7124"
     }
   ],
   "priorFailures": {
@@ -16634,6 +16642,89 @@
         }
       ],
       "validation": "Final source fbae37aa: all2975 Node tests across393 files/17 groups passed with no skipped/cancelled cases. UI94, browser contract12, Windows9 text-context/clipboard/reading checks, original5453875-character3-width scroll-anchor/bounded-DOM checks, production/native debug builds and four static gates passed. Previous failures and targeted52 rechecks retained. Full Rust not rerun; R17 not accepted; local commit only."
+    },
+    "selectionResponseRepair": {
+      "baselineCommit": "e884d0ebd57241e86556947fe729fe06dee70d56",
+      "record": "docs/audit/large-document-interaction-performance.json",
+      "scope": "User-authorized native drag and preview-to-editor latency repair, reading bookmarks and numeric frame/reveal telemetry; no visual changes or Figma, frozen mapping retained.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "blobSha": "7eedaa53583226f68e6c4ff68e9356117ff4ec18",
+          "previousBlobSha": "561c955bab9bca8d1a5790710f2c4fd36e565164"
+        },
+        {
+          "path": "src-tauri/src/performance_log/redaction.rs",
+          "blobSha": "df236ae6b3ec16fd3f2255a512a470c0c6baa054",
+          "previousBlobSha": "524780d440cca8650413302e5ea3934cec6bfea1"
+        },
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "blobSha": "ee8cd430ed7f626af1eb4dd3750209704cd12b91",
+          "previousBlobSha": "1ce861cf3739881d239b73c5c5ecfb14269770c9"
+        },
+        {
+          "path": "src/main.js",
+          "blobSha": "e75765df0e12604f2f867fd79dc0f09052469143",
+          "previousBlobSha": "3fa7a014d6fd5ad35ec925ef3c392d68098e6156"
+        },
+        {
+          "path": "tests/architecture/fixtures/production-modules.json",
+          "blobSha": "29e0328427fb4de1e2d10a86a3b33787ac1d5c2e",
+          "previousBlobSha": "74f257c58442f4caa007fa3d4dc6180ae544f620"
+        },
+        {
+          "path": "tests/stage-12-log-redaction.test.mjs",
+          "blobSha": "626478375d24e356b7a8ffeb2360228f9206edaa",
+          "previousBlobSha": "11a8105ef82a83c469e70c2046e785f1fedb2d41"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "blobSha": "6dd9ebf65ac7f599eba067a4b7e90bb117f4628b",
+          "previousBlobSha": "1cd129724be17fe48292f7fc892a1b8634465e89"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "blobSha": "23c325d7f43dda00c1f9c6a4a05971caaf7559a5",
+          "previousBlobSha": "5a25631f8045780bde6f7edcf8306c91acc75219"
+        },
+        {
+          "path": "src/features/editor/infrastructure/pointer-selection/caret-boundary-reader.js",
+          "blobSha": "b7eac19e3179fb2d186d3bf750087560d8ad6b3c",
+          "previousBlobSha": "f216074ce5e6bca1e1f2354bd872bf48082a1cef"
+        },
+        {
+          "path": "src/features/hybrid-editor/application/hybrid-decoration-coordinator.js",
+          "blobSha": "aee3f0c9e33758482342295029e28ae664bca10a",
+          "previousBlobSha": "c8b80aba1ca4fc29cc13450b8d838f3aa0a43c89"
+        },
+        {
+          "path": "tests/stage-08-hybrid-editor-controller.test.mjs",
+          "blobSha": "539839c6035a09ce2fa69d16f41fae4e0745ec17",
+          "previousBlobSha": "4d88de3a921cc2f29cf933d8a7f3e1dc325c979c"
+        },
+        {
+          "path": "src/features/sync/index.js",
+          "blobSha": "7601ee90f1940dcb0eb63b2a756515316b3c75c8",
+          "previousBlobSha": "3b41d450d6baeeea5066c4fbf0e9845f63ebfeb9"
+        },
+        {
+          "path": "src/features/editor/ui/selection-toolbar-view.js",
+          "blobSha": "2e50ab354997eefa80b526685ba1c58b80596f96",
+          "previousBlobSha": "c9bb05b471f7e646feba3e4e0a81e9ae4d0daace"
+        },
+        {
+          "path": "src/features/sync/selection/preview-selection-target.js",
+          "blobSha": "7ce8f19fc2494bf8f0612a4a8453d46c71522273",
+          "previousBlobSha": null
+        },
+        {
+          "path": "src/features/sync/selection/selection-drag-observer.js",
+          "blobSha": "3122a27077d2115132686bf49def15ca959c7124",
+          "previousBlobSha": null
+        }
+      ],
+      "validation": "Final production0fd03639: Windows original5453875-character response, exact reverse mapping/return bookmarks, real heading-center drag, six resize cases and existing interaction budgets passed. UI94/contract12 and four static gates passed. Node2985 cases covered with the corrected root1903 group rerun; failed original report retained. Full Rust binary295/296: one privileged case-sensitive-directory setup failure; redaction16 and integration12 passed. Local checkpoint only; no full Rust or R17 acceptance, no remote push."
     }
   }
 }

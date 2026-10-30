@@ -108,6 +108,13 @@ test('Hybrid source-selection memory is discarded on document replacement and de
   assert.deepEqual(h.controller.sourceSelectionRanges, []);
 });
 
+test('a source-origin drag never activates the crossed presentation blocks or changes their line heights', () => {
+  const coordinator=createDecorationCoordinator();
+  const view={state:{doc:createDoc('source\n\n## heading\n\n> quote'),selection:{main:{empty:false,anchor:2,head:26}}},hasFocus:true};
+  const active=[{from:0,to:6,revealBlock:true}];
+  assert.deepEqual(coordinator.build(view,{sourceSelectionRanges:active}).editableSourceRanges,active);
+});
+
 test('Atomic 8.15 preserves the EOF double-newline presentation correction for code and Mermaid only', () => {
   const coordinator = createDecorationCoordinator();
   const view = { state: { doc: createDoc('abc\n\n') } };

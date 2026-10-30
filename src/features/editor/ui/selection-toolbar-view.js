@@ -18,7 +18,7 @@ export function createSelectionToolbarView({ root, selection, preferences, getLa
   const strip=createSafeElement(documentRef,'div',{className:'selection-toolbar-items'});group.insertBefore(strip,more);
   const pin=createSafeElement(documentRef,'button',{attributes:{type:'button','data-editor-action':'pin-toolbar','aria-label':'取消固定工具条',title:'取消固定工具条'}});
   pin.append(createIconView(documentRef,'icon-search'));pin.hidden=true;group.append(pin);
-  let pinned=false,destroyed=false,frame=0,previewInteraction=false,projectedKey='';
+  let pinned=false,destroyed=false,frame=0,previewInteraction=false,projectedKey='',pointerSelecting=false;
   function inPreviewContext(){
     if(getLayoutMode()==='preview')return true;
     if(getLayoutMode()!=='both')return false;
@@ -58,7 +58,7 @@ export function createSelectionToolbarView({ root, selection, preferences, getLa
     }
   }
   function refresh(){
-    if(destroyed||!selection)return;
+    if(destroyed||!selection||pointerSelecting)return;
     const current=selection.snapshot();
     const blocked=inPreviewContext()||root.classList.contains('is-hidden')||documentRef.querySelector('.modal-overlay.show,.settings-workspace:not([hidden]),.writing-find-panel:not([hidden]),.menu-dropdown-list.show,.context-menu.show');
     const visible=!blocked&&(current.start<current.end||pinned);
@@ -75,8 +75,12 @@ export function createSelectionToolbarView({ root, selection, preferences, getLa
   events.listen(documentRef,'pointerdown',event=>{
     if(documentRef.querySelector('#preview')?.contains(event.target))previewInteraction=true;
     else if(documentRef.querySelector('#editor')?.contains(event.target))previewInteraction=false;
+    if(event.button===0&&documentRef.querySelector('#editor')?.contains(event.target))pointerSelecting=true;
     schedule();
   },true);
+  const finishPointer=()=>{pointerSelecting=false;schedule();};
+  events.listen(documentRef,'pointerup',finishPointer,true);
+  events.listen(documentRef,'pointercancel',finishPointer,true);
   events.listen(documentRef,'selectionchange',schedule);
   events.listen(documentRef,'contextmenu',schedule,true);
   for(const name of ['pointerup','click','keyup'])events.listen(documentRef,name,schedule);

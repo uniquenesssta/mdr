@@ -1,4 +1,4 @@
-import { createSelectionSyncController } from '../../src/features/sync/index.js';
+import { createSelectionSyncController, createPreviewSelectionTarget } from '../../src/features/sync/index.js';
 
 export function createFrames() {
   let nextId = 1;
@@ -108,6 +108,7 @@ export function createFinalSelectionController({
   const scrollController = { scrollTo() { return true; }, getState() { return { sourceSide: '' }; } };
   const controller = createSelectionSyncController(editor, preview, {
     editorApi,
+    createPreviewSelectionTarget,
     documentModel,
     editorMapper,
     getPreviewMapper: () => previewMapper,

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   createPreviewScrollMapper,
+  createPreviewSelectionTarget,
   createSelectionSyncController
 } from '../src/features/sync/index.js';
 
@@ -94,6 +95,7 @@ function createController(overrides = {}) {
   const scrollWrites = [];
   const controller = createSelectionSyncController(editor, preview, {
     editorApi,
+    createPreviewSelectionTarget,
     documentModel,
     editorMapper,
     getPreviewMapper: () => previewMapper,

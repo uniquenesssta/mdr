@@ -147,9 +147,9 @@ export class HybridDecorationCoordinator {
       // a source-origin drag here so activating a source row is not undone by selecting it.
       const retainSource = view.hasFocus !== false && selection && !selection.empty
         && sourceSelectionRanges.some(range => selection.anchor >= range.from && selection.anchor <= range.to);
-      const retainedSourceRanges = retainSource ? [...sourceSelectionRanges, {
-        from: Math.min(selection.anchor, selection.head), to: Math.max(selection.anchor, selection.head), revealBlock: true
-      }] : [];
+      // Dragging extends the selection, not the set of activated source blocks.
+      // Revealing every crossed heading/quote changes line heights under the pointer.
+      const retainedSourceRanges = retainSource ? sourceSelectionRanges : [];
       const editableRanges = [...this.getEditableRanges(view, tree), ...retainedSourceRanges]
         .sort((a, b) => a.from - b.from).reduce((merged, range) => {
           const previous = merged.at(-1);

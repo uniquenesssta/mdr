@@ -18,6 +18,7 @@ import { runOutlineWindowChecks } from '../lib/outline-window-checks.mjs';
 import { runSelectionContinuationChecks } from '../lib/selection-continuation-checks.mjs';
 import { runDropOutlineFluidChecks } from '../lib/drop-outline-fluid-checks.mjs';
 import { runReadingContextChecks, runLargeReadingWidthChecks } from '../lib/reading-context-checks.mjs';
+import { runSelectionResponseChecks } from '../lib/selection-response-checks.mjs';
 
 const binary = resolve(process.argv[2]);
 const artifacts = resolve(process.argv[3]);
@@ -58,6 +59,13 @@ try {
     : (process.argv.find(arg=>arg.startsWith('--url='))?.slice(6)||'http://127.0.0.1:16663');
   await page.navigate(appOrigin+'/?e2e=1');
   await page.waitFor(()=>document.documentElement.classList.contains('app-ready'), { timeoutMs:20000 });
+  if(process.argv.includes('--selection-response')) {
+    const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
+    assert.ok(sourcePath,'Provide the original read-only large-document path.');
+    await runSelectionResponseChecks({page,app:createApplicationDriver(page),artifacts,source:await readFile(sourcePath,'utf8'),
+      enforce:!process.argv.includes('--observe-response'),
+      resizeViewport:async size=>{geometry(false,false,size);await page.waitFor(`innerWidth===${size.width}&&innerHeight===${size.height}`);}});
+  }
   if(process.argv.includes('--reading-context')) {
     await connection.send('Browser.grantPermissions',{origin:await page.evaluate('location.origin'),permissions:['clipboardReadWrite','clipboardSanitizedWrite']});
     const checks=await runReadingContextChecks({page,app:createApplicationDriver(page),artifacts,
