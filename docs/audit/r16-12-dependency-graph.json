@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "3505b416af6e4ba46b3a373b9511065cb40e2426",
+  "baselineCommit": "345ff6fb1f1f3acdaf60bc8b9edcf7a7373d5400",
   "schemaVersion": 1,
   "stage": "R16.12",
-  "productionFiles": 561,
-  "inputSha256": "0548ed5a513607e825a42f01eafc3b00a137416061cc9f801ba2e21002497d80",
+  "productionFiles": 566,
+  "inputSha256": "5857aa20b0f94dc4d513100674f50ab0935d9b090380511be2acecd0d73f4201",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -959,6 +959,11 @@
       "feature": "editor"
     },
     {
+      "id": "src/features/editor/application/editor-context-actions.js",
+      "kind": "js",
+      "feature": "editor"
+    },
+    {
       "id": "src/features/editor/application/editor-controller.js",
       "kind": "js",
       "feature": "editor"
@@ -1779,6 +1784,11 @@
       "feature": "link-preview"
     },
     {
+      "id": "src/features/menu/browser-interaction-policy.js",
+      "kind": "js",
+      "feature": "menu"
+    },
+    {
       "id": "src/features/menu/index.js",
       "kind": "js",
       "feature": "menu"
@@ -1830,6 +1840,11 @@
     },
     {
       "id": "src/features/menu/ui/menu-presentation.js",
+      "kind": "js",
+      "feature": "menu"
+    },
+    {
+      "id": "src/features/menu/ui/text-context-menu-view.js",
       "kind": "js",
       "feature": "menu"
     },
@@ -2060,6 +2075,11 @@
     },
     {
       "id": "src/features/preview/ui/preview-recovery-view.js",
+      "kind": "js",
+      "feature": "preview"
+    },
+    {
+      "id": "src/features/preview/ui/reading-width-view.js",
       "kind": "js",
       "feature": "preview"
     },
@@ -2925,6 +2945,11 @@
     },
     {
       "id": "src/styles/features/sidebar-outline.css",
+      "kind": "css",
+      "feature": null
+    },
+    {
+      "id": "src/styles/features/text-context.css",
       "kind": "css",
       "feature": null
     },
@@ -6502,6 +6527,24 @@
     },
     {
       "from": "src/bootstrap/module-entry.js",
+      "to": "src/features/menu/index.js",
+      "specifier": "../features/menu/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 16,
+      "column": 1
+    },
+    {
+      "from": "src/bootstrap/module-entry.js",
+      "to": "src/features/preview/index.js",
+      "specifier": "../features/preview/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 17,
+      "column": 1
+    },
+    {
+      "from": "src/bootstrap/module-entry.js",
       "to": "src/features/settings/index.js",
       "specifier": "../features/settings/index.js",
       "kind": "import",
@@ -6533,7 +6576,7 @@
       "specifier": "../main.js",
       "kind": "dynamic-import",
       "domain": "esm",
-      "line": 22,
+      "line": 24,
       "column": 29
     },
     {
@@ -7245,6 +7288,15 @@
       "kind": "re-export",
       "domain": "esm",
       "line": 10,
+      "column": 1
+    },
+    {
+      "from": "src/features/editor/index.js",
+      "to": "src/features/editor/application/editor-context-actions.js",
+      "specifier": "./application/editor-context-actions.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 41,
       "column": 1
     },
     {
@@ -10218,6 +10270,24 @@
       "column": 1
     },
     {
+      "from": "src/features/menu/browser-interaction-policy.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/index.js",
+      "to": "src/features/menu/browser-interaction-policy.js",
+      "specifier": "./browser-interaction-policy.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 18,
+      "column": 1
+    },
+    {
       "from": "src/features/menu/index.js",
       "to": "src/features/menu/menu-actions.js",
       "specifier": "./menu-actions.js",
@@ -10287,6 +10357,15 @@
       "kind": "re-export",
       "domain": "esm",
       "line": 17,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/index.js",
+      "to": "src/features/menu/ui/text-context-menu-view.js",
+      "specifier": "./ui/text-context-menu-view.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 19,
       "column": 1
     },
     {
@@ -10377,6 +10456,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/menu/ui/text-context-menu-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
       "column": 1
     },
     {
@@ -10637,7 +10725,7 @@
       "specifier": "./application/preview-commands.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 35,
+      "line": 36,
       "column": 1
     },
     {
@@ -10646,7 +10734,7 @@
       "specifier": "./application/preview-controller.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 34,
+      "line": 35,
       "column": 1
     },
     {
@@ -10664,7 +10752,7 @@
       "specifier": "./pipeline/preview-cancellation.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 2,
+      "line": 3,
       "column": 1
     },
     {
@@ -10673,7 +10761,7 @@
       "specifier": "./pipeline/preview-enhancement-coordinator.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 4,
+      "line": 5,
       "column": 1
     },
     {
@@ -10682,7 +10770,7 @@
       "specifier": "./pipeline/preview-focus-controller.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 3,
+      "line": 4,
       "column": 1
     },
     {
@@ -10691,7 +10779,7 @@
       "specifier": "./pipeline/preview-layout-stability.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 7,
+      "line": 8,
       "column": 1
     },
     {
@@ -10700,7 +10788,7 @@
       "specifier": "./pipeline/preview-mode-resolver.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 8,
+      "line": 9,
       "column": 1
     },
     {
@@ -10709,7 +10797,7 @@
       "specifier": "./pipeline/preview-render-coordinator.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 6,
+      "line": 7,
       "column": 1
     },
     {
@@ -10718,7 +10806,7 @@
       "specifier": "./pipeline/preview-render-engine.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 36,
+      "line": 37,
       "column": 1
     },
     {
@@ -10727,7 +10815,7 @@
       "specifier": "./pipeline/preview-scheduler.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 5,
+      "line": 6,
       "column": 1
     },
     {
@@ -10736,7 +10824,7 @@
       "specifier": "./pipeline/preview-thresholds.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 12,
+      "line": 13,
       "column": 1
     },
     {
@@ -10745,7 +10833,7 @@
       "specifier": "./render/code-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 24,
+      "line": 25,
       "column": 1
     },
     {
@@ -10754,7 +10842,7 @@
       "specifier": "./render/math-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 25,
+      "line": 26,
       "column": 1
     },
     {
@@ -10763,7 +10851,7 @@
       "specifier": "./render/mermaid-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 26,
+      "line": 27,
       "column": 1
     },
     {
@@ -10772,7 +10860,7 @@
       "specifier": "./render/presentation/math-presentation.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 39,
+      "line": 40,
       "column": 1
     },
     {
@@ -10781,7 +10869,7 @@
       "specifier": "./render/presentation/mermaid-presentation.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 40,
+      "line": 41,
       "column": 1
     },
     {
@@ -10790,7 +10878,7 @@
       "specifier": "./render/presentation/presentation-api.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 38,
+      "line": 39,
       "column": 1
     },
     {
@@ -10799,7 +10887,7 @@
       "specifier": "./render/preview-block-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 21,
+      "line": 22,
       "column": 1
     },
     {
@@ -10808,7 +10896,7 @@
       "specifier": "./render/preview-dom-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 22,
+      "line": 23,
       "column": 1
     },
     {
@@ -10817,7 +10905,7 @@
       "specifier": "./render/preview-markdown-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 37,
+      "line": 38,
       "column": 1
     },
     {
@@ -10826,7 +10914,7 @@
       "specifier": "./render/preview-renderer-port.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 27,
+      "line": 28,
       "column": 1
     },
     {
@@ -10835,7 +10923,7 @@
       "specifier": "./render/task-list-renderer.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 23,
+      "line": 24,
       "column": 1
     },
     {
@@ -10844,7 +10932,7 @@
       "specifier": "./render/virtual-window/height-cache.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 31,
+      "line": 32,
       "column": 1
     },
     {
@@ -10853,7 +10941,7 @@
       "specifier": "./render/virtual-window/spacer-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 32,
+      "line": 33,
       "column": 1
     },
     {
@@ -10862,7 +10950,7 @@
       "specifier": "./render/virtual-window/virtual-window-controller.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 29,
+      "line": 30,
       "column": 1
     },
     {
@@ -10871,7 +10959,7 @@
       "specifier": "./render/virtual-window/virtual-window-model.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 30,
+      "line": 31,
       "column": 1
     },
     {
@@ -10880,7 +10968,7 @@
       "specifier": "./ui/preview-content-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 44,
+      "line": 45,
       "column": 1
     },
     {
@@ -10889,7 +10977,16 @@
       "specifier": "./ui/preview-recovery-view.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 28,
+      "line": 29,
+      "column": 1
+    },
+    {
+      "from": "src/features/preview/index.js",
+      "to": "src/features/preview/ui/reading-width-view.js",
+      "specifier": "./ui/reading-width-view.js",
+      "kind": "re-export",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {
@@ -10898,7 +10995,7 @@
       "specifier": "./virtual/virtual-preview-controller.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 42,
+      "line": 43,
       "column": 1
     },
     {
@@ -10907,7 +11004,7 @@
       "specifier": "./worker/preview-worker-client.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 41,
+      "line": 42,
       "column": 1
     },
     {
@@ -10916,7 +11013,7 @@
       "specifier": "./worker/preview-worker-protocol.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 13,
+      "line": 14,
       "column": 1
     },
     {
@@ -10925,7 +11022,7 @@
       "specifier": "./worker/preview-worker-session.js",
       "kind": "re-export",
       "domain": "esm",
-      "line": 20,
+      "line": 21,
       "column": 1
     },
     {
@@ -11155,6 +11252,15 @@
     },
     {
       "from": "src/features/preview/ui/preview-content-view.js",
+      "to": "src/ui/dom/index.js",
+      "specifier": "../../../ui/dom/index.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 1,
+      "column": 1
+    },
+    {
+      "from": "src/features/preview/ui/reading-width-view.js",
       "to": "src/ui/dom/index.js",
       "specifier": "../../../ui/dom/index.js",
       "kind": "import",
@@ -14151,6 +14257,16 @@
       "column": 1,
       "line": 34,
       "offset": 1204
+    },
+    {
+      "from": "src/styles/index.css",
+      "to": "src/styles/features/text-context.css",
+      "specifier": "./features/text-context.css",
+      "kind": "css-import",
+      "domain": "css",
+      "column": 1,
+      "line": 56,
+      "offset": 2039
     },
     {
       "from": "src/styles/index.css",

@@ -68,7 +68,11 @@ test('R16-10 migration retains declared scenarios and assertions except the expl
     const expected = original.caseContracts.filter(item => !ledger.retiredCases.some(entry => matches(entry, row.path, item.name)));
     const added = (ledger.addedCases || []).filter(entry => entry.path === row.path);
     assert.deepEqual(current.cases.filter(name => !added.some(entry => entry.name === name)), expected.map(item => item.name), row.path);
-    for (const entry of added) assert.ok(current.cases.includes(entry.name), entry.name);
+    for (const entry of added) {
+      assert.ok(current.cases.includes(entry.name), entry.name);
+      if (entry.currentAssertions) assert.deepEqual(current.caseContracts.find(item => item.name === entry.name).assertions,
+        entry.currentAssertions, row.path + ': added reviewed assertions drifted');
+    }
     assert.deepEqual(current.disabledCases, original.disabledCases, row.path);
     for (const [index, contract] of expected.entries()) {
       const replacement = ledger.behaviorReplacements.find(entry => matches(entry, row.path, contract.name));

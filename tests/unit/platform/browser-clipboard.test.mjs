@@ -2,6 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createBrowserClipboard } from '../../../src/platform/index.js';
 
+test('clipboard read returns the real adapter result and preserves permission failures', async () => {
+  const denied = new Error('permission denied');
+  const adapter = createBrowserClipboard({ navigatorObject: { clipboard: { readText: async () => '实际剪贴板' } } });
+  assert.equal(await adapter.readText(), '实际剪贴板');
+  const blocked = createBrowserClipboard({ navigatorObject: { clipboard: { readText: async () => { throw denied; } } } });
+  await assert.rejects(blocked.readText(), error => error === denied);
+  await assert.rejects(createBrowserClipboard({ navigatorObject: {} }).readText(), /unavailable/);
+});
+
 function createFallbackDocument({ result = true } = {}) {
   const log = [];
   const body = {

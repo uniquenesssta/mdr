@@ -1,4 +1,5 @@
 export { createPreviewState } from './application/preview-state.js';
+export { createReadingWidthView } from './ui/reading-width-view.js';
 export { createPreviewCancellation } from './pipeline/preview-cancellation.js';
 export { createPreviewFocusController } from './pipeline/preview-focus-controller.js';
 export { createPreviewEnhancementCoordinator } from './pipeline/preview-enhancement-coordinator.js';

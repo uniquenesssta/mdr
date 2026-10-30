@@ -4,7 +4,7 @@
   "date": "2026-10-27",
   "status": "implemented_runtime_verified_ui_baselines_synchronized",
   "codeConnect": false,
-  "activeVariantCount": 361,
+  "activeVariantCount": 367,
   "excludedLegacyVariants": [
     "98:5367",
     "98:5389",
@@ -4847,6 +4847,70 @@
         "dimensionsAuthority": "variants (live Figma values)"
       },
       "previousContractBeforeFullReview": "Bind to existing native DOM inputs, commands, data stores and lifecycle. Reuse the semantic theme and spacing tokens; preserve behavior."
+    },
+    {
+      "id": "248:11947",
+      "name": "MDR Blue/Document context",
+      "variants": [
+        {
+          "id": "248:11690",
+          "name": "Context=editor",
+          "w": 224,
+          "h": 238
+        },
+        {
+          "id": "248:11802",
+          "name": "Context=preview",
+          "w": 224,
+          "h": 110
+        },
+        {
+          "id": "248:11849",
+          "name": "Context=reading",
+          "w": 224,
+          "h": 168
+        }
+      ],
+      "owners": [
+        "src/features/menu/ui/text-context-menu-view.js",
+        "src/features/menu/browser-interaction-policy.js",
+        "src/features/editor/application/editor-context-actions.js",
+        "src/styles/features/text-context.css"
+      ],
+      "contract": "Document operations only; reading width appears solely in pure reading. Real clipboard/editor commands and standard keyboard behavior; no page navigation, refresh, webpage save, print or inspection actions.",
+      "latestRefinement": {
+        "date": "2026-10-30",
+        "record": "docs/design/reading-context-menu.json",
+        "scope": "Document-native text context menus and pure-reading width; Figma UI work ended before runtime implementation."
+      }
+    },
+    {
+      "id": "249:18001",
+      "name": "MDR Blue/Reading width",
+      "variants": [
+        {
+          "id": "249:17965",
+          "name": "Width=third"
+        },
+        {
+          "id": "249:17977",
+          "name": "Width=half"
+        },
+        {
+          "id": "249:17989",
+          "name": "Width=full"
+        }
+      ],
+      "owners": [
+        "src/features/preview/ui/reading-width-view.js",
+        "src/styles/features/text-context.css"
+      ],
+      "contract": "Reading-only measure; third/half/full of available reading surface with narrow-window clamping; persisted through Settings authority.",
+      "latestRefinement": {
+        "date": "2026-10-30",
+        "record": "docs/design/reading-context-menu.json",
+        "scope": "Document-native text context menus and pure-reading width; Figma UI work ended before runtime implementation."
+      }
     }
   ],
   "runtimeIntegration": {

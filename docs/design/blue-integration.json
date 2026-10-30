@@ -1080,5 +1080,10 @@
     "record": "docs/design/drop-outline-fluid-layout.json",
     "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
     "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app."
+  },
+  "readingContextRefinement": {
+    "date": "2026-10-30",
+    "record": "docs/design/reading-context-menu.json",
+    "scope": "Document-native text context menus and pure-reading width; Figma UI work ended before runtime implementation."
   }
 }

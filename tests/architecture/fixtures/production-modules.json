@@ -5626,6 +5626,56 @@
       "pure-contract",
       "retain",
       false
+    ],
+    [
+      "src/features/editor/application/editor-context-actions.js",
+      "esm-module",
+      "editor-application",
+      "Editor clipboard/selection commands with document identity, version and selection guards.",
+      "editor-context-command-lifecycle",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/browser-interaction-policy.js",
+      "esm-module",
+      "feature",
+      "Suppress WebView page menus and browser navigation shortcuts while leaving app commands intact.",
+      "browser-interaction-listeners",
+      "explicit-instance",
+      "retain",
+      false
+    ],
+    [
+      "src/features/menu/ui/text-context-menu-view.js",
+      "esm-module",
+      "feature-ui",
+      "Context-sensitive text editing/reading actions and reading-width menu controls.",
+      "text-context-menu-view",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/features/preview/ui/reading-width-view.js",
+      "esm-module",
+      "preview",
+      "Project the authoritative persisted reading width into pure-reading layout.",
+      "reading-width-view-listeners",
+      "explicit-destroy",
+      "retain",
+      false
+    ],
+    [
+      "src/styles/features/text-context.css",
+      "stylesheet",
+      "styles",
+      "Compact document context menu and responsive pure-reading measure.",
+      "none",
+      "stylesheet",
+      "retain",
+      false
     ]
   ]
 }

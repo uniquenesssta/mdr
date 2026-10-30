@@ -150,6 +150,12 @@ const DEFINITIONS = Object.freeze([
     serialization: { kind: 'string', omitWhenEmpty: false },
     impactEvent: SETTINGS_IMPACT_EVENTS.PREVIEW
   }),
+  defineSetting('readingWidth', {
+    key: 'md_editor_reading_width', type: 'string', section: SETTING_SECTIONS.EDITOR,
+    validation: { kind: 'enum', values: ['third', 'half', 'full'] },
+    serialization: { kind: 'string', omitWhenEmpty: false },
+    impactEvent: SETTINGS_IMPACT_EVENTS.PREVIEW
+  }),
   defineSetting('tableVisualEditing', {
     key: 'md_editor_table_visual_editing', type: 'boolean', section: SETTING_SECTIONS.EDITOR,
     validation: { kind: 'boolean' },

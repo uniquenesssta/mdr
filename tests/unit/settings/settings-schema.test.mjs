@@ -23,7 +23,7 @@ const ROOT = resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const EXPECTED_IDS = Object.freeze([
   'theme', 'language', 'layoutMode', 'sidebarVisible', 'autoSaveEnabled', 'autoSaveDelay',
   'editorFontSize', 'editorTextColor', 'activeLineColor', 'exportDirectory', 'toolbarVisible',
-  'toolbarHiddenItems', 'toolbarDensity', 'toolbarPrimaryItems', 'previewPerformanceMode', 'tableVisualEditing', 'codeVisualEditing'
+  'toolbarHiddenItems', 'toolbarDensity', 'toolbarPrimaryItems', 'previewPerformanceMode', 'readingWidth', 'tableVisualEditing', 'codeVisualEditing'
 ]);
 const EXPECTED_KEYS = Object.freeze({
   theme: 'md_editor_theme',
@@ -41,6 +41,7 @@ const EXPECTED_KEYS = Object.freeze({
   toolbarDensity: 'md_editor_toolbar_density',
   toolbarPrimaryItems: 'md_editor_toolbar_primary_items',
   previewPerformanceMode: 'md_editor_preview_performance_mode',
+  readingWidth: 'md_editor_reading_width',
   tableVisualEditing: 'md_editor_table_visual_editing',
   codeVisualEditing: 'md_editor_code_visual_editing'
 });
@@ -49,7 +50,7 @@ const EXPECTED_DEFAULTS = Object.freeze({
   autoSaveEnabled: true, autoSaveDelay: 500, editorFontSize: 18, editorTextColor: '',
   activeLineColor: '', exportDirectory: '', toolbarVisible: true,
   toolbarHiddenItems: Object.freeze([]), toolbarDensity: 'compact', toolbarPrimaryItems: Object.freeze(['heading', 'bold', 'italic', 'textColor', 'highlight', 'link']), previewPerformanceMode: 'auto',
-  tableVisualEditing: false, codeVisualEditing: false
+  readingWidth: 'half', tableVisualEditing: false, codeVisualEditing: false
 });
 const EXPECTED_TOOLBAR_ITEMS = Object.freeze([
   'bold', 'italic', 'underline', 'strikethrough', 'script', 'textColor', 'highlight',

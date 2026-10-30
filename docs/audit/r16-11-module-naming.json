@@ -1,12 +1,12 @@
 {
-  "baselineCommit": "3505b416af6e4ba46b3a373b9511065cb40e2426",
+  "baselineCommit": "345ff6fb1f1f3acdaf60bc8b9edcf7a7373d5400",
   "schemaVersion": 1,
   "stage": "R16.11",
   "scope": "Tracked file/directory names, actual production discoveries, production modules, build scripts and reusable test hosts. No file mutation or semantic equivalence claim.",
-  "trackedPaths": 1472,
-  "productionFiles": 561,
-  "moduleCandidates": 645,
-  "inputSha256": "fa6e1c08460e558a2e69b5dfd96db995f30fd9171091f8a1676ee677ed454788",
+  "trackedPaths": 1482,
+  "productionFiles": 566,
+  "moduleCandidates": 651,
+  "inputSha256": "bd49a4106d1bd165c498a66c73d7a9cc2f7a912919b9428357e83b48e1233f92",
   "nameFindings": [
     {
       "path": "docs/audit/windows-validation-final.json",

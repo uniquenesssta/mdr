@@ -2190,6 +2190,15 @@
         "path": "tests/stage-16-esm-application.test.mjs",
         "name": "R16-02 production entry imports ESM owners and every classic file is absent"
       }
+    },
+    {
+      "path": "tests/unit/i18n/translation-bindings.test.mjs",
+      "name": "production integration preserves 113 bindings across shell, Help and the owned clipper view",
+      "reason": "The prior authorized removal of the drag prompt removed its translation binding; the test name now reflects111 total bindings. Historical case identity retained here and the complete current assertions remain exact, including the absent dropMessage binding and locale ownership/disposal checks.",
+      "replacement": {
+        "path": "tests/unit/i18n/translation-bindings.test.mjs",
+        "name": "production integration preserves 111 bindings across shell, Help and the owned clipper view"
+      }
     }
   ],
   "behaviorReplacements": [
@@ -2344,6 +2353,33 @@
       "path": "tests/unit/settings/settings-ui.test.mjs",
       "name": "Figma settings persist valid changes while keeping the workspace open and retain failed drafts for retry",
       "reason": "User-approved full-workspace settings autosave requires positive and failed-draft retry coverage in addition to all historical scenarios."
+    },
+    {
+      "path": "tests/unit/i18n/translation-bindings.test.mjs",
+      "name": "production integration preserves 111 bindings across shell, Help and the owned clipper view",
+      "reason": "The prior authorized removal of the drag prompt removed its translation binding; the test name now reflects111 total bindings. Historical case identity retained here and the complete current assertions remain exact, including the absent dropMessage binding and locale ownership/disposal checks.",
+      "currentAssertions": [
+        "assert.match(index, /translation-bindings\\.js/)",
+        "assert.match(moduleEntry, /createTranslationBindings\\(i18nService, ui,/)",
+        "assert.match(moduleEntry,/own\\(createTranslationBindings\\(/)",
+        "assert.match(moduleEntry,/own\\(createI18nService\\(/)",
+        "assert.ok(moduleEntry.indexOf('own(createI18nService(')<moduleEntry.indexOf('own(createTranslationBindings('))",
+        "assert.doesNotMatch(core, /function applyLanguage\\s*\\(/)",
+        "assert.doesNotMatch(core, /querySelectorAll\\(['\"]\\[data-i18n/)",
+        "assert.doesNotMatch(core, /document\\.documentElement\\.lang\\s*=/)",
+        "assert.match(core, /coreI18nPort\\.subscribe\\(\\(\\) => refreshClassicLocalizedState\\(\\)\\)/)",
+        "assert.match(bootstrap, /refreshClassicLocalizedState\\(\\)/)",
+        "assert.doesNotMatch(bootstrap, /applyLanguage\\(\\)/)",
+        "assert.deepEqual(imageBindings.sort(), ['cancel','exportImageTitle','ratioLabel','ratio9_16','ratio4_5','ratio3_4','ratio1_1','ratio16_9','cropLabel','previewLabel','exportImagePreviewAlt','exportImageHint','refreshPreview','downloadPng'].sort())",
+        "assert.equal(markupBindings.length, 86)",
+        "assert.doesNotMatch(markup, /data-i18n=\"dropMessage\"/)",
+        "assert.equal(helpBindings.length, 1)",
+        "assert.deepEqual(clipperBindings, [\n    ['data-i18n', 'urlTitle'], ['data-i18n', 'urlLabel'],\n    ['data-i18n-placeholder', 'urlPlaceholder'], ['data-i18n', 'useProxy'],\n    ['data-i18n-placeholder', 'proxyPlaceholder'], ['data-i18n', 'fetchBtn'],\n    ['data-i18n', 'manualLabel'], ['data-i18n-placeholder', 'manualPlaceholder'],\n    ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']\n  ])",
+        "assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 111)",
+        "assert.match(main, /subscribeLocale: listener => i18nService\\.subscribe\\(listener\\)/)",
+        "assert.match(clipperView, /subscribeLocale\\(renderTranslations\\)/)",
+        "assert.doesNotMatch(markup, /id=\"url-modal\"/)"
+      ]
     }
   ]
 }

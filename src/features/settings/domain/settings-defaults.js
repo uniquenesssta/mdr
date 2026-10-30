@@ -23,6 +23,7 @@ export const SETTING_DEFAULTS = Object.freeze({
   toolbarDensity: 'compact',
   toolbarPrimaryItems: Object.freeze(['heading', 'bold', 'italic', 'textColor', 'highlight', 'link']),
   previewPerformanceMode: 'auto',
+  readingWidth: 'half',
   tableVisualEditing: false,
   codeVisualEditing: false
 });

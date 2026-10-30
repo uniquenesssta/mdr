@@ -8,7 +8,7 @@ import { createDocumentWorkspace } from './features/documents/ui/document-worksp
 import { createApplicationEvents } from './bootstrap/application-events.js';
 import { createWorkspaceStartup } from './bootstrap/workspace-startup.js';
 import { createFindPreviewCommands } from './features/editor/application/find-preview-commands.js';
-import { canRunEditorAction } from './features/editor/index.js';
+import { canRunEditorAction, createEditorContextActions } from './features/editor/index.js';
 import 'katex/dist/katex.css';
 import './styles/index.css';
 import katexStyleSheetText from 'katex/dist/katex.css?raw';
@@ -1196,7 +1196,13 @@ async function loadAppModules() {
     });
     featureViews.push(editorPaneView);
 
+    const contextActions = createEditorContextActions({ editor: virtualEditor, clipboard: platform.clipboard,
+      focus: () => editorFocusService.focus({ preventScroll: true }), runHistory: executeEditorAction,
+      getDocumentId: () => documentSessionStore.activeId, isReadOnly: () => currentLayoutMode() === 'preview' });
+    featureViews.push(contextActions);
     unregisterEditorViewCommands = editorCommands.register({
+      captureTextContext: contextActions.capture,
+      runTextContextAction: contextActions.execute,
       executeEditorAction,
       openLink: () => currentLayoutMode() !== 'preview' && linkView.open(),
       openImage: () => currentLayoutMode() !== 'preview' && imageView.open(),

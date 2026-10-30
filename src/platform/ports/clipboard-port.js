@@ -3,13 +3,20 @@ import { definePlatformPort } from './port-contract.js';
 /**
  * @typedef {Object} ClipboardPortImplementation
  * @property {(text: string) => Promise<boolean | void>} writeText
+ * @property {(() => Promise<string>)=} readText
  * @property {(() => void | Promise<void>)=} destroy
  */
 
 /** Text clipboard write contract with fallback policy owned by its adapter. */
-export const CLIPBOARD_PORT_METHODS = Object.freeze(['writeText']);
+export const CLIPBOARD_PORT_METHODS = Object.freeze(['writeText', 'readText']);
 
 /** @param {ClipboardPortImplementation} implementation */
 export function defineClipboardPort(implementation) {
-  return definePlatformPort({ name: 'clipboard', methods: CLIPBOARD_PORT_METHODS }, implementation);
+  if (!implementation || typeof implementation !== 'object' || Array.isArray(implementation)) {
+    return definePlatformPort({ name: 'clipboard', methods: CLIPBOARD_PORT_METHODS }, implementation);
+  }
+  return definePlatformPort({ name: 'clipboard', methods: CLIPBOARD_PORT_METHODS }, {
+    ...implementation,
+    readText: implementation?.readText || (() => { throw new Error('Clipboard reading is unavailable; use Ctrl+V.'); })
+  });
 }

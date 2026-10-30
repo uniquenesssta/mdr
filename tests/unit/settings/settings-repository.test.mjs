@@ -97,11 +97,23 @@ test('Atomic 4.7 restores legacy localStorage strings into one typed immutable S
     autoSaveEnabled: false, autoSaveDelay: 1500, editorFontSize: 18, editorTextColor: '#112233',
     activeLineColor: '#445566', exportDirectory: 'C:/Exports', toolbarVisible: false,
     toolbarHiddenItems: ['bold', 'find'], toolbarDensity: 'compact', toolbarPrimaryItems: ['heading', 'bold', 'italic', 'textColor', 'highlight', 'link'], previewPerformanceMode: 'virtual',
-    tableVisualEditing: true, codeVisualEditing: true
+    readingWidth: 'half', tableVisualEditing: true, codeVisualEditing: true
   });
   assert.equal(Object.isFrozen(snapshot), true);
   assert.equal(Object.isFrozen(snapshot.toolbarHiddenItems), true);
   assert.deepEqual(storage.writes(), []);
+});
+
+test('reading width validates, persists and reloads independently without changing existing settings', () => {
+  const storage = new MemoryStorage({ md_editor_theme: 'dark', md_editor_reading_width: 'invalid' });
+  const repository = createSettingsRepository({ storage });
+  assert.equal(repository.load().readingWidth, 'half');
+  assert.deepEqual(storage.writes(), []);
+  for (const value of ['third', 'half', 'full']) {
+    repository.save({ readingWidth: value });
+    assert.equal(repository.load().readingWidth, value);
+    assert.equal(repository.load().theme, 'dark');
+  }
 });
 
 test('Atomic 4.7 falls back for missing, malformed JSON and illegal legacy values without repairing storage during load', () => {

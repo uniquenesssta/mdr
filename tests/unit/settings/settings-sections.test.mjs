@@ -28,6 +28,7 @@ const EXPECTED = Object.freeze({
   ]),
   editor: Object.freeze([
     ['editorFontSize', 'select', 'settings-dialog'],
+    ['readingWidth', 'select', 'external'],
     ['editorTextColor', 'color', 'settings-dialog'],
     ['activeLineColor', 'color', 'retired'],
     ['tableVisualEditing', 'toggle', 'external'],
@@ -120,13 +121,13 @@ test('Section field controls derive legal values from Schema validation instead 
   }
 });
 
-test('Current UI exposes 14 fields, two external toggles and exactly one retained retired setting', () => {
+test('Current UI exposes 14 fields, reading width and two external toggles with one retained retired setting', () => {
   const dialogIds = SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
     .filter(field => field.surface === 'settings-dialog').map(field => field.settingId);
   const externalIds = SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
     .filter(field => field.surface === 'external').map(field => field.settingId);
   assert.equal(dialogIds.length, 14);
-  assert.deepEqual(externalIds, ['tableVisualEditing', 'codeVisualEditing']);
+  assert.deepEqual(externalIds, ['readingWidth', 'tableVisualEditing', 'codeVisualEditing']);
   assert.deepEqual(SETTINGS_SECTION_DEFINITIONS.flatMap(section => section.fields)
     .filter(field => field.surface === 'retired').map(field => field.settingId), ['activeLineColor']);
 });

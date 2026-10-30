@@ -15,3 +15,5 @@ export { createWorkspaceActionsView } from './ui/workspace-actions-view.js';
 export { createMenuActions } from './menu-actions.js';
 
 export { createMenuContentView } from './ui/menu-content-view.js';
+export { createBrowserInteractionPolicy } from './browser-interaction-policy.js';
+export { createTextContextMenuView } from './ui/text-context-menu-view.js';

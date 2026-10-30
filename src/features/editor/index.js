@@ -38,3 +38,4 @@ export { createEditorContentView } from './ui/editor-content-view.js';
 export { createEditorToolbarContentView } from './ui/editor-toolbar-view.js';
 
 export { createDocumentModelBinding } from './infrastructure/document-model-binding.js';
+export { createEditorContextActions } from './application/editor-context-actions.js';

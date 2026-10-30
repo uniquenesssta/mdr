@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-30",
+  "baselineCommit": "345ff6fb1f1f3acdaf60bc8b9edcf7a7373d5400",
+  "branch": "codex/figma-ui",
+  "authorization": "User requested third/half/full pure-reading width and normal document operations instead of browser page menus in all modes.",
+  "figma": {
+    "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+    "sessionId": "be217686-fff4-4058-9d1d-8847ba059b48",
+    "status": "UI_completed_before_implementation",
+    "menuSet": "248:11947",
+    "menus": {
+      "editor": "248:11690",
+      "preview": "248:11802",
+      "reading": "248:11849"
+    },
+    "review": "248:11689",
+    "readingWidthSet": "249:18001",
+    "readingVariants": [
+      "249:17965",
+      "249:17977",
+      "249:17989"
+    ],
+    "screens": [
+      "249:7975",
+      "249:7984",
+      "249:7993"
+    ],
+    "reviewedScreenshots": [
+      "248:11689",
+      "249:7984",
+      "248:11849"
+    ],
+    "contract": "224px content-sized menus;32px action rows;12px shortcuts aligned right;three equal28px width buttons with2px gaps. Existing semantic tokens and Noto Sans SC reused.",
+    "failedAttempts": "Instance max-size overrides unsupported; retained the original master and introduced three reusable width variants, then swapped the new screen instances."
+  },
+  "implementation": {
+    "readingWidth": "Settings-owned md_editor_reading_width: third, half, full. Default half; loaded older settings default safely without rewriting existing values. External context control registered in the existing Editor section. Reading body is centered, clamped to320px minimum and100% maximum; narrow windows never overflow. Split preview and editable widths retain their own rules.",
+    "commands": "Preview menus expose copy/select-all/find and pure-reading width only. Editor and text inputs expose normal edit commands. Editor copy/cut/paste uses real clipboard and CodeMirror transactions; document/version/selection identity guards reject stale async mutations. History is document-scoped and survives right-click caret placement.",
+    "browserPolicy": "Capture-phase contextmenu prevention applies throughout the app. Built-in refresh/history/devtools/print shortcuts and unhandled external anchor navigation are prevented; existing app document shortcuts, safe link preview and explicit external-open actions remain owned by the app.",
+    "lifecycle": "Bootstrap owns the menus, reading projection and browser policy; destroy releases listeners, pending frames, CSS preference projection and owned DOM. Existing virtual-preview measurement observes width reflow; no performance algorithm or frozen model change."
+  },
+  "verification": {
+    "native": {
+      "status": "passed",
+      "passed": true,
+      "checks": [
+        "third changes actual reading width without editing the document",
+        "half changes actual reading width without editing the document",
+        "full changes actual reading width without editing the document",
+        "reading width survives relaunch through real Settings persistence",
+        "narrow reading and menu stay inside the window",
+        "split preview offers reading commands without width or editing actions",
+        "web context menu is prevented even outside document text",
+        "actual clipboard copy/paste reaches editor transactions and undo",
+        "preview selection copies real text without modifying the document"
+      ],
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context/native-delivery/native-reading-context.json",
+      "frame": "O:/Project/Markdown Rust/Temp/reading-context/native-delivery/native-frame.json",
+      "screenshotsReviewed": [
+        "editor-context.png",
+        "reading-width-half.png",
+        "split-preview-context.png"
+      ]
+    },
+    "largeReading": {
+      "passed": true,
+      "characters": 5453875,
+      "measurements": [
+        {
+          "value": "third",
+          "anchorRetained": true,
+          "nodes": 1232
+        },
+        {
+          "value": "full",
+          "anchorRetained": true,
+          "nodes": 1240
+        },
+        {
+          "value": "half",
+          "anchorRetained": true,
+          "nodes": 1232
+        }
+      ],
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context/native-delivery/large-reading-width.json",
+      "originalFile": "O:/Project/Markdown Rust/500万字.md",
+      "readOnly": true,
+      "originalSha256": "c042b1ab556d9156f22a4b81e761a6bb11861324eb762d6e2083fb98850f1032"
+    },
+    "unit": {
+      "priorFocusedPassed": 251,
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context-unit-final.log",
+      "finalChecks": "Passed as part of the complete final repository run."
+    },
+    "productionBuild": {
+      "status": "passed",
+      "emptyOutDir": false,
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context-build-delivery.log"
+    },
+    "nativeBuild": {
+      "status": "passed",
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context-native-build-delivery.log"
+    },
+    "browser": {
+      "initialContextChecks": 9,
+      "contextEvidence": "O:/Project/Markdown Rust/Temp/reading-context/browser-final/reading-context-results.json",
+      "currentUiChecks": 94,
+      "currentUiEvidence": "O:/Project/Markdown Rust/Temp/reading-context/ui-delivery/figma-ui-results.json",
+      "admission": {
+        "accepted": true,
+        "sourceSha256": "fbae37aa20de0b721880edf68b50f84f3081c153d53db1ea851f330ea43802c6",
+        "sourceFiles": 505,
+        "outputFiles": 140
+      },
+      "contextAuthority": "Current-source native9 checks cover the same context operations after explicit CSS fallback registration."
+    },
+    "preservedFailures": [
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/reading-context-focused.log",
+        "reason": "Five old settings expectations did not yet include the newly authorized width setting; extended exact expectations while retaining legacy key/default checks."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/reading-context-unit.log",
+        "reason": "Clipboard adapter extension changed missing-implementation diagnostics; restored the original platform validation path."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/reading-context/native/native-failure.json",
+        "reason": "Native right-click caret placement invalidated a selection-scoped undo intent. History now checks document/version independently; copy/cut/paste retain selection checks and the menu captures the settled caret."
+      },
+      {
+        "evidence": "O:/Project/Markdown Rust/Temp/reading-context-node.log",
+        "reason": "Full run exposed exact UI module/style inventories, an undeclared runtime width default, a prior translation test rename missing its migration ledger and Node24 EventTarget boolean-capture disposal behavior. Registered the new stylesheet/default, retained historical inventory, mapped the renamed case with exact current assertion checks and normalized only the Node test surface. Targeted52 checks passed.",
+        "rechecks": [
+          "O:/Project/Markdown Rust/Temp/reading-context-audit-recheck.log",
+          "O:/Project/Markdown Rust/Temp/reading-context-style-policy-recheck.log"
+        ]
+      }
+    ],
+    "staticGates": {
+      "status": "passed",
+      "checks": [
+        "verify-architecture",
+        "verify-no-legacy-runtime",
+        "verify-generated-files",
+        "verify-readme-record"
+      ],
+      "dependencyCycles": 0,
+      "namingIssues": 0
+    },
+    "browserContract": {
+      "passed": 12,
+      "failed": 0,
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context-contract.log"
+    },
+    "repositoryNode": {
+      "tests": 2975,
+      "pass": 2975,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "files": 393,
+      "groups": 17,
+      "status": "passed",
+      "evidence": "O:/Project/Markdown Rust/Temp/reading-context-node-delivery.log",
+      "suiteResults": "O:/Project/Markdown Rust/Temp/reading-context/node-delivery/repository-audit/suite-results.json"
+    }
+  },
+  "skillUse": {
+    "impeccable": "Installed guidance and craft-floor applied to the incumbent product; runtime context engine unavailable in the installed cache, no engine installation or detector success claimed."
+  },
+  "limits": {
+    "fullRust": "not rerun; no Rust source changes",
+    "R17": "not accepted",
+    "prototypePlayback": "not run; real Windows interaction is recorded separately",
+    "userVisualAcceptance": "pending"
+  },
+  "rollback": "Revert the scoped commit; existing settings bytes remain compatible and older versions ignore the new preference key.",
+  "status": "implemented_and_verified_for_requested_scope",
+  "delivery": {
+    "scope": "Local Git commit; no remote push authorized by this new feature request.",
+    "rollback": "Revert this scoped commit; no user document migration or deletion."
+  }
+}

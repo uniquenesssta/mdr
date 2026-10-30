@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "baf438ba1e81ebde8510daf8058e9b2554c6b05e"
+      "blobSha": "561c955bab9bca8d1a5790710f2c4fd36e565164"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -251,7 +251,7 @@
     },
     {
       "path": "src/bootstrap/module-entry.js",
-      "blobSha": "cceaa275460817fcdaa4b7e9a2b5c51864846760"
+      "blobSha": "4c3db23a547353e4b0f5bf631572efa5520cf5fb"
     },
     {
       "path": "src/bootstrap/workspace-content.js",
@@ -315,7 +315,7 @@
     },
     {
       "path": "src/features/editor/index.js",
-      "blobSha": "edc5c0059fc912bbf47750cb3f7a67b5375f1cdd"
+      "blobSha": "33f48df28e216dccf4b861538f3ddc46be578501"
     },
     {
       "path": "src/features/editor/infrastructure/codemirror-hybrid-extension.js",
@@ -635,7 +635,7 @@
     },
     {
       "path": "src/features/menu/index.js",
-      "blobSha": "c36ba9e99e34e308d762325f3414fcef9af9d5b9"
+      "blobSha": "89b784519003fbabb402d2fa5e8159fb5927be19"
     },
     {
       "path": "src/features/menu/menu-actions.js",
@@ -679,7 +679,7 @@
     },
     {
       "path": "src/features/preview/index.js",
-      "blobSha": "981449fdcaea689bd499170b320ef40ac331a843"
+      "blobSha": "e536bd58ddff84aa836607050c0f2f22ab278ec9"
     },
     {
       "path": "src/features/preview/pipeline/preview-layout-stability.js",
@@ -783,7 +783,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "da92e515e8d6ad01232be21730a81a92a7dca63a"
+      "blobSha": "3fa7a014d6fd5ad35ec925ef3c392d68098e6156"
     },
     {
       "path": "src/platform/desktop/performance-log-client.js",
@@ -871,7 +871,7 @@
     },
     {
       "path": "tests/architecture/fixtures/production-modules.json",
-      "blobSha": "c402ffb81970f139267760824126ac2bfb6183e9"
+      "blobSha": "74f257c58442f4caa007fa3d4dc6180ae544f620"
     },
     {
       "path": "tests/architecture/helpers.mjs",
@@ -1143,7 +1143,7 @@
     },
     {
       "path": "tests/ui/style-layering.test.mjs",
-      "blobSha": "58c2d336863413fd53b77628e878c6cf2c5bcf0e"
+      "blobSha": "4c50efea7cdddc7d8c2bed656c0d834f8da6da0b"
     },
     {
       "path": "tests/unit/documents/document-session-controller.test.mjs",
@@ -1187,11 +1187,11 @@
     },
     {
       "path": "tests/stage-16-test-cleanup.test.mjs",
-      "blobSha": "9fe4c215235b0c631d9b5ea8a108b802c93ed2f2"
+      "blobSha": "abbc2f29b82c7f3da3dc3eafe60e71860f862119"
     },
     {
       "path": "docs/audit/r16-10-test-cleanup.json",
-      "blobSha": "71db8d078886b6e0a2382338036232e86d725eb4"
+      "blobSha": "130c8aa306a7905ad75d40dc7c1553d78aafee5e"
     },
     {
       "path": "scripts/architecture/module-naming.mjs",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "6ccda78a1de43d33e2a901de98f64f22f4e6ad2d"
+      "blobSha": "1cd129724be17fe48292f7fc892a1b8634465e89"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "519fe8877e535af12d77d4c7dcf7b587819a5dec"
+      "blobSha": "5a25631f8045780bde6f7edcf8306c91acc75219"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1468,6 +1468,54 @@
     {
       "path": "src/styles/features/hybrid.css",
       "blobSha": "6cb93c68e2890d750884d82bd17723e26c98db95"
+    },
+    {
+      "path": "src/features/editor/application/editor-context-actions.js",
+      "blobSha": "dc3ad65a9e33aa6f9e8faf500fef2830e3493295"
+    },
+    {
+      "path": "src/features/menu/browser-interaction-policy.js",
+      "blobSha": "578ae9fe89289400e8ca5b514125b8874ce7171e"
+    },
+    {
+      "path": "src/features/menu/ui/text-context-menu-view.js",
+      "blobSha": "90ce3dea9a96f5c6618611167eff7745b5112ad0"
+    },
+    {
+      "path": "src/features/preview/ui/reading-width-view.js",
+      "blobSha": "d9e45a007d727c9daa88aa029fea8e341b879f74"
+    },
+    {
+      "path": "src/features/settings/domain/settings-defaults.js",
+      "blobSha": "772647418a61109b6693d90f3a4726d58d61b4cf"
+    },
+    {
+      "path": "src/features/settings/domain/settings-schema.js",
+      "blobSha": "d64eca676cfe28d6769d771e92fbf0c1d9c0f05d"
+    },
+    {
+      "path": "src/features/settings/sections/editor-settings.js",
+      "blobSha": "549ab9b32c92675bca58d2e36c0b4981aa1afce0"
+    },
+    {
+      "path": "src/platform/browser/browser-clipboard.js",
+      "blobSha": "c1acc229a587c6cde9b6b7b2a46ebe7697459de8"
+    },
+    {
+      "path": "src/platform/create-platform.js",
+      "blobSha": "fa2a85459c239e7c7b82d42f0cb02d0a1ad953ec"
+    },
+    {
+      "path": "src/platform/ports/clipboard-port.js",
+      "blobSha": "3fbd70fc046f75674f4cf5f1c60045bca48c53d7"
+    },
+    {
+      "path": "src/styles/features/text-context.css",
+      "blobSha": "1ab4c5a213862682110e5dbac7710af559e2ef7f"
+    },
+    {
+      "path": "src/styles/index.css",
+      "blobSha": "5d987ecec272434afbb7644a388d0c3be7929a0a"
     }
   ],
   "priorFailures": {
@@ -16470,6 +16518,122 @@
         }
       ],
       "validation": "Final full Node run:2966/2967 across391 files/17 groups; sole old translation-count failure corrected and complete affected group34/34 revalidated. No additional full rerun after that test-only correction. UI94, browser contract12, four gates, Vite/native debug builds and11 Windows UI checks passed. Original5453875-character performance and six-width/sidebar selection matrix passed with existing budgets. Prior failures retained. Full Rust/generic browser not rerun; existing HTML finding and R17 remain unaccepted. Figma only changed UI before code."
+    },
+    "readingContextMenu": {
+      "date": "2026-10-30",
+      "baselineCommit": "345ff6fb1f1f3acdaf60bc8b9edcf7a7373d5400",
+      "record": "docs/design/reading-context-menu.json",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "baf438ba1e81ebde8510daf8058e9b2554c6b05e",
+          "blobSha": "561c955bab9bca8d1a5790710f2c4fd36e565164"
+        },
+        {
+          "path": "src/bootstrap/module-entry.js",
+          "previousBlob": "cceaa275460817fcdaa4b7e9a2b5c51864846760",
+          "blobSha": "4c3db23a547353e4b0f5bf631572efa5520cf5fb"
+        },
+        {
+          "path": "src/features/editor/index.js",
+          "previousBlob": "edc5c0059fc912bbf47750cb3f7a67b5375f1cdd",
+          "blobSha": "33f48df28e216dccf4b861538f3ddc46be578501"
+        },
+        {
+          "path": "src/features/menu/index.js",
+          "previousBlob": "c36ba9e99e34e308d762325f3414fcef9af9d5b9",
+          "blobSha": "89b784519003fbabb402d2fa5e8159fb5927be19"
+        },
+        {
+          "path": "src/features/preview/index.js",
+          "previousBlob": "981449fdcaea689bd499170b320ef40ac331a843",
+          "blobSha": "e536bd58ddff84aa836607050c0f2f22ab278ec9"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "da92e515e8d6ad01232be21730a81a92a7dca63a",
+          "blobSha": "3fa7a014d6fd5ad35ec925ef3c392d68098e6156"
+        },
+        {
+          "path": "tests/architecture/fixtures/production-modules.json",
+          "previousBlob": "c402ffb81970f139267760824126ac2bfb6183e9",
+          "blobSha": "74f257c58442f4caa007fa3d4dc6180ae544f620"
+        },
+        {
+          "path": "tests/ui/style-layering.test.mjs",
+          "previousBlob": "58c2d336863413fd53b77628e878c6cf2c5bcf0e",
+          "blobSha": "4c50efea7cdddc7d8c2bed656c0d834f8da6da0b"
+        },
+        {
+          "path": "tests/stage-16-test-cleanup.test.mjs",
+          "previousBlob": "9fe4c215235b0c631d9b5ea8a108b802c93ed2f2",
+          "blobSha": "abbc2f29b82c7f3da3dc3eafe60e71860f862119"
+        },
+        {
+          "path": "docs/audit/r16-10-test-cleanup.json",
+          "previousBlob": "71db8d078886b6e0a2382338036232e86d725eb4",
+          "blobSha": "130c8aa306a7905ad75d40dc7c1553d78aafee5e"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "6ccda78a1de43d33e2a901de98f64f22f4e6ad2d",
+          "blobSha": "1cd129724be17fe48292f7fc892a1b8634465e89"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "519fe8877e535af12d77d4c7dcf7b587819a5dec",
+          "blobSha": "5a25631f8045780bde6f7edcf8306c91acc75219"
+        },
+        {
+          "path": "src/features/editor/application/editor-context-actions.js",
+          "blobSha": "dc3ad65a9e33aa6f9e8faf500fef2830e3493295"
+        },
+        {
+          "path": "src/features/menu/browser-interaction-policy.js",
+          "blobSha": "578ae9fe89289400e8ca5b514125b8874ce7171e"
+        },
+        {
+          "path": "src/features/menu/ui/text-context-menu-view.js",
+          "blobSha": "90ce3dea9a96f5c6618611167eff7745b5112ad0"
+        },
+        {
+          "path": "src/features/preview/ui/reading-width-view.js",
+          "blobSha": "d9e45a007d727c9daa88aa029fea8e341b879f74"
+        },
+        {
+          "path": "src/features/settings/domain/settings-defaults.js",
+          "blobSha": "772647418a61109b6693d90f3a4726d58d61b4cf"
+        },
+        {
+          "path": "src/features/settings/domain/settings-schema.js",
+          "blobSha": "d64eca676cfe28d6769d771e92fbf0c1d9c0f05d"
+        },
+        {
+          "path": "src/features/settings/sections/editor-settings.js",
+          "blobSha": "549ab9b32c92675bca58d2e36c0b4981aa1afce0"
+        },
+        {
+          "path": "src/platform/browser/browser-clipboard.js",
+          "blobSha": "c1acc229a587c6cde9b6b7b2a46ebe7697459de8"
+        },
+        {
+          "path": "src/platform/create-platform.js",
+          "blobSha": "fa2a85459c239e7c7b82d42f0cb02d0a1ad953ec"
+        },
+        {
+          "path": "src/platform/ports/clipboard-port.js",
+          "blobSha": "3fbd70fc046f75674f4cf5f1c60045bca48c53d7"
+        },
+        {
+          "path": "src/styles/features/text-context.css",
+          "blobSha": "1ab4c5a213862682110e5dbac7710af559e2ef7f"
+        },
+        {
+          "path": "src/styles/index.css",
+          "blobSha": "5d987ecec272434afbb7644a388d0c3be7929a0a"
+        }
+      ],
+      "validation": "Final source fbae37aa: all2975 Node tests across393 files/17 groups passed with no skipped/cancelled cases. UI94, browser contract12, Windows9 text-context/clipboard/reading checks, original5453875-character3-width scroll-anchor/bounded-DOM checks, production/native debug builds and four static gates passed. Previous failures and targeted52 rechecks retained. Full Rust not rerun; R17 not accepted; local commit only."
     }
   }
 }

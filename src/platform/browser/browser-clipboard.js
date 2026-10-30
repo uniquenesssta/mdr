@@ -53,5 +53,11 @@ export function createBrowserClipboard(options = {}) {
     }
   }
 
-  return Object.freeze({ writeText });
+  async function readText() {
+    const read = navigatorObject?.clipboard?.readText;
+    if (typeof read !== 'function') throw new Error('Clipboard reading is unavailable; use Ctrl+V.');
+    return String(await read.call(navigatorObject.clipboard));
+  }
+
+  return Object.freeze({ writeText, readText });
 }

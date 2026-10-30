@@ -162,7 +162,7 @@ function createBrowserImplementations(runtime, capabilities) {
     links: createBrowserLinks(runtime, capabilities),
     clipboard: capabilities.browser.clipboard
       ? createBrowserClipboard({ navigatorObject, documentObject })
-      : unsupportedPort('clipboard', ['writeText'], 'browser.clipboard'),
+      : unsupportedPort('clipboard', ['writeText', 'readText'], 'browser.clipboard'),
     fullscreen: capabilities.browser.fullscreen
       ? createBrowserFullscreen({ documentObject })
       : unsupportedPort('fullscreen', ['isEnabled', 'isActive', 'enter', 'exit', 'subscribe'], 'browser.fullscreen'),

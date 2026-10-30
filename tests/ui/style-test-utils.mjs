@@ -60,6 +60,7 @@ export const STYLE_IMPORTS = Object.freeze([
   'features/selection-toolbar.css',
   'features/find-replace.css',
   'features/document-surface.css',
+  'features/text-context.css',
 ]);
 
 export function expectedStyleEntry() {

@@ -1,0 +1,13 @@
+/* Responsibility: Document-native context actions and pure-reading width; split preview keeps its own measure. */
+.preview-content { --reading-width:50%; }
+.text-context-menu { width:224px;min-width:0;max-width:calc(100vw - 16px); }
+.text-context-menu > button { width:100%; }
+.text-context-shortcut { margin-left:auto;color:var(--color-text-secondary);font-size:12px;line-height:20px; }
+.text-context-menu button:disabled { opacity:.45;cursor:default; }
+.text-context-menu button:focus-visible { outline:2px solid var(--color-accent);outline-offset:-2px; }
+.text-context-width { display:flex;flex-direction:column;gap:4px;padding:8px 4px 4px; }
+.text-context-width > span { color:var(--color-text-secondary);font-size:12px;line-height:18px; }
+.text-context-width-choices { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px; }
+.text-context-width-choices > button { justify-content:center;padding:0;height:28px;min-height:28px;font-size:12px; }
+.text-context-width-choices > button[aria-checked=true] { background:var(--color-accent-soft);color:var(--color-accent); }
+body.preview-only-mode .preview-content .markdown-body { width:max(320px,var(--reading-width,50%));max-width:100%;margin-inline:auto; }

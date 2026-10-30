@@ -13,6 +13,8 @@ import { SETTINGS_CHANGED_EVENT, createSettingsApplyCoordinator, createSettingsF
   createSettingsRepository, createSettingsStore } from '../features/settings/index.js';
 import { createI18nService, createSettingsLocaleController, createTranslationBindings, localeRegistry } from '../i18n/index.js';
 import { createThemeService, createThemeToggleController } from '../theme/index.js';
+import { createBrowserInteractionPolicy, createTextContextMenuView } from '../features/menu/index.js';
+import { createReadingWidthView } from '../features/preview/index.js';
 
 const starts = new WeakMap();
 
@@ -32,6 +34,7 @@ export function startModuleEntry({ documentRef = globalThis.document,
       const ui = own(createUI(root));
       own(createWorkspaceContent(ui));
       const runtime = documentRef.defaultView;
+      own(createBrowserInteractionPolicy(documentRef));
       const platform = createPlatform({ runtime, now: () => runtime.performance.now(),
         record: (operation, entry) => telemetry.record?.(operation, entry) });
       lifetime.own(() => { void platform.destroy().catch(error => console.error('Platform cleanup failed:', error)); });
@@ -77,6 +80,10 @@ export function startModuleEntry({ documentRef = globalThis.document,
         exportCommands: application.exportCommands, recentFiles: application.recentFiles,
         normalizeRecentPath: normalizeRecentFilePath }));
       menuActions.start();
+      own(createReadingWidthView({ root: ui.preview.querySelector('#preview'), settings: settingsStore,
+        eventTarget: documentRef, eventType: SETTINGS_CHANGED_EVENT }));
+      own(createTextContextMenuView({ documentRef, overlayRoot: ui.overlay, editorCommands, settings: settingsStore,
+        commitWidth: value => settingsCommands.commit({ readingWidth: value }), clipboard: platform.clipboard }));
       own(createDocumentEmptyView({root:ui.workspace.querySelector('.l-split-pane'),session:documentSessionStore,onNew:()=>menuController.execute(MENU_COMMAND_IDS.DOCUMENT_NEW)}));
       own(createWorkspaceActionsView({ sidebar: ui.sidebar, overlayRoot: ui.overlay, commands: menuController,
         recentSource: createRecentFilesReadSource(application.recentFiles), desktopAvailable: platform.capabilities.desktop.fileSystem }));
