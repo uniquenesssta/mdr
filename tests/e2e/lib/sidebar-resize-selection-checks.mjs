@@ -93,7 +93,8 @@ export async function runSidebarResizeSelectionChecks({page,app,artifacts,source
       await selectSource(page,next,next+12);
       await openCompactPane(page,'preview');
       const fresh=await stableTarget(page,source.slice(next,next+12));
-      if((await app.snapshot()).selectedText!==source.slice(next,next+12)||!fresh.stable)failures.push({phase:'fresh',windowWidth,sidebarWidth,...fresh});
+      if((await app.snapshot()).selectedText!==source.slice(next,next+12)||!fresh.stable)failures.push({phase:'fresh',windowWidth,sidebarWidth,...fresh,
+        continuation:await evaluateApplication(page,'({intent:selectionSync.editorIntent,state:selectionSync.getState(),scroll:selectionSync.scrollController.getState(),layout:selectionSync.layoutRevision})')});
       measurements.push({windowWidth,sidebarWidth,elapsedMs,widthCommits:probe.widths.length,longTasks:tasks.length,longTaskMs:tasks.reduce((sum,t)=>sum+t.ms,0),maxTaskMs:Math.max(0,...tasks.map(t=>t.ms)),freshLine:freshLine+1,freshTotalMs:Date.now()-freshStarted,retained,fresh});
       await openCompactPane(page,'editor');
       await app.revealPosition(from,{preserveSelection:true});await selectSource(page,from,to);await stableTarget(page,expected);

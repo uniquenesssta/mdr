@@ -172,6 +172,8 @@ export class SelectionSyncController {
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.editorIntent = null;
+    this.editorRevealStartedAt = null;
+    this.editorGestureId = 0;
     this.finalFeedbackState = null;
     this.stats = {
       editorRequests: 0,
@@ -180,18 +182,22 @@ export class SelectionSyncController {
       editorGeometryRefreshes: 0,
       pendingRetries: 0,
       mappingFailures: 0,
-      ignoredFeedbackEvents: 0
+      ignoredFeedbackEvents: 0,
+      revealsCompleted: 0,
+      lastRevealDurationMs: null
     };
 
     this.onEditorSelect = () => this.scheduleEditor(false, 'editor-select');
     this.onEditorKeyUp = event => {
       const selection = this.editorSelectionReader.read();
       if (event?.shiftKey || (selection && !selection.isCollapsed)) {
+        if (event?.shiftKey) { this.editorRevealStartedAt = this.now(); this.editorGestureId += 1; }
         this.scheduleEditor(Boolean(event?.shiftKey), 'editor-keyup');
       }
     };
     this.onEditorPointerDown = () => {
       this.editorPointerActive = true;
+      this.editorRevealStartedAt = null;
       this.editorIntent = null;
       this.highlightSession.clear();
       this.retryScheduler.cancel();
@@ -200,6 +206,8 @@ export class SelectionSyncController {
     this.onDocumentPointerUp = () => {
       if (!this.editorPointerActive) return;
       this.editorPointerActive = false;
+      this.editorRevealStartedAt = this.now();
+      this.editorGestureId += 1;
       this.scheduleEditor(true, 'editor-pointerup', { force: true, frames: 1 });
     };
     this.onStablePreviewSelection = ({ reason = 'preview-selection', force = false, snapshot = null } = {}) => {
@@ -248,6 +256,7 @@ export class SelectionSyncController {
   stop() {
     if (this.destroyed) return;
     this.editorIntent = null;
+    this.editorRevealStartedAt = null;
     this.retryScheduler.cancel();
     this.cancelScheduledFrame('editor');
     this.cancelScheduledFrame('preview');
@@ -348,9 +357,13 @@ export class SelectionSyncController {
     if (!this.isEditorIntentCurrent()) {
       this.editorIntent = {
         identity: this.selectionIdentity(selection),
+        startedAt: this.editorRevealStartedAt,
+        gestureId: this.editorGestureId,
+        scopeWaitMs: 0,
         scopePending: false,
         revealed: false
       };
+      this.editorRevealStartedAt = null;
     }
     return this.editorIntent;
   }
@@ -359,6 +372,7 @@ export class SelectionSyncController {
     const intent = this.prepareEditorIntent(this.editorSelectionReader.read());
     if (intent.scopePending) return;
     intent.scopePending = true;
+    const scopeStartedAt = this.now();
     // Keep this exact selection alive across asynchronous chapter work. A new
     // gesture/document/selection invalidates it, independently of DOM revisions.
     Promise.resolve().then(() => {
@@ -368,8 +382,9 @@ export class SelectionSyncController {
     }).then(ready => {
       if (!this.isEditorIntentCurrent(intent)) return;
       intent.scopePending = false;
+      intent.scopeWaitMs += Math.max(0, this.now() - scopeStartedAt);
       if (ready === false) { this.editorIntent = null; return; }
-      this.scheduleEditor(true, 'editor-scope-ready', { force: true, frames: 2, extendAlignment: false });
+      this.scheduleEditor(true, 'editor-scope-ready', { force: true, frames: 1, extendAlignment: false });
     }, error => {
       if (!this.isEditorIntentCurrent(intent)) return;
       this.editorIntent = null;
@@ -543,21 +558,35 @@ export class SelectionSyncController {
   }
 
   revealPreviewSelection(plan, fromLine) {
+    // A collapsed pane has zero-size Range rects. They cannot establish that a
+    // target is visible or complete a reveal before the user opens that pane.
+    if (this.preview.clientHeight <= 0 || this.preview.clientWidth <= 0) return;
     const moved = this.scrollPreviewPlanIntoView(plan, fromLine);
     const intent = this.editorIntent;
     if (!intent) return;
-    if (!moved && !intent.scrollStarted) { intent.revealed = true; return; }
-    intent.scrollStarted = true;
+    if (!moved && !intent.scrollStarted && intent.startedAt === null) { intent.revealed = true; return; }
+    intent.scrollStarted ||= moved;
     const rect = combinedViewportRect(plan.ranges) || plan.rect;
     const position = rect ? [rect.top, rect.bottom, this.preview.scrollTop] : [this.preview.scrollTop];
     const stable = !moved && intent.lastRevealPosition?.length === position.length
       && position.every((value, i) => Math.abs(value - intent.lastRevealPosition[i]) <= 1);
     intent.visibleSamples = stable ? (intent.visibleSamples || 0) + 1 : 0;
     intent.lastRevealPosition = position;
-    if (intent.visibleSamples >= 3) { intent.revealed = true; return; }
+    if (intent.visibleSamples >= 3) {
+      intent.revealed = true;
+      if (intent.startedAt !== null) {
+        const durationMs = Math.max(0, this.now() - intent.startedAt);
+        this.stats.revealsCompleted += 1;
+        this.stats.lastRevealDurationMs = durationMs;
+        this.record('selection.reveal-latency', { category: 'sync.selection', durationMs,
+          details: { gestureId: intent.gestureId, layoutRevision: this.layoutRevision,
+            scopeWaitMs: intent.scopeWaitMs, stableFrames: intent.visibleSamples } });
+      }
+      return;
+    }
     intent.revealChecks = (intent.revealChecks || 0) + 1;
     if (intent.revealChecks <= 30) {
-      this.scheduleEditor(true, 'editor-reveal-settle', { force: true, frames: 2 });
+      this.scheduleEditor(true, 'editor-reveal-settle', { force: true, frames: 1 });
     } else {
       this.editorIntent = null;
       this.diagnostic('selection.sync-anomaly', { category: 'sync.selection', status: 'warning',
@@ -725,10 +754,14 @@ export class SelectionSyncController {
     // not a new Preview selection competing with it.
     if (this.feedbackGuard.shouldIgnore('editor', { allowSource: true }) || this.editorIntent?.scopePending || this.editorPointerActive) return;
     const editorSelection = this.editorSelectionReader.read();
+    const shouldRealign = this.shouldRealignEditorSelection();
+    if (!shouldRealign && this.highlightSession.getState?.().hasRestore) {
+      this.highlightSession.restore();
+      return;
+    }
     if (!editorSelection || editorSelection.isCollapsed) { this.highlightSession.restore(); return; }
     this.stats.previewRefreshes += 1;
-    const shouldRealign = this.shouldRealignEditorSelection();
-    this.scheduleEditor(shouldRealign, reason, { force: true, frames: 2, extendAlignment: false });
+    this.scheduleEditor(shouldRealign, reason, { force: true, frames: 1, extendAlignment: false });
   }
 
   notifyPreviewMeasured(reason = 'virtual-preview-measured') {
@@ -736,7 +769,7 @@ export class SelectionSyncController {
     // only an unfinished reveal needs another geometry check.
     if (this.destroyed || this.isGeometryChanging() || this.editorPointerActive || this.editorIntent?.scopePending
       || !this.shouldRealignEditorSelection()) return;
-    this.scheduleEditor(true, reason, { force: true, frames: 2, extendAlignment: false });
+    this.scheduleEditor(true, reason, { force: true, frames: 1, extendAlignment: false });
   }
 
   notifyPreviewReplaced(reason = 'preview-replaced') {
@@ -769,6 +802,7 @@ export class SelectionSyncController {
   clear() {
     if (this.destroyed) return;
     this.editorIntent = null;
+    this.editorRevealStartedAt = null;
     this.lastEditorKey = '';
     this.lastPreviewKey = '';
     this.retryScheduler.cancel();

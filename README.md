@@ -21,6 +21,8 @@
 
 ## Change Log
 
+- 2026-10-30：修复预览虚拟窗口滚动时搬移保留节点导致的选区丢失与重复同步，连续窗口缩放合并布局校准；首次划词记录松手到稳定高亮的独立耗时，隐藏预览不再提前完成定位。原文、双向高亮和精度门槛保留；[修复与验证](docs/audit/large-document-interaction-performance.json)。
+
 - 2026-10-29：按真实 Windows 调用栈修复大文档交互卡顿：大纲按可视区挂载，减少预览测量后的重复映射与强制布局，将现有 CodeMirror 后台解析时间片限制为8ms并固定已安装版本。原文实窗性能、2961项Node、82项当前UI和12项浏览器契约通过；通用浏览器回归及原有HTML末尾输入问题未验收。完整标题、折叠导航、选区和原语法保留；[性能证据与维护边界](docs/audit/large-document-interaction-performance.json)。
 
 - 2026-10-28：修复大文档侧栏缩放卡顿及不同尺寸下的选区定位。大文档拖动时先预示边界，松手一次应用内容宽度；预览按实际宽度和字体重测，尺寸变化重新确认选区可见性，同一布局内保持定位稳定。验证见 [修复与验证记录](docs/design/blue-integration.json#continuousResizeRepair)。

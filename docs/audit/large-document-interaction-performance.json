@@ -323,6 +323,77 @@
     "The first complete Node run used a nonexistent npm CLI path supplied by this task. Only the package-script execution test failed. The complete four-test file and then all2961 tests passed with the installed npm path in the corrected environment.",
     "The generic browser run failed; the HEAD diagnostic also failed. Original failures, screenshots and clean-page follow-up results are retained without weakening assertions."
   ],
+  "selectionContinuationRepair": {
+    "date": "2026-10-30",
+    "baselineCommit": "552d35ac33efed5963a8b4acdba2483e2b85ce84",
+    "evidence": "O:/Project/Markdown Rust/Temp/selection-continuation-20261030",
+    "scope": "Preserve retained virtual nodes and native selections, avoid redundant highlight rebuilds, coalesce native window geometry and continue first reveals without redundant frame waits. Appearance, grammar, dependency versions, frozen mappings and original documents remain unchanged.",
+    "reproduction": {
+      "original": "The real browser selected line2 in block b2. An overlapping window shift detached b2 and collapsed both the native selection and live Range to empty.",
+      "repaired": "The same assertion now requires native text and Range text line2 with no detachment; a separate negative control still rebuilds a highlight after the source wrapper is actually replaced."
+    },
+    "changes": [
+      "Reconcile only entering, exiting and changed virtual blocks; keep overlapping source nodes attached.",
+      "Reuse noncollapsed live CSS Highlight ranges; preserve the restore factory for real replacement or return from an unmounted area.",
+      "Structural callbacks with an existing bookmark restore that bookmark rather than re-enter the hidden editor mapping pipeline.",
+      "Use the existing canonical native resize burst lifecycle for geometry suspension and one settled refresh.",
+      "Retain three consecutive stable samples while removing unused inter-sample frames. Record selection.reveal-latency once per actual pointer/Shift gesture without aggregation, from release/key-up through stable visible highlight, including scopeWaitMs.",
+      "Zero-size collapsed previews cannot complete a reveal. Selection remains pending until the pane becomes visible."
+    ],
+    "validation": {
+      "status": "locally-verified-with-existing-unaccepted-findings",
+      "productionBuild": {
+        "accepted": true,
+        "sourceSha256": "417158ed93a64ac5831d21207fb08a05be53520523ed0a1cc9543d7bd3bfdfec",
+        "sourceFiles": 500,
+        "outputFiles": 140
+      },
+      "nativeFollowup": "native-settled/selection-continuation.json",
+      "nativeSixWidthMatrix": "native-visible/sidebar-resize-selection.json",
+      "nativeFinal": "native-final/native-frame.json",
+      "largeDocumentPerformance": "native-final/large-document-interactions.json",
+      "selectionAndComponents": [
+        "native-final/native-preview-selection.json",
+        "native-final/native-diagram-selection.json",
+        "native-final/native-selection-reveal.json",
+        "native-final/outline-window.json"
+      ],
+      "releaseThroughStableMs": [
+        61.09999999962747,
+        143,
+        67.5
+      ],
+      "resizeRevisions": 1,
+      "readingEditorRefreshes": 0,
+      "performanceFailures": [],
+      "fullNode": {
+        "passed": 2965,
+        "failed": 0,
+        "skipped": 0,
+        "files": 391,
+        "groups": 17,
+        "log": "../selection-continuation-repository.log"
+      },
+      "currentUi": 82,
+      "browserContract": 12,
+      "staticGates": "Architecture, no-legacy-runtime, generated-files and README-record passed.",
+      "genericBrowserAccepted": false,
+      "fullRustRerun": false,
+      "stageAccepted": false
+    },
+    "retainedAttempts": [
+      "The original browser reproduction failed with native and Range text empty and selected block detached.",
+      "The first highlight fast path also accepted non-DOM test ranges without a collapsed flag, bypassing the restore-exception negative control. Restricted it to explicitly noncollapsed ranges; the unchanged negative control passes.",
+      "The first native follow-up read layoutRevision from a snapshot that did not expose it; changed only the test inspector to read the real controller property.",
+      "The initial native matrix found a compact-pane selection that mapped correctly but remained offscreen; fixed premature completion from zero-size hidden preview rects, then all six original matrix cases passed.",
+      "A follow-up initially sampled geometry before the canonical native resize burst settled; it now waits for the real burst state to clear and requires at least one final geometry update."
+    ],
+    "limitations": [
+      "Previously recorded generic browser and HTML source-EOF findings remain unaccepted and outside this performance scope; no new generic-suite pass is claimed.",
+      "No Rust source changes; native compilation is not a complete Rust test run.",
+      "No Figma changes or remote push; R17 remains unaccepted."
+    ]
+  },
   "existingFindings": [
     {
       "issue": "The original HTML source-EOF input check can replace the preceding HTML block rather than append a paragraph.",

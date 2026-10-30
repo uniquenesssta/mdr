@@ -15,6 +15,7 @@ import { runDiagramSelectionChecks } from '../lib/diagram-selection-checks.mjs';
 import { runSidebarResizeSelectionChecks } from '../lib/sidebar-resize-selection-checks.mjs';
 import { runLargeDocumentInteractionChecks } from '../lib/large-document-interaction-checks.mjs';
 import { runOutlineWindowChecks } from '../lib/outline-window-checks.mjs';
+import { runSelectionContinuationChecks } from '../lib/selection-continuation-checks.mjs';
 
 const binary = resolve(process.argv[2]);
 const artifacts = resolve(process.argv[3]);
@@ -35,7 +36,7 @@ let connection, page;
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const geometry = (reveal, capture=true, size=null) => JSON.parse(execFileSync('pwsh.exe', ['-NoLogo','-NoProfile','-NonInteractive','-File',
   resolve('tests/e2e/windows/native-frame-geometry.ps1'), '-AppProcessId', String(processHandle.pid),
-  ...(reveal ? ['-Reveal'] : []), ...(size ? ['-WindowWidth',String(size.width),'-WindowHeight',String(size.height)] : []), ...(capture ? ['-ScreenshotPath', join(artifacts, reveal ? 'native-window.png' : 'native-window-final.png')] : [])],
+  ...(reveal ? ['-Reveal'] : []), ...(size?.burst ? ['-ResizeBurst'] : size ? ['-WindowWidth',String(size.width),'-WindowHeight',String(size.height)] : []), ...(capture ? ['-ScreenshotPath', join(artifacts, reveal ? 'native-window.png' : 'native-window-final.png')] : [])],
   { windowsHide: true, encoding: 'utf8', timeout: 20000 }).trim());
 try {
   let target;
@@ -55,6 +56,13 @@ try {
     : (process.argv.find(arg=>arg.startsWith('--url='))?.slice(6)||'http://127.0.0.1:16663');
   await page.navigate(appOrigin+'/?e2e=1');
   await page.waitFor(()=>document.documentElement.classList.contains('app-ready'), { timeoutMs:20000 });
+  if(process.argv.includes('--selection-continuation')) {
+    const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
+    assert.ok(sourcePath,'Provide the original read-only large-document path.');
+    await runSelectionContinuationChecks({page,app:createApplicationDriver(page),artifacts,source:await readFile(sourcePath,'utf8'),
+      resizeBurst:async()=>{geometry(false,false,{burst:true});await page.waitFor('innerWidth===1120&&innerHeight===910');},
+      resizeViewport:async size=>{geometry(false,false,size);await page.waitFor(`innerWidth===${size.width}&&innerHeight===${size.height}`);}});
+  }
   if (process.argv.includes('--large-document-interactions')) {
     const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
     assert.ok(sourcePath,'Provide the original read-only large-document path.');

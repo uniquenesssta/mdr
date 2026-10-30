@@ -1252,7 +1252,8 @@ async function loadAppModules() {
     cancelFrame: id => window.cancelAnimationFrame(id),
     now: () => performance.now(),
     isHybridLayout: () => layoutState.snapshot.mode === 'hybrid',
-    isGeometryChanging: () => layoutState.snapshot.resize.sidebarActive || layoutState.snapshot.resize.splitActive,
+    isGeometryChanging: () => layoutState.snapshot.resize.sidebarActive || layoutState.snapshot.resize.splitActive
+      || layoutState.snapshot.resize.windowBurstEvents > 0,
     updateActiveLine: line => outlineController?.updateActiveLine?.(line),
     record: (operation, entry) => telemetry.record?.(operation, entry),
     diagnostic: (operation, entry) => telemetry.diagnostic?.(operation, entry)

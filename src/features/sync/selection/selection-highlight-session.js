@@ -74,6 +74,11 @@ export class SelectionHighlightSession {
 
   restore() {
     if (this.destroyed || typeof this.restoreFactory !== 'function') return false;
+    // A virtual-window shift can leave every selected node intact. Its live
+    // ranges already track layout; rebuilding them would discard useful work.
+    if (this.supportsCssHighlights() && (this.ranges.length || this.atomicElements.size)
+      && this.ranges.every(range => range.collapsed === false && this.ownsRange(range))
+      && [...this.atomicElements].every(element => this.ownsElement(element))) return true;
     const restoreFactory = this.restoreFactory;
     this.clearEffects();
     let plan = null;

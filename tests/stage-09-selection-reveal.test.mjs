@@ -142,3 +142,43 @@ test('measurement-only notifications still settle an unfinished reveal at its me
     assert.equal(h.controller.shouldRealignEditorSelection(),false);
   }finally{h.controller.destroy();}
 });
+
+test('completed highlights restore on structural mounts without scheduling hidden-editor synchronization', () => {
+  const h=fixture();let restores=0;
+  try {
+    h.controller.highlightSession.getState=()=>({hasRestore:true});
+    h.controller.highlightSession.restore=()=>{restores++;return true;};
+    h.controller.runEditor(true,'editor-pointerup',true,0);h.frames.flushAll();
+    const requests=h.controller.stats.editorRequests;
+    for(let i=0;i<12;i++)h.controller.notifyPreviewMounted();h.frames.flushAll();
+    assert.equal(restores,12);assert.equal(h.controller.stats.editorRequests,requests);
+    assert.equal(h.writes.length,0);
+  }finally{h.controller.destroy();}
+});
+
+test('a zero-height preview cannot complete a reveal before its compact pane becomes visible', () => {
+  const h=fixture({top:330});
+  try {
+    h.preview.getBoundingClientRect=()=>({top:0,bottom:h.preview.clientHeight,width:300,height:h.preview.clientHeight});
+    h.preview.clientHeight=0;h.controller.notifyLayoutGeometry();
+    h.controller.start();h.editor.emit('pointerdown');h.documentRef.emit('pointerup');h.frames.flushAll();
+    assert.equal(h.controller.editorIntent.revealed,false);assert.equal(h.writes.length,0);
+    h.preview.clientHeight=200;h.controller.notifyLayoutGeometry();h.frames.flushAll();
+    assert.equal(h.writes.length,1);assert.equal(h.controller.editorIntent.revealed,true);
+  }finally{h.controller.destroy();}
+});
+
+test('a real pointer reveal records one unaggregated duration only after consecutive stable visible samples', () => {
+  const h=fixture();let clock=100;const records=[];
+  try {
+    h.controller.now=()=>clock;h.controller.record=(operation,entry)=>records.push({operation,...entry});
+    h.controller.start();h.editor.emit('pointerdown');h.documentRef.emit('pointerup');
+    h.frames.flush();assert.equal(records.filter(r=>r.operation==='selection.reveal-latency').length,0);
+    while(h.frames.activeCount()){clock+=16;h.frames.flush();}
+    const timings=records.filter(r=>r.operation==='selection.reveal-latency');
+    assert.equal(timings.length,1);assert.equal(timings[0].durationMs,48);
+    assert.equal(timings[0].aggregate,undefined);assert.equal(timings[0].details.stableFrames,3);
+    h.controller.notifyPreviewMeasured();h.frames.flushAll();
+    assert.equal(records.filter(r=>r.operation==='selection.reveal-latency').length,1);
+  }finally{h.controller.destroy();}
+});

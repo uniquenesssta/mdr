@@ -69,6 +69,34 @@ try {
   assert.ok(measured.estimatedHeight > initial.stats.estimatedHeight, 'measured heights must correct the estimated geometry');
   assert.ok((await browser.page.evaluate(`window.__virtualState.invalidations`)) > 0);
 
+  const retainedSelection = await browser.page.evaluate(`(()=>{
+    const controller=window.__virtualController;
+    controller.renderWindow(false,{start:0,end:6});
+    const wrapper=document.querySelector('[data-preview-block-id="b2"]');
+    const text=wrapper.querySelector('p').firstChild,range=document.createRange();
+    range.selectNodeContents(text);getSelection().removeAllRanges();getSelection().addRange(range);
+    const changes=new MutationObserver(()=>{});changes.observe(wrapper.parentNode,{childList:true});
+    controller.renderWindow(false,{start:1,end:7});
+    const detached=changes.takeRecords().some(r=>[...r.removedNodes].includes(wrapper));changes.disconnect();
+    return {text:range.toString(),native:getSelection().toString(),detached};
+  })()`);
+  assert.deepEqual(retainedSelection,{text:'line 2',native:'line 2',detached:false},
+    'Scrolling an overlapping virtual window must retain selected nodes in place');
+
+  const restoredHighlight=await browser.page.evaluate(`(async()=>{
+    const {createSelectionHighlightSession}=await import(${JSON.stringify(virtualHost.origin)}+'/src/features/sync/selection/selection-highlight-session.js');
+    const root=document.getElementById('preview'),controller=window.__virtualController;
+    const freshRange=()=>{const r=document.createRange();r.selectNodeContents(document.querySelector('[data-preview-block-id="b2"] p').firstChild);return r;};
+    const session=createSelectionHighlightSession({previewElement:root,documentRef:document,highlightRegistry:CSS.highlights,HighlightCtor:Highlight});
+    let rebuilds=0;session.show({ranges:[freshRange()]},{restore:()=>{rebuilds++;return {ranges:[freshRange()]};}});
+    controller.renderWindow(false,{start:0,end:6});session.restore();
+    const retained=rebuilds;
+    controller.changedIds.add('b2');controller.renderWindow(false,{start:0,end:6});session.restore();
+    const text=[...CSS.highlights.get('preview-selection-sync')].map(r=>r.toString()).join('');session.destroy();
+    return {retained,replaced:rebuilds,text};
+  })()`);
+  assert.deepEqual(restoredHighlight,{retained:0,replaced:1,text:'line 2'},'Retained ranges need no rebuild, replaced source nodes must still restore');
+
   await browser.page.evaluate(`(()=>{const root=document.getElementById('preview');root.scrollTop=2200;root.dispatchEvent(new Event('scroll'));})()`);
   await browser.page.waitFor(() => window.__virtualController?.getStats().start > 0, {
     timeoutMs: 3000,

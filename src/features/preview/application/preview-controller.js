@@ -40,7 +40,8 @@ export function createPreviewController(options = {}) {
     if (destroyed) throw new Error('Preview Controller is destroyed.');
   };
   const isHybrid = () => layoutState.snapshot.mode === 'hybrid';
-  const hasActiveResize = () => Boolean(layoutState.snapshot.resize?.sidebarActive || layoutState.snapshot.resize?.splitActive);
+  const hasActiveResize = () => Boolean(layoutState.snapshot.resize?.sidebarActive || layoutState.snapshot.resize?.splitActive
+    || layoutState.snapshot.resize?.windowBurstEvents > 0);
 
   const update = optionsValue => {
     assertActive();

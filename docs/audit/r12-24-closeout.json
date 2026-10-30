@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "c4f57a9f8e3329cf124ea5a9fcad34614b469fe6"
+      "blobSha": "ac4febf44933dd7a2dd00d4289a2751201104d7c"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -675,7 +675,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "blobSha": "08882104739898e207c89cba103565f77826c542"
+      "blobSha": "dfcc513d040b07681d407549989324f7d2a0539c"
     },
     {
       "path": "src/features/preview/index.js",
@@ -727,7 +727,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "blobSha": "cdaa1857f630ffe3865000092f12f9c007b77690"
+      "blobSha": "1ce861cf3739881d239b73c5c5ecfb14269770c9"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -783,7 +783,7 @@
     },
     {
       "path": "src/main.js",
-      "blobSha": "c3abfa30a1f68d8da505baaf0b6cea8652fdd312"
+      "blobSha": "da92e515e8d6ad01232be21730a81a92a7dca63a"
     },
     {
       "path": "src/platform/desktop/performance-log-client.js",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "e689fe3fa2c52288feaf04e6c930607a603a2f47"
+      "blobSha": "18067c609a16565f9aad6371896822d2bcca62b7"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "d574c18d52ddbc27cbf3926122a30e741edc91bd"
+      "blobSha": "0d6ab850186d7556f8c1253934986129fe81c6fd"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1419,7 +1419,7 @@
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
-      "blobSha": "59b93698e6536e081f612bf8603c5a0a0dd3712b"
+      "blobSha": "328c43c127711dd802d9d464b7a94e4a0627d2b4"
     },
     {
       "path": "src/features/preview/virtual/virtual-preview-controller.js",
@@ -1436,6 +1436,10 @@
     {
       "path": "scripts/build/codemirror-parse-budget.mjs",
       "blobSha": "2b525359309634882f9934f7dbf1eae525619c00"
+    },
+    {
+      "path": "src/features/sync/selection/selection-highlight-session.js",
+      "blobSha": "9f72a1852467ee3d8291881927c4072346a73405"
     }
   ],
   "priorFailures": {
@@ -16322,6 +16326,55 @@
         }
       ],
       "validation": "Actual Windows 5.45M-character budgets, full-index outline navigation/collapse/keyboard, selection/window matrix, production build, development preprocessing, four gates, all2961 Node tests across391 files/17 groups, current UI82 and browser contract12 passed. Generic built-app regression55/84 and HEAD diagnostic72/83 are not accepted; clean-page original checks5/6 retain a source-EOF HTML input failure reproduced in both current and HEAD. Full Rust not rerun; original documents unchanged; R17 not accepted."
+    },
+    "selectionContinuationRepair": {
+      "date": "2026-10-30",
+      "baselineCommit": "552d35ac33efed5963a8b4acdba2483e2b85ce84",
+      "record": "docs/audit/large-document-interaction-performance.json",
+      "scope": "Retained virtual nodes, live highlight reuse, canonical native resize continuation, true gesture latency and collapsed-preview visibility.",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "c4f57a9f8e3329cf124ea5a9fcad34614b469fe6",
+          "blobSha": "ac4febf44933dd7a2dd00d4289a2751201104d7c"
+        },
+        {
+          "path": "src/features/preview/application/preview-controller.js",
+          "previousBlob": "08882104739898e207c89cba103565f77826c542",
+          "blobSha": "dfcc513d040b07681d407549989324f7d2a0539c"
+        },
+        {
+          "path": "src/features/sync/selection/selection-sync-controller.js",
+          "previousBlob": "cdaa1857f630ffe3865000092f12f9c007b77690",
+          "blobSha": "1ce861cf3739881d239b73c5c5ecfb14269770c9"
+        },
+        {
+          "path": "src/main.js",
+          "previousBlob": "c3abfa30a1f68d8da505baaf0b6cea8652fdd312",
+          "blobSha": "da92e515e8d6ad01232be21730a81a92a7dca63a"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "e689fe3fa2c52288feaf04e6c930607a603a2f47",
+          "blobSha": "18067c609a16565f9aad6371896822d2bcca62b7"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "d574c18d52ddbc27cbf3926122a30e741edc91bd",
+          "blobSha": "0d6ab850186d7556f8c1253934986129fe81c6fd"
+        },
+        {
+          "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
+          "previousBlob": "59b93698e6536e081f612bf8603c5a0a0dd3712b",
+          "blobSha": "328c43c127711dd802d9d464b7a94e4a0627d2b4"
+        },
+        {
+          "path": "src/features/sync/selection/selection-highlight-session.js",
+          "blobSha": "9f72a1852467ee3d8291881927c4072346a73405",
+          "previousBlob": "63370aa9a02b6ffb8c6dddf1449852d8379ec8e5"
+        }
+      ],
+      "validation": "Final Windows source417158ed: original5.45M-character follow-up, six-width matrix, unchanged400ms/100ms budgets,20 preview/5 diagram checks and original cross-chapter/outline matrix passed. All2965 Node tests across391 files/17 groups, UI82 and browser contract12 passed. Existing generic browser/HTML findings remain unaccepted; no full Rust rerun, R17 not accepted, no push."
     }
   }
 }

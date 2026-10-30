@@ -1,4 +1,4 @@
-param([int]$AppProcessId, [string]$ScreenshotPath, [switch]$Reveal, [int]$WindowWidth, [int]$WindowHeight)
+param([int]$AppProcessId, [string]$ScreenshotPath, [switch]$Reveal, [int]$WindowWidth, [int]$WindowHeight, [switch]$ResizeBurst)
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 Add-Type -TypeDefinition @'
@@ -37,6 +37,12 @@ if ($Reveal) {
 }
 if ($WindowWidth -gt 0 -and $WindowHeight -gt 0) {
   if (-not [MdrFrameProbe]::SetWindowPos($frameWindow,[IntPtr]::Zero,0,0,$WindowWidth,$WindowHeight,22)) { throw 'Owned window resize failed.' }
+}
+if ($ResizeBurst) {
+  foreach ($size in @(@(1240,880),@(1200,890),@(1160,900),@(1120,910))) {
+    if (-not [MdrFrameProbe]::SetWindowPos($frameWindow,[IntPtr]::Zero,0,0,$size[0],$size[1],22)) { throw 'Owned resize burst failed.' }
+    [System.Threading.Thread]::Sleep(30)
+  }
 }
 $outer = [MdrFrameProbe+Rect]::new()
 $client = [MdrFrameProbe+Rect]::new()

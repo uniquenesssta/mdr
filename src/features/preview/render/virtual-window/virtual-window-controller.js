@@ -359,11 +359,9 @@ export class VirtualWindowController {
 
     const previousMounted = this.mounted;
     const nextMounted = new Map();
-    const fragment = this.documentRef.createDocumentFragment();
     const changedNodes = [];
     const mountedNodes = [];
     let reused = 0;
-    fragment.append(this.spacers.top);
 
     for (let index = nextRange.start; index < nextRange.end; index += 1) {
       const block = this.blocks[index];
@@ -378,11 +376,18 @@ export class VirtualWindowController {
         wrapper.dataset.previewBlockIndex = String(index);
       }
       nextMounted.set(block.id, wrapper);
-      fragment.append(wrapper);
     }
 
-    fragment.append(this.spacers.bottom);
-    this.body.replaceChildren(fragment);
+    // Keep overlapping blocks attached: moving them through a fragment collapses
+    // both native selections and live CSS Highlight ranges inside reused nodes.
+    for (const [id, wrapper] of previousMounted) {
+      if (nextMounted.get(id) !== wrapper) wrapper.remove();
+    }
+    let index = 1; // The top spacer is permanently the first child.
+    for (const wrapper of nextMounted.values()) {
+      const current = this.body.children[index++] || this.spacers.bottom;
+      if (current !== wrapper) this.body.insertBefore(wrapper, current);
+    }
     this.mounted = nextMounted;
     this.range = nextRange;
     this.metricsCache = null;

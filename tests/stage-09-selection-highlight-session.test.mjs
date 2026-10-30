@@ -215,6 +215,17 @@ test('R9-09 Highlight Session reports restore exceptions keeps intent and permit
   session.destroy();
 });
 
+test('live noncollapsed CSS ranges survive window changes without rebuilding; collapsed ranges still recover', () => {
+  const {documentRef,preview,textNode}=createTree();const registry=createRegistry();let rebuilds=0;
+  const session=createSelectionHighlightSession({previewElement:preview,documentRef,highlightRegistry:registry,HighlightCtor:FakeHighlight});
+  const selected=range(textNode,0,2);selected.collapsed=false;
+  session.show({ranges:[selected]},{restore:()=>{rebuilds++;return {ranges:[range(textNode,0,2)]};}});
+  for(let i=0;i<12;i++)assert.equal(session.restore(),true);
+  assert.equal(rebuilds,0);assert.equal(session.getState().restoreCount,0);
+  selected.collapsed=true;assert.equal(session.restore(),true);assert.equal(rebuilds,1);
+  session.destroy();
+});
+
 test('R9-09 Highlight Session clear removes CSS ranges atomic classes and remount intent', () => {
   const { documentRef, preview, block, textNode } = createTree();
   const registry = createRegistry();

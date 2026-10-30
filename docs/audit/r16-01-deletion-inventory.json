@@ -1875,7 +1875,7 @@
     },
     {
       "path": "src/features/preview/application/preview-controller.js",
-      "sha256": "aee2e37e5a3ba422f297c836cb7fd6869eaafe9ac49b50c420531bdf91f9a39a"
+      "sha256": "4446e40f5506e098a8d730817d2b61f9ae32f25363fd421f8aa65f0df28c6463"
     },
     {
       "path": "src/features/preview/application/preview-state.js",
@@ -1975,7 +1975,7 @@
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-controller.js",
-      "sha256": "20af7bc316e25a8cb37ac909d0c08dda2a65fbb20cfd33f67aafcc05c4d63834"
+      "sha256": "6ebffb99ba7cf11355b38beccd598d03af7a2675bed1dc0437d1b967406b14fc"
     },
     {
       "path": "src/features/preview/render/virtual-window/virtual-window-model.js",
@@ -2223,7 +2223,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-highlight-session.js",
-      "sha256": "820237dfe4d3dd8bca7da592642442ae8d70868953dfa2ed617f0acf0f9f9b1b"
+      "sha256": "abe7c3ab2a9fb187034085fe642b7ac9fa5645c3887d684400c1d81693c9b498"
     },
     {
       "path": "src/features/sync/selection/selection-retry-scheduler.js",
@@ -2231,7 +2231,7 @@
     },
     {
       "path": "src/features/sync/selection/selection-sync-controller.js",
-      "sha256": "e128bb0cf940522dbc4883a8537f95fe527280e557175ff67df31dea7f7aea3b"
+      "sha256": "16d78b484854d46837e3b1cabb4dba3ecaf237bf14f871ae20b744d689f844dd"
     },
     {
       "path": "src/features/telemetry/aggregation-buffer.js",
@@ -2363,7 +2363,7 @@
     },
     {
       "path": "src/main.js",
-      "sha256": "c46d6bde7488ab4f408f33fc2f158babcc96b3c56f46105dd4122374bb9d050d"
+      "sha256": "2dafb3d72cf95af2e7d4857366ed1612bf1dbb5694875da93f056cad2db55d98"
     },
     {
       "path": "src/model-kernel/index.js",
@@ -3330,6 +3330,10 @@
       "sha256": "d5230d159ad460652f88cdbff29079c1fdd2775b0c9e3ef1f25a89c5f511f990"
     },
     {
+      "path": "tests/e2e/lib/selection-continuation-checks.mjs",
+      "sha256": "ef570f342306caaafb73c950f2b023ace04990a53099210407e76f9c9006802d"
+    },
+    {
       "path": "tests/e2e/lib/selection-reveal-checks.mjs",
       "sha256": "c5402149eec0390dc78b51e600ec018d24424d80724c16f278736056dd4a05d2"
     },
@@ -3339,7 +3343,7 @@
     },
     {
       "path": "tests/e2e/lib/sidebar-resize-selection-checks.mjs",
-      "sha256": "7261be91d872242c07001dae4e83d1f980baf896d25b617cc8c43e9ab0e79e0d"
+      "sha256": "290d83331cfd753e97ecdb500e865492e766b2c0fd2e5452fecb571504ecb7b7"
     },
     {
       "path": "tests/e2e/lib/single-implementation.mjs",
@@ -3387,7 +3391,7 @@
     },
     {
       "path": "tests/e2e/preview-virtual-window.test.mjs",
-      "sha256": "35a84e7e191576631f41b283c23eafa159d0e711f807dabeab1e27f0bef10454"
+      "sha256": "804597099426affa9f5bd26f1b00f28fe248680805d2851798a05df9dc49d111"
     },
     {
       "path": "tests/e2e/recent-files-menu.test.mjs",
@@ -3459,7 +3463,7 @@
     },
     {
       "path": "tests/e2e/windows/native-frame-geometry.ps1",
-      "sha256": "320b45b380234c37c72bb12cfbd7819d0ed2543ba7e91bf79791880fdb5f8710"
+      "sha256": "0b6bb74f7a3d99bbb58c5e4165e046a06712336a1e67bf72fea3f4d205a54c04"
     },
     {
       "path": "tests/e2e/windows/native-window-interop.mjs",
@@ -3479,7 +3483,7 @@
     },
     {
       "path": "tests/e2e/windows/run-native-frame-check.mjs",
-      "sha256": "bbf0355715d52a6fa04c20d5e171e0260e4a87764853bf4ed6e7ba0596d7aa95"
+      "sha256": "5ee8283dc7f0c0a4fc1054d29ec012c9f3d78277adb4c4317e8f9605d8155181"
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
@@ -3727,7 +3731,7 @@
     },
     {
       "path": "tests/stage-09-selection-highlight-session.test.mjs",
-      "sha256": "545e7512b7ba970c1c95e1b8478a2f75425aa50f3cc3db3ad847a2b4422b9b1d"
+      "sha256": "8e736d8c20133b09b50f1af558121c2e2b1ee661aa1b96bdaaa0ab100929c267"
     },
     {
       "path": "tests/stage-09-selection-readers.test.mjs",
@@ -3739,7 +3743,7 @@
     },
     {
       "path": "tests/stage-09-selection-reveal.test.mjs",
-      "sha256": "d354a5cc201d64bfafb0ee7683fadf332019398b9ce0a2faa967f98812806f69"
+      "sha256": "eadd8e94d0dbf7e7a79e7d82707b9fd9aa4f58d708b23e8d246278caa7291289"
     },
     {
       "path": "tests/stage-10-autosave-controller.test.mjs",
@@ -4770,7 +4774,7 @@
       "sha256": "aa5c2c180d92a943f2db7f866d4828b7e94ceef3af6e387674d06f786dee030c"
     }
   ],
-  "inputSha256": "377985b26c032d63cccc7816d05cfd4a1d8498d45db12d733bc02636f34578ce",
+  "inputSha256": "df72bfdd054e42295ceb1b26b85f1ce9e7dd7daa0a0ecaf1c4c29f2406c690d8",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",
@@ -5479,6 +5483,11 @@
     {
       "from": "tests/e2e/preview-virtual-window.test.mjs",
       "line": 18,
+      "kind": "computed-import"
+    },
+    {
+      "from": "tests/e2e/preview-virtual-window.test.mjs",
+      "line": 87,
       "kind": "computed-import"
     },
     {
