@@ -85,11 +85,14 @@ test('compatibility and dynamic callers reference the external sprite without a 
   // R13.14 moves the two clipper icons from the template to its owned view.
   const clipperIcons = [...clipperView.matchAll(/createIconView\(documentRef, '(icon-[a-z-]+)'/g)].map(match => match[1]);
   const imageIcons = [...exportImageView.matchAll(/createIcon\(doc,'(icon-[a-z-]+)'/g)].map(match => match[1]);
-  assert.equal(shellReferences.length, 52);
+  // The removed drag prompt no longer owns its file icon; the full-window drop receiver remains.
+  assert.equal(shellReferences.length, 51);
+  assert.match(shell, /id="drop-overlay"[^>]*aria-hidden="true"/);
+  assert.doesNotMatch(shell, /class="drop-message"/);
   assert.deepEqual(imageIcons, ['icon-image', 'icon-close']);
   assert.doesNotMatch(exportImageView, /createElementNS|<svg\b|<use\b|\/assets\/icons\.svg#icon-/i);
   assert.deepEqual(clipperIcons, ['icon-close']);
-  assert.equal(shellReferences.length + clipperIcons.length + imageIcons.length, 55);
+  assert.equal(shellReferences.length + clipperIcons.length + imageIcons.length, 54);
   assert.ok(shellReferences.every(record => record.href === `${ICON_SPRITE_URL}#${record.iconId}`));
   assert.ok(shellReferences.every(record => expectedIconIds.includes(record.iconId)));
   assert.doesNotMatch(shell, /<symbol\b|class="icon-sprite"|href="#icon-/i);

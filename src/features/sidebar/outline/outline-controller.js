@@ -8,6 +8,7 @@
 import {
   buildOutlineTree,
   collectCollapsibleOutlineIds,
+  findOutlineNode,
   normalizeOutlineHeadingIndex,
   normalizePreviewHeadingBlocks,
   outlineHeadingIndexesEqual
@@ -45,6 +46,7 @@ export function createOutlineController({
   requireFunction(collapseStore.restore, 'Outline collapse store.restore');
   requireFunction(collapseStore.toggle, 'Outline collapse store.toggle');
   requireFunction(collapseStore.collapse, 'Outline collapse store.collapse');
+  requireFunction(collapseStore.collapseMany, 'Outline collapse store.collapseMany');
   requireFunction(collapseStore.expandAll, 'Outline collapse store.expandAll');
   requireFunction(collapseStore.collapseAll, 'Outline collapse store.collapseAll');
   requireFunction(collapseStore.destroy, 'Outline collapse store.destroy');
@@ -198,7 +200,9 @@ export function createOutlineController({
     },
     collapseNode(id) {
       assertActive();
-      const pending = collapseStore.collapse(id);
+      const node = findOutlineNode(tree, String(id || ''));
+      if (!node) return Promise.resolve(Object.freeze({ ok: false, reason: 'invalid-id' }));
+      const pending = collapseStore.collapseMany(collectCollapsibleOutlineIds(node.children));
       render('collapse-node');
       return pending;
     },

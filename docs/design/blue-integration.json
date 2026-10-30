@@ -1074,5 +1074,11 @@
       "One final reflow remains at pointer release; native measurements recorded end tasks around 0.2 seconds with the large outline visible.",
       "R17 formal acceptance and remote push remain out of scope."
     ]
+  },
+  "dropOutlineFluidRefinement": {
+    "date": "2026-10-30",
+    "record": "docs/design/drop-outline-fluid-layout.json",
+    "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
+    "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app."
   }
 }

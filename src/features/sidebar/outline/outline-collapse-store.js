@@ -102,6 +102,15 @@ export function createOutlineCollapseStore({
       collapsedIds.add(key);
       return persist();
     },
+    collapseMany(ids) {
+      assertActive();
+      let changed = false;
+      for (const id of ids || []) {
+        const key = String(id || '').trim();
+        if (key && !collapsedIds.has(key)) { collapsedIds.add(key); changed = true; }
+      }
+      return changed ? persist() : Promise.resolve(Object.freeze({ ok: true, persisted: false }));
+    },
     expandAll() {
       assertActive();
       if (!collapsedIds.size) return Promise.resolve(Object.freeze({ ok: true, persisted: false }));

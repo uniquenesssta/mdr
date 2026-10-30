@@ -19,10 +19,16 @@ export async function runOutlineWindowChecks({ page, app, artifacts }) {
   await page.waitFor(`Boolean(document.querySelector('#outline-list [data-outline-id="${headings[0].id}"]'))`);
   const toggle = await page.evaluate("(()=>{const e=document.querySelector('#outline-list [data-outline-action=toggle]');return e?e.dataset.outlineId:null;})()");
   assert.ok(toggle);
-  await page.click(`#outline-list [data-outline-action="toggle"][data-outline-id="${toggle}"]`);
-  assert.equal(await page.evaluate(`document.querySelector('#outline-list [data-outline-action="toggle"][data-outline-id="${toggle}"]').getAttribute('aria-expanded')`),'false');
+  const toggleSelector=`#outline-list [data-outline-action="toggle"][data-outline-id="${toggle}"]`;
+  const expanded=()=>page.evaluate(`document.querySelector(${JSON.stringify(toggleSelector)}).getAttribute('aria-expanded')`);
+  // Earlier scenarios exercise persisted collapse state; verify the transition from that actual state.
+  const initiallyExpanded=await expanded();
+  assert.ok(['true','false'].includes(initiallyExpanded));
+  await page.click(toggleSelector);
+  assert.equal(await expanded(),initiallyExpanded==='true'?'false':'true');
   assert.equal(await evaluateApplication(page,'applicationCapabilities.markdownEditorOutlineControllerPort.snapshot.headings.length'),headings.length);
-  await page.click(`#outline-list [data-outline-action="toggle"][data-outline-id="${toggle}"]`);
+  await page.click(toggleSelector);
+  assert.equal(await expanded(),initiallyExpanded);
   const start = await page.evaluate("(()=>{const links=[...document.querySelectorAll('#outline-list [data-outline-action=navigate]')];const e=links.at(-1);e.focus();return e.dataset.outlineId;})()");
   const next = headings[headings.findIndex(h=>h.id===start)+1];assert.ok(next);
   await page.pressKey('Tab');

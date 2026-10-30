@@ -78,7 +78,7 @@ export function createSidebarContentView(slots) {
         "\n    ",
         ["div",{"class":"context-separator","id":"outline-context-node-separator","hidden":true},[]],
         "\n    ",
-        ["button",{"id":"outline-context-collapse-node","data-outline-context-action":"collapse-node","hidden":true},["折叠此大纲的所有子集"]],
+        ["button",{"id":"outline-context-collapse-node","data-outline-context-action":"collapse-node","hidden":true},["折叠所有子集"]],
         "\n  "
       ]]
     ]]

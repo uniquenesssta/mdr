@@ -1,9 +1,9 @@
 {
-  "baselineCommit": "552d35ac33efed5963a8b4acdba2483e2b85ce84",
+  "baselineCommit": "3505b416af6e4ba46b3a373b9511065cb40e2426",
   "schemaVersion": 1,
   "stage": "R16.12",
   "productionFiles": 561,
-  "inputSha256": "dbf802c5705d5ab9f37dea0fab67fbbfc64e7a22ff402a3208b0cb44f153a994",
+  "inputSha256": "0548ed5a513607e825a42f01eafc3b00a137416061cc9f801ba2e21002497d80",
   "nodes": [
     {
       "id": "builtin:node:crypto",
@@ -12032,7 +12032,7 @@
       "specifier": "./outline-active-heading.js",
       "kind": "import",
       "domain": "esm",
-      "line": 15,
+      "line": 16,
       "column": 1
     },
     {
@@ -12042,6 +12042,15 @@
       "kind": "import",
       "domain": "esm",
       "line": 8,
+      "column": 1
+    },
+    {
+      "from": "src/features/sidebar/outline/outline-view.js",
+      "to": "src/features/sidebar/outline/outline-tree-builder.js",
+      "specifier": "./outline-tree-builder.js",
+      "kind": "import",
+      "domain": "esm",
+      "line": 2,
       "column": 1
     },
     {

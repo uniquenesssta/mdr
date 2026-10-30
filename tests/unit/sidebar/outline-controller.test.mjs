@@ -20,6 +20,7 @@ function harness() {
     isCollapsed(id) { return collapsed.has(id); },
     toggle(id) { collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id); persistence.push(['toggle', id]); return Promise.resolve({ ok: true }); },
     collapse(id) { collapsed.add(id); persistence.push(['collapse', id]); return Promise.resolve({ ok: true }); },
+    collapseMany(ids) { for(const id of ids)collapsed.add(id);persistence.push(['many',[...ids]]);return Promise.resolve({ok:true}); },
     expandAll() { collapsed.clear(); persistence.push(['expand']); return Promise.resolve({ ok: true }); },
     collapseAll(ids) { collapsed.clear(); for (const id of ids) collapsed.add(id); persistence.push(['all', [...ids]]); return Promise.resolve({ ok: true }); },
     destroy() { collapseStore.destroyed = true; }
@@ -59,6 +60,19 @@ test('Atomic 6.8 updates index while inactive and renders only when Sidebar acti
   h.controller.activate();
   assert.equal(h.activeIds.at(-1), 'b');
   h.controller.destroy();
+});
+
+test('collapse children recursively targets only the chosen branch and leaves its own state and siblings unchanged', async () => {
+  const h=harness();h.controller.start();
+  h.controller.replaceIndex([{id:'a',level:1,line:1,text:'A'},{id:'b',level:2,line:2,text:'B'},
+    {id:'c',level:3,line:3,text:'C'},{id:'d',level:4,line:4,text:'D'},{id:'x',level:1,line:5,text:'X'},
+    {id:'y',level:2,line:6,text:'Y'}],{documentKey:'doc',version:1});
+  await h.collapseStore.collapse('x');await h.controller.collapseNode('a');
+  assert.deepEqual(h.persistence.at(-1),['many',['b','c']]);
+  assert.equal(h.collapseStore.isCollapsed('a'),false);assert.equal(h.collapseStore.isCollapsed('b'),true);
+  assert.equal(h.collapseStore.isCollapsed('c'),true);assert.equal(h.collapseStore.isCollapsed('x'),true);
+  assert.equal(h.collapseStore.isCollapsed('y'),false);
+  assert.equal((await h.controller.collapseNode('missing')).ok,false);h.controller.destroy();
 });
 
 test('Atomic 6.8 rejects stale index results only within the same document identity', () => {

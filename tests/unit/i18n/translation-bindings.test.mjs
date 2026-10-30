@@ -165,7 +165,7 @@ test('refresh continues through binding failures and reports them after remainin
   bindings.destroy();
 });
 
-test('production integration preserves 113 bindings across shell, Help and the owned clipper view', async () => {
+test('production integration preserves 111 bindings across shell, Help and the owned clipper view', async () => {
   const { readFile } = await import('node:fs/promises');
   const [moduleEntry, core, bootstrap, index, markup, helpDialog, clipperView, main, exportImageView] = await Promise.all([
     readFile('src/bootstrap/module-entry.js', 'utf8'),
@@ -206,7 +206,9 @@ test('production integration preserves 113 bindings across shell, Help and the o
     for (const entry of (loop[2] || loop[4]).matchAll(/\['[^']+','([^']+)'/g)) imageBindings.push(entry[1]);
   }
   assert.deepEqual(imageBindings.sort(), ['cancel','exportImageTitle','ratioLabel','ratio9_16','ratio4_5','ratio3_4','ratio1_1','ratio16_9','cropLabel','previewLabel','exportImagePreviewAlt','exportImageHint','refreshPreview','downloadPng'].sort());
-  assert.equal(markupBindings.length, 87);
+  // Removing the drag prompt removes only its visible translation binding; locale ownership remains.
+  assert.equal(markupBindings.length, 86);
+  assert.doesNotMatch(markup, /data-i18n="dropMessage"/);
   assert.equal(helpBindings.length, 1);
   assert.deepEqual(clipperBindings, [
     ['data-i18n', 'urlTitle'], ['data-i18n', 'urlLabel'],
@@ -215,7 +217,7 @@ test('production integration preserves 113 bindings across shell, Help and the o
     ['data-i18n', 'manualLabel'], ['data-i18n-placeholder', 'manualPlaceholder'],
     ['data-i18n', 'cancel'], ['data-i18n', 'convertInsert']
   ]);
-  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 112);
+  assert.equal(markupBindings.length + helpBindings.length + clipperBindings.length + imageBindings.length, 111);
   assert.match(main, /subscribeLocale: listener => i18nService\.subscribe\(listener\)/);
   assert.match(clipperView, /subscribeLocale\(renderTranslations\)/);
   assert.doesNotMatch(markup, /id="url-modal"/);

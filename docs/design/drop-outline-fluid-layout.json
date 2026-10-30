@@ -1,0 +1,175 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-30",
+  "branch": "codex/figma-ui",
+  "baselineCommit": "3505b416af6e4ba46b3a373b9511065cb40e2426",
+  "authorization": "User requested no drag prompt card, target-scoped recursive child folding and responsive editor width; latest correction confines Figma to UI only.",
+  "figma": {
+    "fileKey": "hMLGpGuR3Cpo0Tt2U8iagb",
+    "status": "visual_changes_completed_before_code",
+    "sessionId": "068a0f21-61da-4c6e-a665-cd54ae1f2473",
+    "drag": {
+      "master": "100:7417",
+      "set": "100:7426",
+      "hiddenPromptChildren": [
+        "100:7418",
+        "100:7424",
+        "100:7425"
+      ],
+      "screen": "245:7575",
+      "instance": "245:7711",
+      "contract": "Full-window scrim, 4px backdrop blur, 2px blue border. No central card, icon or text. Library master360x122 is a viewport sample, not a runtime size constraint."
+    },
+    "outline": {
+      "master": "101:8093",
+      "label": "I101:8114;94:1304",
+      "text": "折叠所有子集"
+    },
+    "editor": {
+      "renderedMaster": "99:6099",
+      "renderedBody": "99:6101",
+      "sourceMaster": "99:6122",
+      "sourceBody": "99:6124",
+      "sizing": "FILL; maxWidth=null; existing padding retained",
+      "readingMaster": "99:6126",
+      "reading": "Existing reading measure retained"
+    },
+    "screenshotsReviewed": [
+      "245:7575",
+      "104:1006",
+      "101:8093"
+    ],
+    "boundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app."
+  },
+  "implementation": {
+    "drag": "The empty aria-hidden overlay fills the window and remains pointer-transparent; existing browser/native drop receivers and file import policy retain ownership.",
+    "outline": "Explicit right-click heading takes precedence; blank-panel context uses the active heading. Recursively persist collapsible descendant IDs in one write, retain target and unrelated branch states. Global collapse/expand remain separate commands. No document-body writes.",
+    "width": "Remove hybrid content caps at desktop/narrow sizes; source content also has no maximum width. Actual content fills scroller width minus gutters; retain32px/24px text inset. Reading preview measure unchanged."
+  },
+  "verification": {
+    "unit": {
+      "passed": 8
+    },
+    "build": {
+      "vite": "passed",
+      "nativeDebug": "passed",
+      "emptyOutDir": false
+    },
+    "browser": {
+      "passed": 94,
+      "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/browser-final/figma-ui-results.json",
+      "widths": [
+        900,
+        1280,
+        1920,
+        2560
+      ],
+      "modes": [
+        "hybrid",
+        "both"
+      ],
+      "actualMarkdownDrop": true,
+      "admission": {
+        "accepted": true,
+        "sourceSha256": "5538a1ca4d440099e96eea507766a326d7c539ef2bb4d2b32297673675959975",
+        "sourceFiles": 500,
+        "outputFiles": 140
+      }
+    },
+    "native": {
+      "status": "passed",
+      "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-verified/native-frame.json",
+      "uiChecks": 11,
+      "uiEvidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-verified/native-drop-outline-fluid.json",
+      "characters": 5453875,
+      "interactionEvidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-verified/large-document-interactions.json",
+      "selectionGestureMs": [
+        295,
+        296,
+        276
+      ],
+      "maximumInteractionTaskMs": 68,
+      "matrixEvidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-verified/sidebar-resize-selection.json",
+      "matrixCases": 6,
+      "outlineEvidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-verified/outline-window.json",
+      "performanceBudgets": {
+        "maxTaskMs": 100,
+        "maxSelectionGestureMs": 400
+      },
+      "originalDocumentUnchanged": true
+    },
+    "preservedAttempts": [
+      {
+        "type": "browser",
+        "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/browser/figma-ui-failure.json",
+        "cause": "Previous settings scenario remained open. New scenario now explicitly returns to the document before testing visible editor geometry."
+      },
+      {
+        "type": "native",
+        "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/native-final/native-failure.json",
+        "cause": "Old large-outline test assumed initially expanded state after a preceding persisted-collapse scenario; now checks inversion and restoration from the actual initial state."
+      },
+      {
+        "type": "repository-node",
+        "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-node.log",
+        "cause": "Initial full run retained three stale assertions: missing reviewed-current mapping for the modified telemetry producer; sprite usage52/55 versus authorized51/54; translation binding count87/112 versus86/111. Original telemetry catalogue retained. Exact reviewed mapping, icon counts and translation counts synchronized with no-prompt assertions. Second full run retained one translation-count failure; its complete5-file/34-test group passed after correction.",
+        "targetedRecheck": {
+          "passed": 27,
+          "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-metadata-recheck.log"
+        }
+      }
+    ],
+    "originalDocument": {
+      "path": "O:/Project/Markdown Rust/500万字.md",
+      "sha256": "c042b1ab556d9156f22a4b81e761a6bb11861324eb762d6e2083fb98850f1032"
+    },
+    "repositoryNode": {
+      "status": "full_run_then_affected_group_revalidated",
+      "fullRun": {
+        "tests": 2967,
+        "pass": 2966,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "files": 391,
+        "groups": 17,
+        "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-node-final.log",
+        "suiteResults": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-20261030/node-final/repository-audit/suite-results.json"
+      },
+      "lastFailure": "Removed drag-prompt translation was still counted in the legacy exact binding count. Updated86 static/111 total bindings; remaining translation ownership and content assertions retained.",
+      "affectedGroupRecheck": {
+        "tests": 34,
+        "pass": 34,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "files": 5,
+        "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-i18n-final.log"
+      },
+      "anotherFullRunAfterFinalTestExpectationUpdate": false
+    },
+    "browserContract": {
+      "passed": 12,
+      "failed": 0,
+      "evidence": "O:/Project/Markdown Rust/Temp/drop-outline-fluid-contract.log"
+    },
+    "staticGates": {
+      "passed": [
+        "verify-architecture",
+        "verify-no-legacy-runtime",
+        "verify-generated-files",
+        "verify-readme-record"
+      ],
+      "dependencyCycles": 0,
+      "namingIssues": 0
+    }
+  },
+  "limits": {
+    "r17Accepted": false,
+    "fullRustSuite": "not rerun; no Rust source changes",
+    "genericBrowserSuite": "Existing generic browser and source-EOF HTML findings remain unaccepted; this task does not claim those repaired.",
+    "userAcceptance": "Automated and Windows evidence are separate from user visual acceptance."
+  },
+  "rollback": "Revert the scoped task commit; no product data migration, no original document changes and no deletion.",
+  "status": "implemented_and_verified_for_requested_scope"
+}

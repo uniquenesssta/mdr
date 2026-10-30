@@ -3,8 +3,9 @@
 .virtual-editor-host .cm-scroller { line-height: 32px; }
 body:not(.hybrid-view-mode) .virtual-editor-host .cm-scroller { font-family: var(--font-family-mono); }
 .virtual-editor-host .cm-content, .virtual-editor-host .cm-gutters { padding-top: 32px; padding-bottom: 32px; }
+.virtual-editor-host .cm-content { max-width:none; }
 .virtual-editor-host .cm-cursor { border-left-color: var(--color-editor-caret); }
-.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { width: 100%; max-width: calc(var(--document-measure) + 64px); padding: 32px 0; margin: 0 auto; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { width: 100%; max-width: none; padding: 32px 0; margin: 0; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line { --hybrid-line-inline-padding: 32px; padding: 0 var(--hybrid-line-inline-padding); border-radius: 0; font-size: calc(var(--editor-font-size,18px) * 17 / 18); line-height: 32px; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line:has(> br:only-child) { min-height: 24px; line-height: 24px; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading { padding-top: 0; padding-bottom: 0; color: var(--color-text-heading); font-weight: 700; letter-spacing: 0; border: 0; }
@@ -30,7 +31,7 @@ body:not(.hybrid-view-mode) .virtual-editor-host .cm-scroller { font-family: var
 .preview-content th { background: var(--color-canvas); }
 .preview-content hr { border: 0; border-top: 1px solid var(--color-border-subtle); margin: 24px 0; }
 @media(max-width:900px) {
-  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { max-width: 568px; padding: 24px 0; }
+  .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { padding: 24px 0; }
   .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line { --hybrid-line-inline-padding: 24px; }
   .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-1 { font-size: calc(var(--editor-font-size,18px) * 24 / 18); line-height: 36px; }
   .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-block-widget { width: calc(100% - 48px); margin: 12px 24px; }

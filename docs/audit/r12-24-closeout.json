@@ -147,7 +147,7 @@
     },
     {
       "path": "docs/audit/r16-01-deletion-inventory.json",
-      "blobSha": "ac4febf44933dd7a2dd00d4289a2751201104d7c"
+      "blobSha": "baf438ba1e81ebde8510daf8058e9b2554c6b05e"
     },
     {
       "path": "scripts/architecture/checks.mjs",
@@ -563,7 +563,7 @@
     },
     {
       "path": "src/features/import/ui/import-content-view.js",
-      "blobSha": "4eb0e43c476de7aeaf6d39dff58120a41caf2b39"
+      "blobSha": "3d91577a6e7a7f44032fb135daf5efd2700a7b38"
     },
     {
       "path": "src/features/import/web-clipper/html-extractor.js",
@@ -719,7 +719,7 @@
     },
     {
       "path": "src/features/sidebar/ui/sidebar-content-view.js",
-      "blobSha": "09e46dc9157361921a060efba13b4782b9f6c7dd"
+      "blobSha": "ff9d5846a0874f6b56144d07c358513818047b79"
     },
     {
       "path": "src/features/sync/scroll/scroll-sync-controller.js",
@@ -1203,7 +1203,7 @@
     },
     {
       "path": "docs/audit/r16-11-module-naming.json",
-      "blobSha": "18067c609a16565f9aad6371896822d2bcca62b7"
+      "blobSha": "6ccda78a1de43d33e2a901de98f64f22f4e6ad2d"
     },
     {
       "path": "scripts/architecture/dependency-graph.mjs",
@@ -1215,7 +1215,7 @@
     },
     {
       "path": "docs/audit/r16-12-dependency-graph.json",
-      "blobSha": "0d6ab850186d7556f8c1253934986129fe81c6fd"
+      "blobSha": "519fe8877e535af12d77d4c7dcf7b587819a5dec"
     },
     {
       "path": "scripts/architecture/repository.mjs",
@@ -1440,6 +1440,34 @@
     {
       "path": "src/features/sync/selection/selection-highlight-session.js",
       "blobSha": "9f72a1852467ee3d8291881927c4072346a73405"
+    },
+    {
+      "path": "src/features/sidebar/outline/outline-collapse-store.js",
+      "blobSha": "0abd68a5b63b92dd491b4ec540a7015924be9d5e"
+    },
+    {
+      "path": "src/features/sidebar/outline/outline-controller.js",
+      "blobSha": "75574f6ef91814d3334b60e39d05e28234d0bec7"
+    },
+    {
+      "path": "src/features/sidebar/outline/outline-tree-builder.js",
+      "blobSha": "35bbbaddc325efb978c36aa8c05700d8dea2b91f"
+    },
+    {
+      "path": "src/features/sidebar/outline/outline-view.js",
+      "blobSha": "34b4ebff643da99a7a4b0c4960191650f4bae352"
+    },
+    {
+      "path": "src/styles/components/drop-overlay.css",
+      "blobSha": "62829be333fb78cd0d67cbe74d423327e4b3672b"
+    },
+    {
+      "path": "src/styles/features/document-surface.css",
+      "blobSha": "0fdf0c11f1429e223d848945d320d22b6517698f"
+    },
+    {
+      "path": "src/styles/features/hybrid.css",
+      "blobSha": "6cb93c68e2890d750884d82bd17723e26c98db95"
     }
   ],
   "priorFailures": {
@@ -15152,6 +15180,12 @@
         "baselineBlob": "d82d635a6b314b19681409d62446afac9e62cff2",
         "currentPath": "src/features/layout/toolbar/toolbar-boundary-controller.js",
         "reason": "User-authorized minimal header: measure its single 208px mode group instead of requiring the removed action row or a narrow two-row presentation. Original R15 baseline and telemetry event schema retained."
+      },
+      {
+        "path": "src/features/sidebar/outline/outline-controller.js",
+        "currentPath": "src/features/sidebar/outline/outline-controller.js",
+        "baselineBlob": "0433a8206b2a87c8d382aadb72bb2a27d8f75231",
+        "reason": "User-authorized recursive descendant folding changes the controller action; original R15 event producer baseline retained. Existing renderOutline event, category, duration and details fields are unchanged; current bytes reviewed in dropOutlineFluidRefinement."
       }
     ],
     "supplementalRepair": {
@@ -16375,6 +16409,67 @@
         }
       ],
       "validation": "Final Windows source417158ed: original5.45M-character follow-up, six-width matrix, unchanged400ms/100ms budgets,20 preview/5 diagram checks and original cross-chapter/outline matrix passed. All2965 Node tests across391 files/17 groups, UI82 and browser contract12 passed. Existing generic browser/HTML findings remain unaccepted; no full Rust rerun, R17 not accepted, no push."
+    },
+    "dropOutlineFluidRefinement": {
+      "date": "2026-10-30",
+      "baselineCommit": "3505b416af6e4ba46b3a373b9511065cb40e2426",
+      "record": "docs/design/drop-outline-fluid-layout.json",
+      "changedReviewedSources": [
+        {
+          "path": "docs/audit/r16-01-deletion-inventory.json",
+          "previousBlob": "ac4febf44933dd7a2dd00d4289a2751201104d7c",
+          "blobSha": "baf438ba1e81ebde8510daf8058e9b2554c6b05e"
+        },
+        {
+          "path": "src/features/import/ui/import-content-view.js",
+          "previousBlob": "4eb0e43c476de7aeaf6d39dff58120a41caf2b39",
+          "blobSha": "3d91577a6e7a7f44032fb135daf5efd2700a7b38"
+        },
+        {
+          "path": "src/features/sidebar/ui/sidebar-content-view.js",
+          "previousBlob": "09e46dc9157361921a060efba13b4782b9f6c7dd",
+          "blobSha": "ff9d5846a0874f6b56144d07c358513818047b79"
+        },
+        {
+          "path": "docs/audit/r16-11-module-naming.json",
+          "previousBlob": "18067c609a16565f9aad6371896822d2bcca62b7",
+          "blobSha": "6ccda78a1de43d33e2a901de98f64f22f4e6ad2d"
+        },
+        {
+          "path": "docs/audit/r16-12-dependency-graph.json",
+          "previousBlob": "0d6ab850186d7556f8c1253934986129fe81c6fd",
+          "blobSha": "519fe8877e535af12d77d4c7dcf7b587819a5dec"
+        },
+        {
+          "path": "src/features/sidebar/outline/outline-collapse-store.js",
+          "blobSha": "0abd68a5b63b92dd491b4ec540a7015924be9d5e"
+        },
+        {
+          "path": "src/features/sidebar/outline/outline-controller.js",
+          "blobSha": "75574f6ef91814d3334b60e39d05e28234d0bec7"
+        },
+        {
+          "path": "src/features/sidebar/outline/outline-tree-builder.js",
+          "blobSha": "35bbbaddc325efb978c36aa8c05700d8dea2b91f"
+        },
+        {
+          "path": "src/features/sidebar/outline/outline-view.js",
+          "blobSha": "34b4ebff643da99a7a4b0c4960191650f4bae352"
+        },
+        {
+          "path": "src/styles/components/drop-overlay.css",
+          "blobSha": "62829be333fb78cd0d67cbe74d423327e4b3672b"
+        },
+        {
+          "path": "src/styles/features/document-surface.css",
+          "blobSha": "0fdf0c11f1429e223d848945d320d22b6517698f"
+        },
+        {
+          "path": "src/styles/features/hybrid.css",
+          "blobSha": "6cb93c68e2890d750884d82bd17723e26c98db95"
+        }
+      ],
+      "validation": "Final full Node run:2966/2967 across391 files/17 groups; sole old translation-count failure corrected and complete affected group34/34 revalidated. No additional full rerun after that test-only correction. UI94, browser contract12, four gates, Vite/native debug builds and11 Windows UI checks passed. Original5453875-character performance and six-width/sidebar selection matrix passed with existing budgets. Prior failures retained. Full Rust/generic browser not rerun; existing HTML finding and R17 remain unaccepted. Figma only changed UI before code."
     }
   }
 }

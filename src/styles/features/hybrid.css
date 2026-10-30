@@ -24,8 +24,8 @@ body.hybrid-view-mode .f-editor-pane .collapse-btn {
 }
 
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content {
-  width: min(100%, 980px);
-  max-width: 980px;
+  width: 100%;
+  max-width: none;
   margin: 0 auto;
   padding: 36px 0 120px;
 }
@@ -340,7 +340,7 @@ margin-left: 18px;
 
 /* Confirmed MDR Figma component presentation. */
 body.hybrid-view-mode .f-editor-pane > .pane-header, body.preview-only-mode .f-preview-pane > .pane-header { display: none; }
-.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { max-width: calc(var(--document-measure) + 64px); width: 100%; padding-top: 40px; }
+.virtual-editor-host .cm-editor.cm-hybrid-mode .cm-content { max-width: none; width: 100%; padding-top: 40px; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-line { --hybrid-line-inline-padding: 32px; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading { font-weight: 500; letter-spacing: 0; }
 .virtual-editor-host .cm-editor.cm-hybrid-mode .cm-hybrid-heading-1 { font-size: 2em; line-height: 1.45; border: 0; }

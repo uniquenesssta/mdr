@@ -1,4 +1,5 @@
 import { createOutlineWindowView } from './outline-window-view.js';
+import { collectCollapsibleOutlineIds, findOutlineNode } from './outline-tree-builder.js';
 
 /**
  * Responsibility: Own Outline DOM projection and Outline-specific list/context-menu listeners.
@@ -60,6 +61,7 @@ export function createOutlineView({
   const rowByHeadingId = new Map();
   let activeHeadingId = '';
   let contextHeadingId = '';
+  let renderedTree = [];
   let started = false;
   let destroyed = false;
   const windowView = createOutlineWindowView({ documentRef, panel, list, isCollapsed,
@@ -148,8 +150,9 @@ export function createOutlineView({
 
   function onPanelContextMenu(event) {
     const node = event?.target?.closest?.('.outline-node');
-    contextHeadingId = node?.dataset?.outlineId || '';
-    const hasChildren = Boolean(node?.classList?.contains('has-children'));
+    contextHeadingId = node?.dataset?.outlineId || activeHeadingId;
+    const target = findOutlineNode(renderedTree, contextHeadingId);
+    const hasChildren = collectCollapsibleOutlineIds(target?.children).length > 0;
     contextSeparator.hidden = !hasChildren;
     contextCollapseNodeButton.hidden = !hasChildren;
     openContextMenu(event);
@@ -179,6 +182,7 @@ export function createOutlineView({
     render(tree) {
       assertActive();
       const nodes = Array.isArray(tree) ? tree : [];
+      renderedTree = nodes;
       const windowResult = windowView.render(nodes);
       if (windowResult) return Object.freeze(windowResult);
       rowByHeadingId.clear();
@@ -216,6 +220,7 @@ export function createOutlineView({
       }
       rowByHeadingId.clear();
       activeHeadingId = '';
+      renderedTree = [];
       contextHeadingId = '';
       started = false;
       destroyed = true;

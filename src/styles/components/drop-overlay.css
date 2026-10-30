@@ -1,6 +1,3 @@
 /* Responsibility: A bounded file drop target over the actual drag lifecycle. */
-.drop-overlay { position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--color-overlay-scrim);z-index:var(--layer-popover);pointer-events:none; }
-.drop-overlay.show { display:flex; }
-.drop-message { width:360px;max-width:calc(100vw - 32px);padding:16px;display:flex;flex-direction:column;align-items:center;gap:8px;border:2px solid var(--color-accent);border-radius:12px;background:var(--color-accent-soft);color:var(--color-accent);font-size:18px;line-height:28px;font-weight:700;text-align:center; }
-.drop-message .icon { width:24px;height:24px; }
-.drop-message::after { content:'Markdown / 文本文件 / 图片';font-size:14px;line-height:22px;font-weight:400;color:var(--color-text-secondary); }
+.drop-overlay { position:fixed;inset:0;display:none;background:var(--color-overlay-scrim);border:2px solid var(--color-accent);backdrop-filter:blur(4px);z-index:var(--layer-popover);pointer-events:none; }
+.drop-overlay.show { display:block; }

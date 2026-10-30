@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { runBlueComponentChecks } from './blue-component-checks.mjs';
 import { runWritingPreferenceChecks } from './writing-preference-checks.mjs';
 import { runQuoteHeightChecks } from './quote-height-checks.mjs';
+import { runDropOutlineFluidChecks } from './drop-outline-fluid-checks.mjs';
 
 const sample = '# 慢慢写，也很好。\n\n不急着把每个想法变成结论。\n先为它留下一点空间，让文字慢慢生长。\n\n> 写作不是把所有事情说完，\n> 而是找到此刻真正想说的那一句。\n\n## 把注意力还给文字\n\nalpha ALPHA scatteralpha alpha\n\n- [ ] 留一点余白\n\n' + '写作需要耐心。\n\n'.repeat(60);
 
@@ -121,6 +122,7 @@ export async function runFigmaUiChecks({ page, app, artifacts }) {
   report.checks.push(...await runBlueComponentChecks({ page, app, artifacts }));
   report.checks.push(...await runWritingPreferenceChecks({ page, app, artifacts }));
   report.checks.push(...await runQuoteHeightChecks({ page, app, artifacts }));
+  report.checks.push(...await runDropOutlineFluidChecks({page,app,artifacts}));
   check('no page exceptions', page.exceptions.length === 0);
   check('no console errors', page.consoleMessages.filter(entry => entry.type === 'error').length === 0);
   await page.evaluate(`delete globalThis.__figmaEditor;delete globalThis.__figmaScroll;delete globalThis.__figmaScrollTop;`);

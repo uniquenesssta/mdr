@@ -3328,7 +3328,7 @@
         "src/features/sync/selection/preview-component-mapping.js"
       ],
       "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
-      "contract": "FILL viewport/body, max-width720, min-width0. Code/source text follows editorFontSize18 default; sample paragraphs are illustrative. Rendered Mermaid corresponds to the complete source fence in both directions; this is component correspondence, never character-exact mapping. Native SVG label selection stays visible; pending/error code retains ordinary text mapping. Replaced diagram DOM invalidates structural anchors.",
+      "contract": "Editable viewport/body FILL, no fixed maximum width, min-width0; preserve padding. Reading preview retains its existing measure. Code/source text follows editorFontSize18 default; sample paragraphs are illustrative. Rendered Mermaid corresponds to the complete source fence in both directions; this is component correspondence, never character-exact mapping. Native SVG label selection stays visible; pending/error code retains ordinary text mapping. Replaced diagram DOM invalidates structural anchors.",
       "latestFullReview": {
         "date": "2026-10-27",
         "reference": "full-component-review.json",
@@ -3340,6 +3340,16 @@
         "date": "2026-10-28",
         "record": "blue-integration.json#continuousResizeRepair",
         "rule": "Large-document separator preview with a single content-width commit on release; exact content-width/typography cache; recheck visibility in a new layout epoch. Ordinary same-layout mounts do not reopen a completed reveal; native preview selection and manual preview scrolling keep ownership."
+      },
+      "adaptiveWidthRefinement": {
+        "date": "2026-10-30",
+        "record": "docs/design/drop-outline-fluid-layout.json",
+        "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
+        "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app.",
+        "renderedBody": "99:6101",
+        "sourceBody": "99:6124",
+        "maxWidth": null,
+        "readingMasterUnchanged": "99:6126"
       }
     },
     {
@@ -3795,7 +3805,7 @@
     {
       "id": "100:7426",
       "name": "MDR Blue/Drag overlay",
-      "description": "拖入显示，离开/取消/完成后撤销；不修改原有文件类型与导入策略。",
+      "description": "全窗拖入反馈；仅保留模糊遮罩与蓝色边框，离开、取消、完成后撤销。",
       "properties": [
         {
           "key": "State",
@@ -3816,10 +3826,12 @@
       ],
       "url": "https://www.figma.com/design/hMLGpGuR3Cpo0Tt2U8iagb?node-id=100-7426",
       "owners": [
-        "src/features/import/files/drop-overlay-view.js"
+        "src/features/import/ui/import-content-view.js",
+        "src/features/import/files/drop-overlay-view.js",
+        "src/styles/components/drop-overlay.css"
       ],
       "implementation": "Existing owner adapted to the latest reviewed blue component; runtime representative checks and remaining limits recorded in blue-integration.json.",
-      "contract": "360x122 prompt card;whole-window drop receiving area retained. Do not shrink actual gesture target to card bounds.",
+      "contract": "Full-window scrim with4px backdrop blur and2px blue border; no prompt card/icon/text. The360x122 library sample does not cap the runtime viewport or receiving area.",
       "densityReview": "docs/design/overlay-density-review.md",
       "latestFullReview": {
         "date": "2026-10-27",
@@ -3827,6 +3839,12 @@
         "reviewed": true,
         "changed": false,
         "dimensionsAuthority": "variants (live Figma values)"
+      },
+      "latestRefinement": {
+        "date": "2026-10-30",
+        "record": "docs/design/drop-outline-fluid-layout.json",
+        "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
+        "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app."
       }
     },
     {
@@ -4045,7 +4063,16 @@
         "changed": false,
         "dimensionsAuthority": "variants (live Figma values)"
       },
-      "previousContractBeforeFullReview": "Document176x204/7commands;sidebar216x120;outline192x92.14px text,28px rows;content-sized widths with viewport-safe positioning."
+      "previousContractBeforeFullReview": "Document176x204/7commands;sidebar216x120;outline192x92.14px text,28px rows;content-sized widths with viewport-safe positioning.",
+      "outlineDescendantsRefinement": {
+        "date": "2026-10-30",
+        "record": "docs/design/drop-outline-fluid-layout.json",
+        "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
+        "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app.",
+        "label": "折叠所有子集",
+        "target": "Right-click heading, or active heading for blank-panel context",
+        "behavior": "Fold collapsible descendants recursively; preserve own state, unrelated branches and document content"
+      }
     },
     {
       "id": "101:8222",

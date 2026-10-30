@@ -1675,7 +1675,7 @@
     },
     {
       "path": "src/features/import/ui/import-content-view.js",
-      "sha256": "200b866b23f58f9878d16aef30fce3cf0c47a1db7174c74c4cf890b27fb7f194"
+      "sha256": "6251d5b53cc63cff288b3470d3096bf4678c4da9d737d423eb27a7f4d83541d8"
     },
     {
       "path": "src/features/import/web-clipper/html-extractor.js",
@@ -2147,19 +2147,19 @@
     },
     {
       "path": "src/features/sidebar/outline/outline-collapse-store.js",
-      "sha256": "af16b188780d414fd3ae44e185b5e26e6c87b8fd42ecbe9269d9c2f250d83488"
+      "sha256": "53fd6b5902b304bca172f747feff3cfee717783ea7175dbc9f92a7abd2c0eea8"
     },
     {
       "path": "src/features/sidebar/outline/outline-controller.js",
-      "sha256": "37ce60557b3a9e2e5592fdf8c2919d52382e8ea618f8ef84bc9084f7ae89fac0"
+      "sha256": "b60a765e207b3e27499599dffa6d938ef07a9aaa711b6b9e0c790fddc728aea2"
     },
     {
       "path": "src/features/sidebar/outline/outline-tree-builder.js",
-      "sha256": "432f3c046822e3ece962f27d90b7d977ff9cf8485f6f04579d82831dd472772f"
+      "sha256": "21aaddc35068b88202fdb303e37e921b0166ec538840fbc996af679f9c422adf"
     },
     {
       "path": "src/features/sidebar/outline/outline-view.js",
-      "sha256": "dafe36fa8bd3ddbfaa899e01e4ee2225213ba4c0d7752460dc68d7c71d248e38"
+      "sha256": "e50ab6a50badee947d66855da1b6649f9263328dc9a260e56f74a2cdfade3c8d"
     },
     {
       "path": "src/features/sidebar/outline/outline-window-model.js",
@@ -2179,7 +2179,7 @@
     },
     {
       "path": "src/features/sidebar/ui/sidebar-content-view.js",
-      "sha256": "24119e056aa6793c7a0a5dab76adbd974e547290237b478a3f7b40cfc90aa301"
+      "sha256": "d82ab45c768c82229f1ae9967484a6d1114748d884972eccd5fd3468094801de"
     },
     {
       "path": "src/features/sync/index.js",
@@ -2551,7 +2551,7 @@
     },
     {
       "path": "src/styles/components/drop-overlay.css",
-      "sha256": "7169a284bf373d38152ad562919f1645fb669ece6918a21260cff7c3cb30be63"
+      "sha256": "7d81ab3e11c7ca5223c3d6de0b05ecde24ba9365be96ba713c6baaaed83b30b7"
     },
     {
       "path": "src/styles/components/form.css",
@@ -2599,7 +2599,7 @@
     },
     {
       "path": "src/styles/features/document-surface.css",
-      "sha256": "3eab534db98fdd638295804ba31e56cae60c8cd40dd2cb13c94a04ff150fd234"
+      "sha256": "481240d2938d6dafd456b6715ef17236eab6b9658349884bc6d918d9e1a1d627"
     },
     {
       "path": "src/styles/features/editor.css",
@@ -2647,7 +2647,7 @@
     },
     {
       "path": "src/styles/features/hybrid.css",
-      "sha256": "d0b487edfff4ab2675e84df2d669858a17b4d82698d8f1957636f879dc839bb8"
+      "sha256": "9d47843d6291fd0562bed6a66028906f24fd7342965ea083343dba1d5c50f539"
     },
     {
       "path": "src/styles/features/media.css",
@@ -3278,6 +3278,10 @@
       "sha256": "1879a93c43bfc6e76bb79f49c5e1ffc702b4bcfcd22ad99949597360f56677c7"
     },
     {
+      "path": "tests/e2e/lib/drop-outline-fluid-checks.mjs",
+      "sha256": "76f37b76ccf6dd845b1a1e8546549e5f68a139ce986a156b2268a60d2f483efe"
+    },
+    {
       "path": "tests/e2e/lib/e2e-installation.mjs",
       "sha256": "9ac43e310183cf102a01a737d922c4cb9c7e92aef05da211e417fdff6a32be64"
     },
@@ -3291,7 +3295,7 @@
     },
     {
       "path": "tests/e2e/lib/figma-ui-checks.mjs",
-      "sha256": "da6cc6c934fdce78c65cd8611ddbff7891ec27f4a9815d786ab712bfe42a5834"
+      "sha256": "941bf538de46dd6b26f213153d65ab8e5e6822e653ceae4273b71e791703e476"
     },
     {
       "path": "tests/e2e/lib/hybrid-image-checks.mjs",
@@ -3315,7 +3319,7 @@
     },
     {
       "path": "tests/e2e/lib/outline-window-checks.mjs",
-      "sha256": "0f784781cdeaf6aee14346e91b03588c929761af90a861a6c04858fc09b2006d"
+      "sha256": "d25be63d9d6b05b75be80d775be3d8106e0856db971fda5fcd33823df7f02477"
     },
     {
       "path": "tests/e2e/lib/performance-capture.mjs",
@@ -3483,7 +3487,7 @@
     },
     {
       "path": "tests/e2e/windows/run-native-frame-check.mjs",
-      "sha256": "5ee8283dc7f0c0a4fc1054d29ec012c9f3d78277adb4c4317e8f9605d8155181"
+      "sha256": "a06b8f8a74788620061a5f21290bff0e56bd52b04e4ea5d84ff14ce11a2af3c1"
     },
     {
       "path": "tests/e2e/windows/run-render-boundary-probe.mjs",
@@ -3519,7 +3523,7 @@
     },
     {
       "path": "tests/fixtures/blue-ui/markup-baseline.json",
-      "sha256": "8d96c48d31b12c4c82e9be5ad0c26114f8afec779d9f1466b99b0d4af656de3e"
+      "sha256": "6466e88ce76c3a66e3c896ae3b0f5f845ad401723d711c35e2fc1414e4e73c14"
     },
     {
       "path": "tests/fixtures/dependency-tls/root-ca.pem",
@@ -4171,7 +4175,7 @@
     },
     {
       "path": "tests/svg-sprite.test.mjs",
-      "sha256": "d7e8e1ef2aaee1b0346a1dd8cf754ee21ae877b69203fe694545127e3907193c"
+      "sha256": "d98f307b017371be0ba6f53c0600b48ec8badb96bd289e2718cdbc74791e6a9a"
     },
     {
       "path": "tests/ui/app-shell.test.mjs",
@@ -4319,7 +4323,7 @@
     },
     {
       "path": "tests/unit/i18n/translation-bindings.test.mjs",
-      "sha256": "925e633b9aab277fd117b29026c4a5c03e54f58b493c35b437dfb5fd1a7b650c"
+      "sha256": "39f899bb3dfe436c6c42244cc41d28ebca0ba8b4ef5c5d6b28b03e464a468217"
     },
     {
       "path": "tests/unit/layout/classic-layout-state-port.test.mjs",
@@ -4695,11 +4699,11 @@
     },
     {
       "path": "tests/unit/sidebar/outline-collapse-store.test.mjs",
-      "sha256": "e56dce07d8910f293d2505920fde17d8cb97289140617bfa9e4570748ae67329"
+      "sha256": "6c92aa986c8fa98487c848780696f9e2bc1b9f99847fee94efca386b23454009"
     },
     {
       "path": "tests/unit/sidebar/outline-controller.test.mjs",
-      "sha256": "e394bd6ff9b67153cc142b4dd3b4fc12fd2157e8a4e10fe0d29ad029079df21a"
+      "sha256": "922e5b7407d9e969bf1fe5c44860044775844f96d0065de41bdcc7926e93f74d"
     },
     {
       "path": "tests/unit/sidebar/outline-tree-builder.test.mjs",
@@ -4707,7 +4711,7 @@
     },
     {
       "path": "tests/unit/sidebar/outline-view.test.mjs",
-      "sha256": "8869bd67a0e58ab7ae6ac36bcfb26939c2269519818323d1e7a88b0587410bf0"
+      "sha256": "9c233189b58ef310477607e0c8d31cc83011158d8a581c645de1fe191c5df476"
     },
     {
       "path": "tests/unit/sidebar/outline-window-model.test.mjs",
@@ -4774,7 +4778,7 @@
       "sha256": "aa5c2c180d92a943f2db7f866d4828b7e94ceef3af6e387674d06f786dee030c"
     }
   ],
-  "inputSha256": "df72bfdd054e42295ceb1b26b85f1ce9e7dd7daa0a0ecaf1c4c29f2406c690d8",
+  "inputSha256": "462594c70ab348d4da4f7495ea836fbd427a068045209044bf47906a9c57cdb9",
   "protectedModels": [
     {
       "path": "src-tauri/src/document_store/mod.rs",

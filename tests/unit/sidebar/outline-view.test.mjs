@@ -91,7 +91,7 @@ test('Atomic 6.8 Outline view renders DOM primitives and owns delegated actions'
     closeContextMenus: () => calls.push(['close'])
   });
   view.start();
-  view.render([{ id: 'a', level: 1, text: 'Alpha', line: 2, children: [{ id: 'b', level: 2, text: 'Beta', line: 4, children: [] }] }]);
+  view.render([{ id: 'a', level: 1, text: 'Alpha', line: 2, children: [{ id: 'b', level: 2, text: 'Beta', line: 4, children: [{id:'c',level:3,text:'Gamma',line:6,children:[{id:'d',level:4,text:'Delta',line:8,children:[]}]}] }] }]);
   const root = list.children[0];
   const toggle = findByAction(root, 'toggle');
   const navigate = findByAction(root, 'navigate');
@@ -105,6 +105,11 @@ test('Atomic 6.8 Outline view renders DOM primitives and owns delegated actions'
   assert.equal(collapseNodeButton.hidden, false);
   contextMenu.emit('click', expandButton);
   assert.deepEqual(calls.slice(-3), [['menu'], ['expand'], ['close']]);
+  panel.emit('contextmenu',panel);contextMenu.emit('click',collapseNodeButton);
+  assert.deepEqual(calls.slice(-3),[['menu'],['collapse-node','a'],['close']], 'blank-area context uses the selected heading');
+  const branch=root.children[0].children[1].children[0];
+  panel.emit('contextmenu',branch);contextMenu.emit('click',collapseNodeButton);
+  assert.deepEqual(calls.slice(-3),[['menu'],['collapse-node','b'],['close']], 'right-click heading overrides the selection');
   view.destroy();
   assert.equal(list.listenerCount(), 0);
   assert.equal(panel.listenerCount(), 0);

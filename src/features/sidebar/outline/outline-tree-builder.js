@@ -124,3 +124,12 @@ export function collectCollapsibleOutlineIds(nodes, output = []) {
   }
   return output;
 }
+
+export function findOutlineNode(nodes, id) {
+  for (const node of nodes || []) {
+    if (node.id === id) return node;
+    const match = findOutlineNode(node.children, id);
+    if (match) return match;
+  }
+  return null;
+}

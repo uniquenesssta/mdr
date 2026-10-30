@@ -16,6 +16,7 @@ import { runSidebarResizeSelectionChecks } from '../lib/sidebar-resize-selection
 import { runLargeDocumentInteractionChecks } from '../lib/large-document-interaction-checks.mjs';
 import { runOutlineWindowChecks } from '../lib/outline-window-checks.mjs';
 import { runSelectionContinuationChecks } from '../lib/selection-continuation-checks.mjs';
+import { runDropOutlineFluidChecks } from '../lib/drop-outline-fluid-checks.mjs';
 
 const binary = resolve(process.argv[2]);
 const artifacts = resolve(process.argv[3]);
@@ -56,6 +57,11 @@ try {
     : (process.argv.find(arg=>arg.startsWith('--url='))?.slice(6)||'http://127.0.0.1:16663');
   await page.navigate(appOrigin+'/?e2e=1');
   await page.waitFor(()=>document.documentElement.classList.contains('app-ready'), { timeoutMs:20000 });
+  if(process.argv.includes('--drop-outline-fluid')) {
+    const checks=await runDropOutlineFluidChecks({page,app:createApplicationDriver(page),artifacts,browserDrop:false,
+      resizeViewport:async size=>{geometry(false,false,size);await page.waitFor(`innerWidth===${size.width}&&innerHeight===${size.height}`);}});
+    await writeFile(join(artifacts,'native-drop-outline-fluid.json'),JSON.stringify({passed:true,checks},null,2));
+  }
   if(process.argv.includes('--selection-continuation')) {
     const sourcePath=process.argv.find(arg=>arg.startsWith('--resize-source='))?.slice(16);
     assert.ok(sourcePath,'Provide the original read-only large-document path.');

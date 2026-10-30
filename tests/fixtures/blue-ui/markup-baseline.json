@@ -7,7 +7,12 @@
     "independentGeometry": "tests/e2e/lib/blue-component-checks.mjs",
     "note": "Complete current markup comparison supplements the independent Figma metrics and real command checks; the historical Stage 16 fixture stays unchanged.",
     "historicalSha256": "4eb83c94c2175a651127b413084c56ecbee3f564afa2359c1ffe6d9d249984a2",
-    "headerRevision": "2026-10-27: User removed the visible title/actions and source tab; modes remain centered. Hidden title projection preserves existing document ports; export trigger moves to the existing File/Export owner. Historical Stage 16 fixture unchanged."
+    "headerRevision": "2026-10-27: User removed the visible title/actions and source tab; modes remain centered. Hidden title projection preserves existing document ports; export trigger moves to the existing File/Export owner. Historical Stage 16 fixture unchanged.",
+    "latestRefinement": {
+      "date": "2026-10-30",
+      "source": "Latest user feedback; Figma100:7417,101:8093 and245:7575 visually checked before implementation.",
+      "historicalBaselinePreserved": true
+    }
   },
   "slots": {
     "menu": [
@@ -4774,7 +4779,7 @@
               "hidden": true
             },
             [
-              "折叠此大纲的所有子集"
+              "折叠所有子集"
             ]
           ],
           "\n  "
@@ -4993,45 +4998,10 @@
         "div",
         {
           "class": "drop-overlay",
-          "id": "drop-overlay"
+          "id": "drop-overlay",
+          "aria-hidden": "true"
         },
-        [
-          "\n      ",
-          [
-            "div",
-            {
-              "class": "drop-message"
-            },
-            [
-              [
-                "svg",
-                {
-                  "class": "icon icon-lg"
-                },
-                [
-                  [
-                    "use",
-                    {
-                      "href": "/assets/icons.svg#icon-menu-file"
-                    },
-                    []
-                  ]
-                ]
-              ],
-              " ",
-              [
-                "span",
-                {
-                  "data-i18n": "dropMessage"
-                },
-                [
-                  "释放以打开文件或插入图片"
-                ]
-              ]
-            ]
-          ],
-          "\n    "
-        ]
+        []
       ],
       [
         "input",

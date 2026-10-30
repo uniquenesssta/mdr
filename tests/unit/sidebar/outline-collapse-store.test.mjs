@@ -35,6 +35,13 @@ test('Atomic 6.8 collapse store restores and persists the exact legacy key', asy
   h.store.destroy();
 });
 
+test('subtree collapse persists all descendant flags in one write and retains unrelated collapse state', async () => {
+  const h=harness();h.store.restore();
+  await h.store.collapseMany(['b','c','b']);assert.equal(h.writes.length,1);
+  assert.deepEqual(JSON.parse(h.writes[0][1]),{a:true,b:true,c:true});
+  await h.store.collapseMany(['b','c']);assert.equal(h.writes.length,1);h.store.destroy();
+});
+
 test('Atomic 6.8 invalid collapse persistence is controlled and destroy is terminal', async () => {
   const errors = [];
   const store = createOutlineCollapseStore({

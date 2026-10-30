@@ -1368,5 +1368,11 @@
     "record": "blue-integration.json#continuousResizeRepair",
     "status": "interaction-reference-synchronized-source-repair-runtime-and-repository-verified",
     "scope": "Reference interaction descriptions only; performance implementation and validation are source code and runtime concerns. Figma is not a prerequisite for performance fixes."
+  },
+  "dropOutlineFluidRefinement": {
+    "date": "2026-10-30",
+    "record": "docs/design/drop-outline-fluid-layout.json",
+    "scope": "Drag feedback, target-scoped descendant folding and adaptive editor width",
+    "figmaBoundary": "Figma changed only the visual masters/screens; implementation, logic, performance, builds and runtime checks execute directly against the repository and Windows app."
   }
 }

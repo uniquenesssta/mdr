@@ -1,5 +1,7 @@
 # MDR Figma 接入
 
+2026-10-30 当前补充：[拖入反馈、子集折叠与编辑区自适应](drop-outline-fluid-layout.json)。本轮 Figma 仅完成 UI 组件与界面修订，随后退出；功能、性能、构建和 Windows 验证直接在项目中执行。下方未接入等状态属于各日期的历史记录，当前接入见 [blue-integration.json](blue-integration.json)。
+
 最新组件排布以[2026-10-26重构记录](component-layout-redesign.md)为准；先前收窄尺寸不再作为当前视觉方案。新版未接入程序。
 
 ## 蓝白完整组件与接入准备（2026-10-26）
